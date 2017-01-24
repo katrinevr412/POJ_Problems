@@ -1,0 +1,119 @@
+import java.util.Scanner;
+
+
+public class Main {
+	
+	public static int UP = 1;
+	public static int EVEN = 0;
+	public static int DOWN = -1;
+	public static int LIGHT = -1;
+	public static int HEAVY = 1;
+	
+	public class weight{
+		int[] left;
+		int[] right;
+		int rel;
+		
+		public weight(int[] left, int[] right, String s){
+			this.left = left;
+			this.right = right;
+			if(s.equals("up")) rel = UP;
+			else if(s.equals("down")) rel = DOWN;
+			else rel = EVEN;
+		}
+		
+	}
+	
+	public static void main(String args[]) throws Exception
+    {
+		//Main1013 m = new Main1013();
+		Scanner cin=new Scanner(System.in);
+		
+		int num = cin.nextInt();
+		for(int iii = 0; iii < num; iii++){
+			weight[] weights = new weight[3];
+			//int len = 0;
+			for(int ii = 0; ii < 3; ii++) {
+				String leftStr = cin.next(), rightStr = cin.next(), relStr = cin.next();
+				int len = leftStr.length();
+				int[] left = new int[len], right = new int[len];
+				for(int i = 0; i < len; i++){
+					left[i] = leftStr.charAt(i) - 'A';
+					right[i] = rightStr.charAt(i) - 'A';
+				}
+				weights[ii] = new Main().new weight(left, right, relStr);
+			}
+			boolean[] state = new boolean[12];//true表示未排除为假币的可能
+			//for(boolean b: state) b = true;//开始，都有可能为假币
+			for(int i = 0; i < 12; i++) state[i] = true;
+			//for(boolean b: state) System.out.print(b + " ");
+			for(weight w: weights){
+				if(w.rel == EVEN){
+					for(int i: w.left) state[i] = false;
+					for(int i: w.right) state[i] = false;
+				}
+				else{
+					boolean[] temp = new boolean[12];
+					for(int k = 0; k < 12; k++) temp[k] = false;
+					for(int i: w.left) temp[i] = true;
+					for(int i: w.right) temp[i] = true;
+					for(int i = 0; i < 12; i++){
+						if(!temp[i]) state[i] = false;
+					}
+				}
+			}
+			
+			//for(boolean b: state) System.out.print(b + " ");
+			
+			int targ = -1;
+			int RL = EVEN;
+			for(int i = 0; i < 12; i++){
+				if(!state[i]) continue;
+				int cnt = 0;
+				int rl = EVEN;
+				for(weight w: weights){
+					//检查i为假币是否合适条件w
+					if(w.rel == EVEN) continue;
+					//平的一定符合
+					boolean inLeft = false, inRight = false;
+					for(int j: w.left){
+						if(i == j) {
+							inLeft = true;
+							break;
+						}
+					}
+					for(int j: w.right){
+						if(i == j) {
+							inRight = true;
+							break;
+						}
+					}
+					if((inLeft && inRight) || (!inLeft && !inRight)){
+						//不是解
+						cnt++;
+						break;
+					}
+					int tempRl;
+					if(w.rel == UP && inLeft || w.rel == DOWN && inRight) tempRl = HEAVY;
+					else tempRl = LIGHT;
+					if(rl + tempRl == 0) {
+						cnt++;
+						break;//轻重矛盾。
+					}
+					rl = tempRl;
+				}
+				//continue;
+				if(cnt == 0){
+					targ = i;
+					RL = rl;
+					break;
+				}
+			}
+			//这里是一个round
+			//System.out.println(targ);
+			System.out.println(((char)(targ +'A')) + " is the counterfeit coin and it is " + 
+			(RL == LIGHT ? "light" : "heavy") + ".");
+		}
+		
+    }
+}
