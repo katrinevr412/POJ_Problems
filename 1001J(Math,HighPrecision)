@@ -1,0 +1,134 @@
+import java.io.*;
+import java.util.*;
+public class Main
+{
+	static Main m = new Main();
+	public class BigInt{
+		int[] dec;
+		public BigInt(String s){
+			dec = new int[s.length()];
+			for(int i = s.length() - 1; i >=0; i--){
+				dec[i] = s.charAt(s.length() - 1 - i) - '0';
+			}
+		}
+		public BigInt(int[] dec){
+			this.dec = dec;
+		}
+		public int length(){
+			return dec.length;
+		}
+		public String toString(){
+			String res = "";
+			boolean Zero = true;
+			for(int i = dec.length-1; i>=0; i--){
+				if(Zero){
+				    if(dec[i] != 0){
+				    	res += (char)(dec[i]+'0');
+				    	Zero = false;
+				    }
+				}
+				else{
+					res += (char)(dec[i]+'0');
+				}
+			}
+			return res;
+		}
+		
+	}
+	
+	public static BigInt prod(BigInt a, BigInt b){
+		//int[] res = new int[a.length() + b.length()];
+		int A = a.length(), B = b.length();
+		int[] res = new int[A+B];
+		res[A+B-1] = 0;
+		for(int i = 0; i < A+B-1; i++){
+			res[i] = 0;
+			for(int j = 0; j <= i && j < A; j++){
+				if(i-j < B){
+					res[i] += a.dec[j] * b.dec[i-j];
+				}
+			}
+		}
+		for(int i = 0; i < A+B-1; i++){
+			if(res[i] > 9){
+				res[i+1] += res[i]/10;
+				res[i] %= 10;
+			}
+		}
+		
+		return m.new BigInt(res);
+	}
+	
+            public static void main(String args[]) throws Exception
+            {
+            	
+            	//System.out.println(prod(m.new BigInt("12"), m.new BigInt("24")));
+            	
+                    Scanner cin=new Scanner(System.in);
+                    while(cin.hasNext()){
+                    	String a = cin.next();
+                    	int b = cin.nextInt();
+                    	if(a.equals("0.0000")) {
+                    		System.out.println(0);
+                    		continue;
+                    	}
+                    	int pow = 0; String base;
+                    	//下面求基数和次数
+                    	int dianpos = a.indexOf('.');
+                    	if(dianpos == -1){
+                    		base = a;
+                    		pow = 0;
+                    	}
+                    	else{
+                    		pow = a.length() - 1 - dianpos;
+                    		String intg = a.substring(0, dianpos) + a.substring(dianpos+1);
+                    		while(intg.charAt(intg.length() - 1) == '0' && pow > 0){
+                    			intg = intg.substring(0, intg.length() - 1);
+                    			pow--;
+                    		}
+                    		base = intg;
+                    	}
+                    	/*
+                    	System.out.println(a + " " + b);
+                    	int[] powten = {1, 10, 100, 1000, 10000, 100000};
+                    	for(int i = 0; i < 6; i++){
+                    		System.out.println(a*powten[i]);
+                    		if((int)(a*powten[i]) == a*powten[i]){
+                    			pow = i;
+                    			System.out.println(i);
+                    			base = (int) (a * powten[i]);
+                    			break;
+                    		}
+                    	}*/
+                    	//System.out.println(pow + " " + base);
+                    	pow *= b;
+                    	//Main m = new Main();
+                    	//String s = (new Integer(base)).toString();
+                    	//System.out.println(s + " " + pow);
+                    	BigInt bi = m.new BigInt(base), res = m.new BigInt("1");
+                    	for(int i = 1; i <= b; i++){
+                    		res = prod(res, bi);
+                    	}
+                    	String resInt = res.toString();
+                    	int len = resInt.length();
+                    	if(pow == 0){
+                    		System.out.println(resInt);
+                    		
+                    	}
+                    	else if(pow < len){
+                    		System.out.print(resInt.substring(0, len - pow));
+                    		System.out.print('.');
+                    		System.out.print(resInt.substring(len - pow));
+                    		System.out.println();
+                    	}
+                    	else{
+                    		System.out.print(".");
+                    		for(int i = 0; i < pow-len; i++){
+                    			System.out.print(0);
+                    		}
+                    		System.out.print(resInt);
+                    		System.out.println();
+                    	}
+                    }
+            }
+}
