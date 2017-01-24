@@ -1,0 +1,42 @@
+import java.util.Scanner;
+
+
+public class Main {
+
+	public static int NI(int p, int q){
+		//p对q的逆
+		if(p > q) return NI(p%q, q);
+		if(p == 1 || q == 1) return 1;
+		int y = NI(q%p, p);
+		int ans = ((q*y-1)/p)%q;
+		return q-ans;
+	}
+	
+	public static int MOD = 23 * 28 * 33;
+	public static int PniE = NI(23, 28), PniI = NI(23, 33), EniP = NI(28, 23),
+			          EniI = NI(28, 33), IniP = NI(33, 23), IniE = NI(33, 28);
+	
+	public static void main(String[] args){
+		Scanner sc = new Scanner(System.in);
+		
+		int cnt = 0;
+		while(sc.hasNext()){
+			cnt++;
+			int P = sc.nextInt(), E = sc.nextInt(), I = sc.nextInt(), D = sc.nextInt();
+			if(P == -1) break;
+			int PM = P%23, EM = E%28, IM = I%33;
+			int minMod = 23 * 28 * IM * PniI * EniI + 23 * 33 * EM * PniE * IniE 
+					+ 28 * 33 * PM * EniP * IniP;
+			minMod %= MOD;
+			int k = 0;
+			for(; ; k++){
+				int temp = minMod + MOD * k;
+				if(temp > D){
+					System.out.println("Case " + cnt + ": the next triple peak occurs in " + (temp - D) + " days.");
+					break;
+				}
+			}
+		}
+	}
+	
+}
