@@ -1,0 +1,13 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+int a, b;
+cin >> a >> b;
+int res;
+for(int i = 0; i < 1000000000; i++){
+res = a + b;
+}
+	cout << res << endl; // prints !!!Hello World!!!
+	return 0;
+}
