@@ -1,0 +1,53 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Scanner;
+
+
+public class Main {
+	
+	public static Map<String, Integer> msi = new HashMap();
+	public static String[] TZY = {"imix", "ik", "akbal", "kan", "chicchan", 
+		"cimi", "manik", "lamat", "muluk", "ok", 
+		"chuen", "eb", "ben", "ix", "mem", 
+		"cib", "caban", "eznab", "canac", "ahau"};
+	public static void initializeMap(){
+		String[] YUE = {"pop", "no", "zip", "zotz", "tzec", "xul", "yoxkin",
+		"mol", "chen", "yax", "zac", "ceh", "mac", "kankin", "muan", "pax", "koyab", 
+		"cumhu", "uayet"};
+		for(int i = 0; i < 19; i++){
+			msi.put(YUE[i], i);
+		}
+	}
+	
+	public static int getHYue(String s){
+		return msi.get(s) == null? -1 : msi.get(s);
+	}
+	
+	public static void main(String args[]) throws Exception
+    {
+		
+		initializeMap();
+		//ArrayList<String> test = new ArrayList<String>(5);
+		//System.out.println(test.get(1));
+		@SuppressWarnings("resource")
+		Scanner sc = new Scanner(System.in);
+		
+		int num = sc.nextInt();
+		System.out.println(num);
+		for(int i = 0; i < num; i++){
+			String HR = sc.next(), HYu = sc.next();
+			int HNian = sc.nextInt();
+			int HRi = Integer.parseInt(HR.substring(0, HR.length() - 1));
+			int HYue = getHYue(HYu);
+			int absRq = HNian * 365 + HYue * 20 + HRi;
+			
+			int TZNian = absRq/260, TZYR = absRq%260;
+			String TZYue = TZY[TZYR%20];
+			int TZRi = TZYR%13 + 1;
+			System.out.println(TZRi + " " + TZYue + " " + TZNian);
+			
+		}
+    }
+}
