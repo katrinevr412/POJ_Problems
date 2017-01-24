@@ -1,0 +1,21 @@
+import java.util.Scanner;
+
+
+public class Main {
+	public static void main(String args[]) throws Exception
+    {
+		Scanner sc = new Scanner(System.in);
+		
+		int num = sc.nextInt();
+		int cnt = 0;
+		for(int i = 0; i < num; i++){
+			double a = sc.nextDouble(), b = sc.nextDouble();
+			cnt++;
+			double nd = Math.PI * (a*a+b*b) / 100;
+			int d = (int)nd;
+			if(d < nd) d++;
+			System.out.println("Property " + cnt + ": This property will begin eroding in year " + d + ".");
+		}
+		System.out.println("END OF OUTPUT.");
+    }
+}
