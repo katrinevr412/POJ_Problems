@@ -1,0 +1,304 @@
+import java.awt.List;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Scanner;
+import java.util.Set;
+
+
+public class Main {
+	
+	static int cnt = 0;
+	
+	public class stamp{
+		int id;
+		int val;
+		public stamp(int value){
+			val = value;
+			id = cnt;
+			cnt++;
+		}
+		
+		public boolean equals(stamp another){
+			return id == another.id;
+		}
+
+		public int compareTo(stamp x) {
+			// TODO Auto-generated method stub
+			if(val < x.val) return -1;
+			if(val > x.val) return 1;
+			return 0;
+		}
+		
+	}
+	
+	public class result{
+		stamp[] stamps ;
+		int cardcnt;
+		int diffcnt;
+		int highval;
+		public result(stamp i, stamp j, stamp k, stamp l){
+			cardcnt = 0;
+			stamps = new stamp[4];
+			stamps[0] = i;
+			stamps[1] = j;
+			stamps[2] = k;
+			stamps[3] = l;
+			Set<Integer> th = new HashSet();
+			for(stamp ii: stamps){
+				if(ii != null) {
+					cardcnt++;
+				
+					th.add(ii.id);
+					highval = ii.val;
+				}
+			}
+			diffcnt = th.size();
+		}
+		
+		
+		
+		public int better(result another){
+			//Set<Integer> th = new HashSet(), an = new HashSet();
+			//int thcnt = 0, ancnt = 0;
+			//int thVal = 0, anVal = 0;
+			/*for(stamp i: stamps){
+				if(i != null) {
+					th.add(i.id);
+					thVal = i.val;
+					thcnt++;
+				}
+				
+			}
+			for(stamp i: another.stamps){
+				if(i != null) {
+					an.add(i.id);
+					anVal = i.val;
+					ancnt++;
+				}
+			}*/
+			if(this.diffcnt > another.diffcnt) return 1;
+			if(this.diffcnt < another.diffcnt) return -1;
+			if(this.cardcnt < another.cardcnt) return 1;
+			if(this.cardcnt > another.cardcnt) return -1;
+			if(this.highval > another.highval) return 1;
+			if(this.highval < another.highval) return -1;
+			return 0;
+		}
+	}
+	
+	public static void clear(){
+		cnt = 0;
+	}
+	
+	static int partion(stamp[] array, int p, int r) {
+		stamp x = array[r];
+		int i = p - 1;//注意这点，把i设成负值，然后作为移动的标志
+		int j;
+		for (j = p; j < r; j++) {
+		if (array[j].compareTo(x) < 0) {
+		i++;
+		stamp temp = array[j];
+		array[j] = array[i];
+		array[i] = temp;
+		}
+		}
+		stamp temp = array[j];
+		array[j] = array[i + 1];
+		array[i + 1] = temp;
+		return i+1;//返回的应该是交换后的哨兵的位置
+		}
+		//递归解决每个划分后的小数组
+		static void quickSort(stamp[] array, int p, int r) {
+		if (p < r) {
+		int q = partion(array, p, r);
+		quickSort(array, p, q - 1);
+		quickSort(array, q + 1, r);
+		}
+		}
+	
+	 public static void main(String args[]) throws Exception
+     {
+		 
+		 Main m = new Main();
+     	
+     	//System.out.println(prod(m.new BigInt("12"), m.new BigInt("24")));
+     	
+             Scanner cin=new Scanner(System.in);
+             
+             while(cin.hasNext()){
+            	 
+            	 ArrayList<stamp> Stps = new ArrayList();
+            	 clear();
+            	 
+            	 while(true){
+            		 int temp = cin.nextInt();
+            		 if(temp == 0) break;
+            		 
+            		 Stps.add(m.new stamp(temp));
+            	 }
+            	 
+            	 stamp[] stps = new stamp[Stps.size()];
+            	 for(int i = 0; i < Stps.size(); i++) stps[i] = Stps.get(i);
+            	 quickSort(stps, 0, stps.length-1);
+            	 
+            	 while(true){
+            		 int req = cin.nextInt();
+            		 
+            		 if(req == 0) break;
+            		 //req.add(temp);
+            		 int MinVal[] = new int[4];
+            		 for(int i = 0; i < 4; i++){
+            			 MinVal[i] = req - (4-i) * stps[stps.length-1].val;
+            		 }
+            		 
+            		 if(MinVal[0] > 0){
+            			 System.out.println(req + " ---- none");
+            			 continue;
+            		 }
+            		 
+            		 int curVal = 0;
+            		 result curRes = null;
+            		 boolean tie = false;
+            		 
+            		 for(int i = 0; i < stps.length; i++){
+            			 curVal += stps[i].val;
+            			 if(curVal > req) break;
+            			 if(curVal == req){
+            				 result temp =  m.new result(stps[i], null, null, null);
+            				 
+            				 if(curRes == null) curRes = temp;
+            				 else{
+            					 int cpr = temp.better(curRes);
+            					 if(cpr == 1) {
+            						 curRes = temp;
+            						 tie = false;
+            					 }
+            					 if(cpr == 0){
+            						 tie = true;
+            					 }
+            				 }
+            				 
+            				 curVal -= stps[i].val;
+            				 continue;
+            			 }
+            			 if(curVal < MinVal[1]) {
+            				 curVal -= stps[i].val;
+            				 continue;
+            			 }
+            			 for(int j = i; j < stps.length; j++){
+            				 curVal += stps[j].val;
+            				 if(curVal > req) {
+            					 curVal -= stps[j].val;
+            					 break;
+            				 }
+            				 if(curVal == req){
+            					 result temp = m.new result(stps[i], stps[j], null, null);
+            					 
+            					 if(curRes == null) curRes = temp;
+                				 else{
+                					 int cpr = temp.better(curRes);
+                					 if(cpr == 1) {
+                						 curRes = temp;
+                						 tie = false;
+                					 }
+                					 if(cpr == 0){
+                						 tie = true;
+                					 }
+                				 }
+            					 
+            					 curVal -= stps[j].val;
+            					 continue;
+            				 }
+            				 if(curVal < MinVal[2]){
+            					 curVal -= stps[j].val;
+            					 continue;
+            				 }
+            				 for(int k = j; k < stps.length; k++){
+            					 curVal += stps[k].val;
+            					 if(curVal > req) {
+            						 curVal -= stps[k].val;
+            						 break;
+            					 }
+            					 if(curVal == req){
+            						 result temp = m.new result(stps[i], stps[j], stps[k], null);
+            						 
+            						 if(curRes == null) curRes = temp;
+                    				 else{
+                    					 int cpr = temp.better(curRes);
+                    					 if(cpr == 1) {
+                    						 curRes = temp;
+                    						 tie = false;
+                    					 }
+                    					 if(cpr == 0){
+                    						 tie = true;
+                    					 }
+                    				 }
+            						 
+            						 curVal -= stps[k].val;
+            						 continue;
+            					 }
+            					 if(curVal < MinVal[3]){
+            						 curVal -= stps[k].val;
+            						 continue;
+            					 }
+            					 for(int l = k; l < stps.length; l++){
+            						 curVal += stps[l].val;
+            						 if(curVal < req) {
+            							 curVal -= stps[l].val;
+            							 continue;
+            						 }
+            						 else if(curVal > req){
+            							 curVal -= stps[l].val;
+            							 break;
+            						 }
+            						 else{
+            							 result temp = m.new result(stps[i], stps[j], stps[k], stps[l]);
+            							 
+            							 if(curRes == null) curRes = temp;
+                        				 else{
+                        					 int cpr = temp.better(curRes);
+                        					 if(cpr == 1) {
+                        						 curRes = temp;
+                        						 tie = false;
+                        					 }
+                        					 if(cpr == 0){
+                        						 tie = true;
+                        					 }
+                        				 }
+            							 
+            							 curVal -= stps[l].val;
+            							 continue;
+            						 }
+            					 }
+            					 curVal -= stps[k].val;
+            				 }
+            				 curVal -= stps[j].val;
+            			 }
+            			 curVal -= stps[i].val;
+            		 }
+            		 
+            		 ///end:
+            		 if(curRes == null){
+            			 System.out.println(req + " ---- none");
+            		 }
+            		 else if(tie){
+            			System.out.println(req + " (" + curRes.diffcnt + "): tie");
+            			//3 (2): tie 
+            		 }
+            		 else{
+            			 System.out.print(req + " (" + curRes.diffcnt + "):");
+            			 for(stamp i: curRes.stamps){
+            				 if(i != null){
+            					 System.out.print(" " + i.val);
+            				 }
+            			 }
+            			 System.out.println();
+            		 }
+            		 //7 (3): 1 1 2 3
+            		 
+            	 }
+            	 
+             }
+             
+     }
+}
