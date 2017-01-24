@@ -1,0 +1,105 @@
+#include <iostream>
+#include <string>
+#include <cmath>
+#include <iomanip>
+#include <sstream>
+
+#include <stdio.h>
+
+using namespace std;
+
+int maxi(int a, int b){
+	if(a > b) return a;
+	return b;
+}
+
+int mini(int a, int b){
+	if(a < b) return a;
+	return b;
+}
+
+bool isCan(int* nums, int num, int sum){
+	//return false;
+	if(sum < 0) return false;
+	if(sum == 0) return true;
+	if(num <= 0) return sum == 0;
+	if(num == 1) return sum <= nums[1];
+	//if(nums[num] == 0) return isCan(nums, num-1, sum);
+	if(num == 2){
+		if(nums[1] > 0) return sum <= nums[1] + nums[2]*2;
+		return sum<= nums[2]*2 && sum%2==0;
+	}
+
+	//下面是num>=3的情况
+	int xiasum = 0;
+	for(int i = 1; i < num; i++) xiasum += i * nums[i];
+	int  lower_sum = sum - xiasum;
+	if(lower_sum <= 0) lower_sum = -100;
+
+	int x_num = 0;
+	for(int i = num - 1; i > 0; i--){
+		if(nums[i] > 0) {
+			x_num = i;
+			break;
+		}
+	}
+
+	int upper = mini(nums[num], sum/num);
+	int lower = maxi(0, (lower_sum - 1)/num + 1);
+	//cout << num << " " << upper << " " << lower << endl;
+	if(upper < lower) return false;
+
+	for(int i = upper; i >= lower; i--){
+		if(isCan(nums, x_num, sum - i * num)) return true;
+	}
+	return false;
+}
+
+
+int main() {
+	int nums[7];
+	string s;
+	int ct = 0;
+	while(getline(cin, s)){
+		ct++;
+		stringstream ss(s);
+		int cnt = 0;
+		for(int i = 1; i < 7; i++){
+			ss >> nums[i];
+			cnt += nums[i];
+		}
+		if(cnt == 0) return 0;
+		cout << "Collection #" << ct << ":" << endl;
+		if((nums[1] + nums[3] + nums[5])%2 == 1){
+			cout << "Can't be divided." << endl << endl;
+			continue;
+		}
+
+		int max = 7;
+		for(int i = 6; i > 0; i--){
+			if(nums[i] > 0){
+				max = i;
+				break;
+			}
+		}
+		//cout << max << endl;
+		int sum = 0;
+		for(int i = 1; i <= max; i++){
+			sum += i * nums[i];
+		}
+		//int offset = (nums[max]-1)/2+1;
+		//nums[max] -= offset;
+		//sum -= offset * max;
+		bool can = isCan(nums, max, sum/2);
+		if(can){
+			cout << "Can be divided." << endl << endl;
+		}
+		else{
+			cout << "Can't be divided." << endl << endl;
+		}
+
+	}
+
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
