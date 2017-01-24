@@ -1,0 +1,211 @@
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Scanner;
+import java.util.Set;
+
+
+public class Main {
+	
+	static int partion(Integer[] array, int p, int r) {
+		Integer x = array[r];
+		int i = p - 1;//注意这点，把i设成负值，然后作为移动的标志
+		int j;
+		for (j = p; j < r; j++) {
+		if (array[j].compareTo(x) < 0) {
+		i++;
+		Integer temp = array[j];
+		array[j] = array[i];
+		array[i] = temp;
+		}
+		}
+		Integer temp = array[j];
+		array[j] = array[i + 1];
+		array[i + 1] = temp;
+		return i+1;//返回的应该是交换后的哨兵的位置
+		}
+		//递归解决每个划分后的小数组
+		static void quickSort(Integer[] array, int p, int r) {
+		if (p < r) {
+		int q = partion(array, p, r);
+		quickSort(array, p, q - 1);
+		quickSort(array, q + 1, r);
+		}
+		}
+	
+	public class image{
+		int kuan;
+		int[] pVal;
+		int[] pAggNum;
+		int total;
+		
+		public image(int k, ArrayList<Integer> pv, ArrayList<Integer> pn){
+			kuan = k;
+			pVal = new int[pv.size()];
+			for(int i = 0; i < pv.size(); i++){
+				pVal[i] = pv.get(i);
+			}
+			//pAggNum = pn;
+			pAggNum = new int[pn.size()];
+			pAggNum[0] = 0;
+			for(int i = 0; i < pn.size()-1; i++){
+				pAggNum[i+1] = pAggNum[i] + pn.get(i);
+			}
+			total = pAggNum[pn.size()-1] + pn.get(pn.size()-1);
+			//for(int i = 0; i < pAggNum.length; i++) System.out.print(pVal[i] + " ");
+			//System.out.println(total);
+		}
+		
+		
+		
+		
+	}
+	
+	public static int getPixel(int absPos, image IM){
+		int size = IM.pAggNum.length;
+		if(absPos >= IM.pAggNum[size-1]) return IM.pVal[size-1];
+		int lower = 0, upper = size-1;
+		while(lower < upper-1){
+			int mid = (lower + upper)/2;
+			if(absPos < IM.pAggNum[mid]){
+				upper = mid;
+			}
+			else if(absPos > IM.pAggNum[mid]){
+				lower = mid;
+			}
+			else{
+				return IM.pVal[mid];
+			}
+		}
+		
+		return IM.pVal[lower];
+	}
+			
+	public static boolean inRange(int targ, image IM){
+		return targ >= 0 && targ < IM.total;
+	}
+	
+	public static int Max(int a, int b){
+		if(a>b) return a;
+		return b;
+	}
+	
+	public static int[] solve(image IM){
+		//返回一个结果数组
+		Set<Integer> posPoints = new HashSet();
+		//所有可能的跳变點的集合
+		posPoints.add(IM.total - IM.kuan);
+		for(int i = 0; i < IM.pAggNum.length; i++){
+			int temp = IM.pAggNum[i];
+			posPoints.add(temp);
+			if(inRange(temp-IM.kuan, IM)) posPoints.add(temp-IM.kuan);
+			if(inRange(temp+IM.kuan, IM)) posPoints.add(temp+IM.kuan);
+			if(inRange(temp-IM.kuan-1, IM)) posPoints.add(temp-IM.kuan-1);
+			if(inRange(temp-IM.kuan+1, IM)) posPoints.add(temp-IM.kuan+1);
+			if(inRange(temp+IM.kuan-1, IM)) posPoints.add(temp+IM.kuan-1);
+			if(inRange(temp+IM.kuan+1, IM)) posPoints.add(temp+IM.kuan+1);
+			if(inRange(temp-1, IM)) posPoints.add(temp-1);
+			if(inRange(temp+1, IM)) posPoints.add(temp+1);
+		}
+		
+		//Integer[] posP = (Integer[])posPoints.toArray();
+		Integer[] posP = new Integer[posPoints.size()];
+		Iterator it = posPoints.iterator();
+		int cnt = 0;
+		while(it.hasNext()){
+			posP[cnt] = (Integer) it.next();
+			cnt++;
+		}
+		
+		//for(int i: posP) System.out.print(i + " ");
+		//System.out.println();
+		
+		int[] res = new int[posP.length];
+		quickSort(posP, 0, posP.length - 1);
+		for(int i = 0; i < posP.length; i++){
+			int temp = 0;
+			int pos = posP[i];
+			int curPix = getPixel(pos, IM);
+			int row = pos/IM.kuan, col = pos%IM.kuan;
+			int tRow = (IM.total-1)/IM.kuan+1;
+			ArrayList<Integer> adjPos = new ArrayList<Integer>();
+			if(col != 0) adjPos.add(pos-1);
+			if(col != IM.kuan-1) adjPos.add(pos+1);
+			if(row != 0) adjPos.add(pos-IM.kuan);
+			if(row != tRow-1 && inRange(pos+IM.kuan, IM)) adjPos.add(pos+IM.kuan);
+			if(col != 0 && row != 0) adjPos.add(pos-IM.kuan-1);
+			if(col != IM.kuan-1 && row != 0) adjPos.add(pos-IM.kuan+1);
+			if(col != 0 && row != tRow-1 && inRange(pos+IM.kuan-1, IM)) adjPos.add(pos+IM.kuan-1);
+			if(col != IM.kuan-1 && row != tRow-1 && inRange(pos+IM.kuan+1, IM)) adjPos.add(pos+IM.kuan+1);
+			for(Integer Jpos: adjPos){
+				int JPix = getPixel(Jpos, IM);
+				temp = Max(temp, Math.abs(JPix - curPix));
+			}
+			
+			res[i] = temp;
+		}
+		
+		//for(int i: res) System.out.print(i + " ");
+		//System.out.println();
+		
+		
+		ArrayList<Integer> cleanPos = new ArrayList<Integer>(),
+				cleanRes = new ArrayList<Integer>();
+		int curVal = -1;
+		for(int i = 0; i < posP.length; i++){
+			if(res[i] == curVal) continue;
+			cleanPos.add(posP[i]);
+			cleanRes.add(res[i]);
+			curVal = res[i];
+		}
+		
+		int[] fRes = new int[2 * cleanPos.size()];
+		for(int i = 0; i < cleanPos.size(); i++){
+			fRes[2*i] = cleanRes.get(i);
+			if(i != cleanPos.size() - 1){
+				fRes[2*i+1] = cleanPos.get(i+1) - cleanPos.get(i);
+			}
+			else{
+				fRes[2*i+1] = IM.total - cleanPos.get(i);
+			}
+		}
+		
+		return fRes;
+	}
+	
+	public static void main(String args[]) throws Exception
+    {
+		//Integer[] test = {1,5,2,4,-9,6,3,0};
+		//quickSort(test, 0, 7);
+		//for(int i = 0; i < 8; i++) System.out.println(test[i]);
+		Main m = new Main();
+		Scanner sc = new Scanner(System.in);
+		while(sc.hasNext()){
+			int kuan = sc.nextInt();
+			if(kuan == 0) break;
+			System.out.println(kuan);
+			ArrayList<Integer> pVal = new ArrayList<Integer>(), pNum = new ArrayList<Integer>();
+			while(true){
+				int val = sc.nextInt(), num = sc.nextInt();
+				if(val == 0 && num == 0) break;
+				pVal.add(val);
+				pNum.add(num);
+			}
+			
+			image Im = m.new image(kuan, pVal, pNum);
+			
+			//int[] test = {3, 5, 11, 12, 14, 19, 23, 25, 28, 31, 32, 34};
+			//for(int i = 0; i < 12; i++) System.out.println(getPixel(test[i], Im));
+			
+			int[] res = solve(Im);
+			for(int i = 0; i < res.length; i+=2){
+				System.out.println(res[i] + " " + res[i+1]);
+			}
+			
+			System.out.println("0 0");
+		}
+		System.out.println(0);
+    }
+	
+	
+}
