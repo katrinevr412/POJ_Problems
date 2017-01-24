@@ -1,0 +1,56 @@
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Scanner;
+
+
+public class Main {
+
+	
+	public static int numOfNi(String s){
+		int res = 0;
+		int len = s.length();
+		for(int i = 0; i < len - 1; i++){
+			for(int j = i+1; j < len; j++){
+				if(s.charAt(i) > s.charAt(j)){
+					res++;
+				}
+			}
+		}
+		return res;
+	}
+	
+	public static void main(String args[]) throws Exception
+    {
+		//ArrayList<String> test = new ArrayList<String>(5);
+		//System.out.println(test.get(1));
+		@SuppressWarnings("resource")
+		Scanner sc = new Scanner(System.in);
+		
+		int n = sc.nextInt(), m = sc.nextInt();
+		
+		int maxNi = n * (n-1) / 2 + 1;
+		
+		ArrayList<ArrayList<String>> aas = new ArrayList<ArrayList<String>>(maxNi);
+		for(int i = 0; i < maxNi; i++){
+			aas.add(new ArrayList<String>());
+		}
+		
+		for(int i = 0; i < m; i++){
+			String s = sc.next();
+			//int ni = numOfNi(s);
+			aas.get(numOfNi(s)).add(s);
+		}
+		Iterator it = aas.iterator();
+		while( it.hasNext() ){
+			//if()
+			ArrayList<String> as = (ArrayList<String>) it.next();
+			if(as.size() > 0){
+				Iterator itt = as.iterator();
+				while(itt.hasNext()){
+					System.out.println(itt.next());
+				}
+			}
+		}
+		
+    }
+}
