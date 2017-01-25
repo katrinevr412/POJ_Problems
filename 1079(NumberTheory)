@@ -1,0 +1,42 @@
+#include <iostream>
+using namespace std;
+
+int ABS(int a){
+	return a>=0? a: -a;
+}
+
+int GCD(int a, int b){
+	if(a == 0) return b;
+	if(b == 0) return a;
+	if(a > b) return GCD(b, a%b);
+	return GCD(a, b%a);
+}
+
+int main() {
+	int A, B;
+	while(cin >> A >> B){
+		if(A == 0 && B == 0) return 0;
+		int gcd = GCD(A, B);
+		A /= gcd;
+		B /= gcd;
+		int a0, b0;
+		b0 = 1;
+		int temp = A/B;
+		if(ABS(A-(temp+1)*B) <= ABS(A-temp*B)) a0 = temp+1;
+		else a0 = temp;
+		cout << a0 << "/" << 1 << endl;
+		for(int b1 = 2; b1 < B; b1++){
+			int a1 = b1 * A / B;
+			if(ABS((a1+1)*B-b1*A) <= ABS(a1*B-b1*A)) a1++;
+			if(GCD(a1, b1) > 1) continue;
+			if(b0*ABS(a1*B-b1*A) < b1*ABS(a0*B-b0*A)){
+				a0 = a1;
+				b0 = b1;
+				cout << a0 << "/" << b0 << endl;
+			}
+		}
+		cout << A << "/" << B << endl;
+		cout << endl;
+	}
+	return 0;
+}
