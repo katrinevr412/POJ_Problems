@@ -1,0 +1,140 @@
+#include <iostream>
+using namespace std;
+
+class node{
+public:
+	int value;
+	node *prev;
+	node *next;
+	node(int v): value(v){
+		prev = NULL;
+		next = NULL;
+	}
+	~node(){
+		if(next != NULL) delete next;
+		delete this;
+	}
+};
+
+class dq{
+public:
+	node *head;
+	node *tail;
+	dq(node *n){
+		head = n;
+		tail = n;
+	}
+	dq(int v){
+		node *n = new node(v);
+		head = n;
+		tail = n;
+	}
+	void addHead(node *n){
+		head->prev = n;
+		n->next = head;
+		head = n;
+	}
+	void addTail(node *n){
+		tail->next = n;
+		n->prev = tail;
+		tail = n;
+	}
+	void addHead(int v){
+		node *n = new node(v);
+		addHead(n);
+	}
+	void addTail(int v){
+		node *n = new node(v);
+		addTail(n);
+	}
+	~dq(){
+		delete head;
+	}
+};
+
+
+int main() {
+	int N, K;
+	cin >> N >> K;
+	int cnt = 1;
+	int sum = 0;
+	int next[10001] = {0};
+	int prev[10001] = {0};
+	bool state[10001] = {false};
+	for(int i = 0; i < K; i++){
+		int gs;
+		cin >> gs;
+		sum += gs;
+		for(int j = 0; j < gs; j++){
+			int temp;
+			cin >> temp;
+			next[cnt] = temp;
+			prev[temp] = cnt;
+			cnt++;
+		}
+	}
+	int kong;
+	for(int i = N; i >= 1; i--){
+		if(prev[i] == 0){
+			kong = i;
+			break;
+		}
+	}
+	/*
+	for(int i = 1; i <= N; i++){
+		cout << next[i] << " ";
+	}
+	cout << endl;
+	for(int i = 1; i <= N; i++){
+		cout << prev[i] << " ";
+	}*/
+	cnt = 0;
+	for(int i = 1; i <= sum; i++){
+		if(state[i]) continue;
+		state[i] = true;
+		if(next[i] == i){
+			cnt++;
+
+			continue;
+		}/*
+		cout << i << endl;
+		for(int i = 1; i <= sum; i++){
+			cout << state[i] << " ";
+		}
+		cout << endl;*/
+		int j = i;
+		dq *DQ = new dq(i);
+		while(next[j] != 0 && next[j] != i){
+
+			j = next[j];
+			state[j] = true;
+			DQ->addTail(j);
+		}
+		if(next[j] == i){
+			cout << DQ->head->value << " " << kong << endl;
+			node *iter = DQ->head;
+			while(iter->next != NULL){
+				cout << iter->next->value << " " << iter->value << endl;
+				iter = iter->next;
+			}
+			cout << kong << " " << DQ->tail->value << endl;
+		}
+		else{
+			int k = i;
+			while(prev[k] != 0){
+				k = prev[k];
+				state[k] = true;
+				DQ->addHead(k);
+			}
+			node *iter = DQ->head;
+			while(iter->next != NULL){
+				cout << iter->next->value << " " << iter->value << endl;
+				iter = iter->next;
+			}
+			kong = iter->value;
+		}
+	}
+	if(cnt == sum) cout << "No optimization needed" << endl;
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
