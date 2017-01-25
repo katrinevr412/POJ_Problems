@@ -1,0 +1,38 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int main() {
+	int x0, y0;
+	double r;
+	while(1){
+		scanf("%d%d%lf", &x0, &y0, &r);
+		if(r < 0) return 0;
+		int x[151], y[151];
+		int gs;
+		scanf("%d", &gs);
+		int cnt = 0;
+		for(int i = 0; i < gs; i++){
+			int tempx, tempy;
+			scanf("%d%d", &tempx, &tempy);
+			if((x0-tempx)*(x0-tempx)+(y0-tempy)*(y0-tempy) <= r*r){
+				x[cnt] = tempx; y[cnt] = tempy;
+				cnt++;
+			}
+		}
+		if(cnt <= 2){
+			cout << cnt << endl;
+			continue;
+		}
+		int mx = 0;
+		for(int i = 0; i < cnt; i++){
+			int temp = 0;
+			for(int j = 0; j < cnt; j++){
+				if((x[i]-x0)*(y[j]-y0) <= (x[j]-x0)*(y[i]-y0)) temp++;
+			}
+			if(temp > mx) mx = temp;
+		}
+		cout << mx << endl;
+	}
+	return 0;
+}
