@@ -1,0 +1,214 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
+using namespace std;
+
+struct question{
+	string code;
+	string name;
+	int numOfBranch;
+	char branch[15];
+	int branchIdx[256];
+	string branchDes[15];
+} questions[110];
+
+void print(int n, int ws){
+	int kg = ws-1;
+	if(n>=10) kg--;
+	if(n>=100) kg--;
+	if(n>=1000) kg--;
+	if(n>=10000) kg--;
+	for(int i = 0; i < kg; i++) cout << " ";
+	cout << n;
+}
+
+ostream& operator<<(ostream& out, const question& q){
+	out << q.code << " " << q.name << endl;
+	for(int i = 0; i < q.numOfBranch; i++){
+		out << " " << q.branch[i] << " " << q.branchDes[i] << endl;
+	}
+	return out;
+}
+
+void get(string &s){
+	s = "";
+	while(s.length() == 0) getline(cin, s);
+}
+
+int cnt = -1;
+
+int main() {
+	string surveyName;
+	get(surveyName);
+	//int branchCnt;
+	map<string, int> questionIdx;
+	while(1){
+		string temp;
+		get(temp);
+		if(temp[0] == '#'){
+			cnt++;
+			break;
+		}
+		else if(temp[0] == ' '){
+			int branchCnt = questions[cnt].numOfBranch;
+			questions[cnt].branch[branchCnt] = temp[1];
+			questions[cnt].branchDes[branchCnt] = temp.substr(3);
+			questions[cnt].branchIdx[temp[1]] = branchCnt;
+			questions[cnt].numOfBranch++;
+		}
+		else{
+			cnt++;
+			questions[cnt].code = temp.substr(0,3);
+			questions[cnt].name = temp.substr(4);
+			questions[cnt].numOfBranch = 0;
+			questionIdx.insert(pair<string, int>(questions[cnt].code, cnt));
+			//cout << "question code: " << questions[cnt].code << " ,question number: " << cnt << endl;
+		}
+	}
+	int ansCnt = 0;
+	string ans[10010];
+	string tempAns;
+	while(1){
+		get(tempAns);
+		if(tempAns == "#") break;
+		ans[ansCnt] = tempAns;
+		ansCnt++;
+	}
+	string query;
+	while(1){
+		get(query);
+		if(query == "#") break;
+		int firstQ = questionIdx[query.substr(0,3)];
+		int secondQ = questionIdx[query.substr(4,3)];
+		//cout << firstQ << secondQ << endl;
+		string queryName = query.substr(8);
+		cout << surveyName << " - " << queryName << endl;
+		cout << questions[firstQ] << questions[secondQ] << endl;
+		int gs[15][15] = {0};
+		int cnt1 = questions[firstQ].numOfBranch, cnt2 = questions[secondQ].numOfBranch;
+		for(int i = 0; i < ansCnt; i++){
+			int x1 = questions[firstQ].branchIdx[ans[i][firstQ]];
+			int x2 = questions[secondQ].branchIdx[ans[i][secondQ]];
+			gs[x1][x2]++;
+		}
+		int gs1[15] = {0}, gs2[15] = {0};
+		for(int i = 0; i < cnt1; i++){
+			for(int j = 0; j < cnt2; j++){
+				gs1[i] += gs[i][j];
+				gs2[j] += gs[i][j];
+			}
+		}
+		int bfs1[15][15], bfs2[15][15];
+		for(int i = 0; i < cnt1; i++){
+			if(gs1[i] == 0){
+				for(int j = 0; j <= cnt2; j++) bfs1[i][j] = -1;
+			}
+			else{
+				bfs1[i][cnt2] = 100;
+				bool kj[15] = {0};
+				for(int j = 0; j < cnt2; j++){
+					bfs1[i][j] = (gs[i][j]*100)/gs1[i];
+					if((gs[i][j]*100)%gs1[i] != 0) kj[j] = 1;
+				}
+				int sum = 0;
+				for(int j = 0; j < cnt2; j++) sum += bfs1[i][j];
+				int cha = 100-sum;
+				for(int j = 0; j < cnt2; j++){
+					if(cha == 0) break;
+					if(!kj[j]) continue;
+					bfs1[i][j]++;
+					cha--;
+				}
+			}
+		}
+		bfs1[cnt1][cnt2] = 100;
+		bool kjk[15] = {0};
+		for(int j = 0; j < cnt2; j++){
+			bfs1[cnt1][j] = (gs2[j]*100)/ansCnt;
+			if((gs2[j]*100)%ansCnt != 0) kjk[j] = 1;
+		}
+		int summ = 0;
+		for(int j = 0; j < cnt2; j++) summ += bfs1[cnt1][j];
+		int chaa = 100-summ;
+		for(int j = 0; j < cnt2; j++){
+			if(chaa == 0) break;
+			if(!kjk[j]) continue;
+			bfs1[cnt1][j]++;
+			chaa--;
+		}
+		for(int j = 0; j < cnt2; j++){
+			if(gs2[j] == 0) {
+				for(int i = 0; i <= cnt1; i++) bfs2[i][j] = -1;
+			}
+			else{
+				bfs2[cnt1][j] = 100;
+				bool kj[15] = {0};
+				for(int i = 0; i < cnt1; i++){
+					bfs2[i][j] = (gs[i][j]*100)/gs2[j];
+					if((gs[i][j]*100)%gs2[j] != 0) kj[i]=1;
+				}
+				int sum = 0;
+				for(int i = 0; i < cnt1; i++) sum += bfs2[i][j];
+				int cha = 100-sum;
+				for(int i = 0; i < cnt1; i++){
+					if(cha == 0) break;
+					if(!kj[i]) continue;
+					bfs2[i][j]++;
+					cha--;
+				}
+			}
+		}
+		bfs2[cnt1][cnt2] = 100;
+		bool kjj[15] = {0};
+		for(int i = 0; i < cnt1; i++){
+			bfs2[i][cnt2] = (gs1[i]*100)/ansCnt;
+			if((gs1[i]*100)%ansCnt != 0) kjj[i] = 1;
+		}
+		int sumu = 0;
+		for(int i = 0; i < cnt1; i++) sumu += bfs2[i][cnt2];
+		int chah = 100-sumu;
+		for(int i = 0; i < cnt1; i++){
+			if(chah == 0) break;
+			if(!kjj[i]) continue;
+			bfs2[i][cnt2]++;
+			chah--;
+		}
+		for(int i = 0; i < cnt1; i++) gs[i][cnt2] = gs1[i];
+		for(int j = 0; j < cnt2; j++) gs[cnt1][j] = gs2[j];
+		gs[cnt1][cnt2] = ansCnt;
+		string code1 = questions[firstQ].code, code2 = questions[secondQ].code;
+		cout << "      ";
+		for(int j = 0; j < cnt2; j++) cout << " " << code2 << ":" << questions[secondQ].branch[j];
+		cout << " TOTAL";
+		cout << endl;
+		for(int i = 0; i <= cnt1; i++){
+			if(i != cnt1) cout << " " << code1 << ":" << questions[firstQ].branch[i];
+			else cout << " TOTAL";
+			for(int j = 0; j <= cnt2; j++){
+				print(gs[i][j], 6);
+			}
+			cout << endl;
+			cout << "      ";
+			for(int j = 0; j <= cnt2; j++){
+				if(bfs1[i][j] == -1) cout << "     -";
+				else {
+					print(bfs1[i][j], 5);
+					cout << "%";
+				}
+			}
+			cout << endl;
+			cout << "      ";
+			for(int j = 0; j <= cnt2; j++){
+				if(bfs2[i][j] == -1) cout << "     -";
+				else {
+					print(bfs2[i][j], 5);
+					cout << "%";
+				}
+			}
+			cout << endl;
+		}
+		cout << endl;
+	}
+	return 0;
+}
