@@ -1,0 +1,250 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+struct point{
+	int x;
+	int y;
+};
+
+
+
+int R, T;
+int state[32][32];//0: empty -1: 堆玻璃     >0: robots，是几就是第几个robot
+point robotList[55];//robot所在的位置
+point teleList[22];
+bool destroyed[55];
+bool used[22];//teleport是否已经使用
+
+point pos;
+
+int numRobot;
+int numSteps;
+
+int ABS(int a){
+	if(a < 0) return -a;
+	return a;
+}
+
+bool inRange(int x, int y){
+	return x>=1 && x<=31 && y>=1 && y<=31;
+}
+
+bool inRange(point p){
+	return inRange(p.x, p.y);
+}
+
+bool init(){
+	scanf("%d%d", &R, &T);
+	if(R == 0 && T == 0) return false;
+	pos.x = 15;
+	pos.y = 15;
+	for(int i = 1; i <= 31; i++){
+		for(int j = 1; j <= 31; j++){
+			state[i][j] = 0;
+		}
+	}
+	for(int i = 1; i <= R; i++){
+		scanf("%d%d", &robotList[i].x, &robotList[i].y);
+		state[robotList[i].x][robotList[i].y] = i;
+		destroyed[i] = false;
+	}
+	for(int i = 1; i <= T; i++){
+		scanf("%d%d", &teleList[i].x, &teleList[i].y);
+		used[i] = false;
+	}
+	numRobot = R;
+	numSteps = 0;
+	return true;
+}
+
+void robotMove(int x, int y, int& rNum, int State[32][32], point rList[55], bool Destroyed[55]){
+	for(int i = 1; i <= R; i++){
+		if(Destroyed[i]) continue;
+		//首先㞎原来的位置置零
+		State[rList[i].x][rList[i].y] = 0;
+		if(rList[i].x < x) rList[i].x++;
+		else if(rList[i].x > x) rList[i].x--;
+		if(rList[i].y < y) rList[i].y++;
+		else if(rList[i].y > y) rList[i].y--;
+	}
+	for(int i = 1; i <= R; i++){
+		if(Destroyed[i]) continue;
+		if(State[rList[i].x][rList[i].y] == -1){
+			Destroyed[i] = true;
+			rNum --;
+		}
+		else if(State[rList[i].x][rList[i].y] == 0){
+			State[rList[i].x][rList[i].y] = i;
+		}
+		else{
+			int yuanI = State[rList[i].x][rList[i].y];
+			Destroyed[yuanI] = true;
+			Destroyed[i] = true;
+			rNum -= 2;
+			State[rList[i].x][rList[i].y] = -1;
+		}
+	}
+}
+
+int main() {
+	int cases = 0;
+	while(init()){
+		cases ++;
+		printf("Case %d:\n", cases);
+		while(1){
+			numSteps ++;
+			bool buTele = false;
+			int tempState[9][32][32];
+			point tempRobotList[9][55];
+			bool tempDestroyed[9][55];
+			int tempNumRobot = 55;
+			int tempMaxMinDist = 0;
+			int argMove = -1;
+			for(int moveNo = 0; moveNo < 9; moveNo++){
+				int robotNum = numRobot;
+				int rowOffset = moveNo/3-1, colOffset = moveNo%3-1;
+				int newRow = pos.x+rowOffset, newCol = pos.y+colOffset;
+				int tuiRow = newRow + rowOffset, tuiCol = newCol + colOffset;
+				//判断移动是否合法
+				bool debris = inRange(newRow, newCol) && inRange(tuiRow, tuiCol) && state[newRow][newCol] == -1 && state[tuiRow][tuiCol] != -1;
+				bool hefa = (rowOffset==0 && colOffset==0) ||
+						(inRange(newRow, newCol) && ((state[newRow][newCol] == 0) || debris));
+				if(!hefa) continue;
+				//复制现场
+				for(int i = 0; i < 32; i++){
+					for(int j = 0; j < 32; j++){
+						tempState[moveNo][i][j] = state[i][j];
+					}
+				}
+				for(int i = 1; i <= R; i++){
+					tempRobotList[moveNo][i] = robotList[i];
+					tempDestroyed[moveNo][i] = destroyed[i];
+				}
+				//如果是堆玻璃
+				if(debris){
+					int idxR = state[tuiRow][tuiCol];
+					if(idxR > 0){
+						robotNum --;
+						tempDestroyed[moveNo][idxR] = true;
+					}
+					tempState[moveNo][tuiRow][tuiCol] = -1;
+					tempState[moveNo][newRow][newCol] = 0;
+				}
+
+				//判断是否直接萎掉
+				bool weidiao = false;
+				for(int i = -1; i <= 1; i++){
+					for(int j = -1; j <= 1; j++){
+						if(inRange(newRow+i, newCol+j) && tempState[moveNo][newRow+i][newCol+j] > 0){
+							weidiao = true;
+							break;
+						}
+					}
+					if(weidiao) break;
+				}
+				if(weidiao) continue;
+
+				//至少没萎掉，所以不用用teleport了
+				buTele = true;
+				robotMove(newRow, newCol, robotNum, tempState[moveNo], tempRobotList[moveNo], tempDestroyed[moveNo]);
+				int minDist = 200;
+				for(int i = 1; i <= R; i++){
+					if(tempDestroyed[moveNo][i]){
+						continue;
+					}
+					int tempDist = ABS(newRow-tempRobotList[moveNo][i].x) + ABS(newCol-tempRobotList[moveNo][i].y);
+					if(tempDist < minDist) minDist = tempDist;
+				}
+				if(robotNum < tempNumRobot || (robotNum == tempNumRobot && minDist > tempMaxMinDist)){
+					tempMaxMinDist = minDist;
+					tempNumRobot = robotNum;
+					argMove = moveNo;
+				}
+
+			}
+			if(buTele){
+				//复制回原数据中
+				numRobot = tempNumRobot;
+				for(int i = 0; i < 32; i++){
+					for(int j = 0; j < 32; j++){
+						state[i][j] = tempState[argMove][i][j];
+					}
+				}
+				for(int i = 1; i <= R; i++){
+					robotList[i] = tempRobotList[argMove][i];
+					destroyed[i] = tempDestroyed[argMove][i];
+				}
+				pos.x = pos.x+argMove/3-1, pos.y = pos.y+argMove%3-1;
+				if(numRobot == 0){
+					printf("Won game after making %d moves.\n", numSteps);
+					printf("Final position: (%d,%d)\n", pos.x, pos.y);
+					int debrisNum = 0;
+					for(int i = 1; i < 32; i++){
+						for(int j = 1; j < 32; j++){
+							if(state[i][j] == -1) debrisNum ++;
+						}
+					}
+					printf("Number of cells with debris: %d\n\n", debrisNum);
+					break;
+				}
+				continue;
+			}
+
+			int TeleNum = -1;
+			//首先确定tele的编号
+			for(int i = 1; i <= T; i++){
+				if(used[i]) continue;
+				int nX = teleList[i].x, nY = teleList[i].y;
+				if(state[nX][nY] != 0) continue;
+				bool guadiao = false;
+				for(int j = -1; j <= 1; j++){
+					for(int k = -1; k <= 1; k++){
+						if(inRange(nX+j, nY+k) && state[nX+j][nY+k] > 0){
+							guadiao = true;
+							break;
+						}
+					}
+					if(guadiao) break;
+				}
+				if(guadiao) continue;
+				TeleNum = i;
+				used[i] = true;
+				break;
+			}
+			if(TeleNum > 0){
+				pos.x = teleList[TeleNum].x, pos.y = teleList[TeleNum].y;
+				printf("Move %d: teleport to (%d,%d)\n", numSteps, pos.x, pos.y);
+				robotMove(pos.x, pos.y, numRobot, state, robotList, destroyed);
+				if(numRobot == 0){
+					printf("Won game after making %d moves.\n", numSteps);
+					printf("Final position: (%d,%d)\n", pos.x, pos.y);
+					int debrisNum = 0;
+					for(int i = 1; i < 32; i++){
+						for(int j = 1; j < 32; j++){
+							if(state[i][j] == -1) debrisNum ++;
+						}
+					}
+					printf("Number of cells with debris: %d\n\n", debrisNum);
+					break;
+				}
+			}
+			else{
+				//挫败了
+				robotMove(pos.x, pos.y, numRobot, state, robotList, destroyed);
+				printf("Lost game after making %d moves.\n", numSteps);
+				printf("Final position: (%d,%d)\n", pos.x, pos.y);
+				int debrisNum = 0;
+				for(int i = 1; i < 32; i++){
+					for(int j = 1; j < 32; j++){
+						if(state[i][j] == -1) debrisNum ++;
+					}
+				}
+				printf("Number of cells with debris: %d\n", debrisNum);
+				printf("Number of robots remaining: %d\n\n", numRobot);
+				break;
+			}
+		}
+	}
+	return 0;
+}
