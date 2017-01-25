@@ -1,0 +1,62 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+int hang, lie;
+
+bool state[32][32];
+
+bool zhany[32][32];
+
+int zc = 0;
+
+void init(){
+	zc = 0;
+	for(int i = 0; i < hang; i++){
+		for(int j = 0; j < lie; j++){
+			zhany[i][j] = 0;
+		}
+	}
+}
+
+int zcgx(int ch, int cl){
+	int res = 0;
+	if(cl == 0 || !state[ch][cl-1]) res++;
+	if(cl == lie-1 || !state[ch][cl+1]) res++;
+	if(ch == 0 || !state[ch-1][cl]) res++;
+	if(ch == hang-1 || !state[ch+1][cl]) res++;
+	return res;
+}
+
+void jisuan(int ch, int cl){
+	zc += zcgx(ch, cl);
+	zhany[ch][cl] = true;
+	if(ch>0 && !zhany[ch-1][cl] && state[ch-1][cl]) jisuan(ch-1, cl);
+	if(ch < hang-1 && !zhany[ch+1][cl] && state[ch+1][cl]) jisuan(ch+1, cl);
+	if(cl>0 && !zhany[ch][cl-1] && state[ch][cl-1]) jisuan(ch, cl-1);
+	if(cl < lie-1 && !zhany[ch][cl+1] && state[ch][cl+1]) jisuan(ch, cl+1);
+	if(ch>0 && cl>0 && !zhany[ch-1][cl-1] && state[ch-1][cl-1]) jisuan(ch-1, cl-1);
+	if(ch>0 && cl<lie-1 && !zhany[ch-1][cl+1] && state[ch-1][cl+1]) jisuan(ch-1, cl+1);
+	if(ch<hang-1 && cl>0 && !zhany[ch+1][cl-1] && state[ch+1][cl-1]) jisuan(ch+1, cl-1);
+	if(ch<hang-1 && cl<lie-1 && !zhany[ch+1][cl+1] && state[ch+1][cl+1]) jisuan(ch+1, cl+1);
+}
+
+int main() {
+	while(1){
+		int chang, clie;
+		cin >> hang >> lie >> chang >> clie;
+		if(hang == 0) return 0;
+		for(int i = 0; i < hang; i++){
+			string s;
+			cin >> s;
+			for(int j = 0; j < lie; j++){
+				if(s[j] == '.') state[i][j] = 0;
+				else state[i][j] = 1;
+			}
+		}
+		init();
+		jisuan(chang-1, clie-1);
+		cout << zc << endl;
+	}
+	return 0;
+}
