@@ -1,0 +1,38 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int main() {
+	int gs;
+	while(1){
+		scanf("%d", &gs);
+		if(gs == 0) return gs;
+		int x[701], y[701];
+		bool alr[701][701] = {false};
+		for(int i = 0; i < gs; i++){
+			scanf("%d%d", x+i, y+i);
+		}
+		int max = 0;
+		for(int i = 0; i < gs-2; i++){
+			for(int j = i+1; j < gs-1; j++){
+				if(alr[i][j]) continue;
+				alr[i][j] = true;
+				int duile[701];
+				duile[0] = i, duile[1] = j;
+				int cnt = 2;
+				for(int k = j+1; k < gs; k++){
+					if(x[i] * (y[j]-y[k]) + x[j] * (y[k]-y[i]) + x[k] * (y[i]-y[j]) == 0){
+						duile[cnt] = k;
+						for(int l = 0; l < cnt; l++){
+							alr[duile[l]][k] = true;
+						}
+						cnt++;
+					}
+				}
+				if(cnt > max) max = cnt;
+			}
+		}
+		cout << max << endl;
+	}
+	return 0;
+}
