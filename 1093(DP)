@@ -1,0 +1,109 @@
+#include <iostream>
+#include <cstdlib>
+#include <stdio.h>
+#include <string>
+#include <string.h>
+using namespace std;
+
+string words[10010];
+int lengths[10010];
+
+int main() {
+	int L;
+	while(1){
+		string LL;
+		getline(cin, LL);
+		L = atoi(LL.c_str());
+		if(L == 0) break;
+		int numOfWords = 0;
+		string s;
+		while(1){
+			getline(cin, s);
+
+			int len = s.length();
+			if(len == 0) break;
+			string temp = "";
+			for(int i = 0; i < len; i++){
+				if(s[i] != ' ') temp += s[i];
+				else if(temp.length() > 0){
+					words[numOfWords] = temp;
+					lengths[numOfWords] = temp.length();
+					numOfWords ++;
+					temp = "";
+				}
+				else continue;
+				if(i == len-1 && temp.length() > 0){
+					words[numOfWords] = temp;
+					lengths[numOfWords] = temp.length();
+					numOfWords ++;
+				}
+			}
+		}
+		int badness[10010], traceGS[10010], traceLen[10010];
+		badness[numOfWords] = 0;
+		for(int i = numOfWords - 1; i >= 0; i--){
+			int bdns = 2147483647;
+			int tGS, tL;
+			int zlen = lengths[i];
+			int gs = 1;
+			while(zlen <= L - gs + 1 && i + gs <= numOfWords){
+				if(gs == 1){
+					if(zlen == L){
+						if(bdns >= badness[i+1]){
+							bdns = badness[i+1];
+							tGS = 1;
+						}
+					}
+					else{
+						if(bdns >= 500 + badness[i+1]){
+							bdns = 500+badness[i+1];
+							tGS = 1;
+						}
+					}
+				}
+				else{
+					int mod = (L-zlen)%(gs-1), shang = (L-zlen)/(gs-1);
+					int score = mod * shang * shang + (gs-1-mod) * (shang-1) * (shang-1) + badness[i+gs];
+					if(bdns >= score){
+						bdns = score;
+						tGS = gs;
+						tL = zlen;
+					}
+				}
+				zlen += lengths[i+gs];
+				gs ++;
+			}
+			badness[i] = bdns;
+			traceGS[i] = tGS;
+			traceLen[i] = tL;
+		}
+		int idx = 0;
+		while(idx < numOfWords){
+			int GS = traceGS[idx];
+			int zlen = traceLen[idx];
+			if(GS == 1){
+				cout << words[idx];
+				for(int i = 0; i < L-lengths[idx]; i++){
+					cout << " ";
+				}
+				cout << endl;
+			}
+			else{
+				int mod = (L-zlen)%(GS-1), shang = (L-zlen)/(GS-1);
+				for(int i = 0; i < GS; i++){
+					cout << words[idx+i];
+					if(i == GS-1){
+						cout << endl;
+					}
+					else{
+						for(int j = 0; j < shang; j++) cout << " ";
+						if(i >= GS-1-mod) cout << " ";
+					}
+				}
+			}
+			idx += GS;
+		}
+		cout << endl;
+	}
+	return 0;
+}
