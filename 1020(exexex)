@@ -1,0 +1,127 @@
+#include <iostream>
+using namespace std;
+
+
+
+//bool occ[40][40] = {{false}};
+
+void ff(int *occ, int sideLen){
+		bool xj = true;
+		int dqidx = -1;
+		int zhidx = -1;
+		int zhi = 2147483647;
+		int i;
+		bool tag = false;
+		for(int i = 0; i < sideLen; i++){
+			if(occ[i] < zhi){
+				zhi = occ[i];
+				dqidx = i;
+				xj = true;
+			}
+			else if(occ[i] > zhi){
+				if(xj){
+					zhidx = i;
+					tag = true;
+					break;
+				}
+				dqidx = i;
+				zhi = occ[i];
+				xj = false;
+			}
+			//idx = i;
+		}
+		if(!tag){
+			zhidx = sideLen;
+		}
+		cout << dqidx << " " << zhidx << endl;
+}
+
+
+bool caking(int fang, int pieceNum, int *pieceLen, int sideLen, int *occ, bool *state){
+	if(fang == pieceNum) return true;
+	//首先找到第一个局部极小，
+	bool xj = true;
+	int dqidx = -1;
+	int zhidx = -1;
+	int zhi = 2147483647;
+	//int idx;
+	bool tag = false;
+	for(int i = 0; i < sideLen; i++){
+		if(occ[i] < zhi){
+			zhi = occ[i];
+			dqidx = i;
+			xj = true;
+		}
+		else if(occ[i] > zhi){
+			if(xj){
+				zhidx = i;
+				tag = true;
+				break;
+			}
+			dqidx = i;
+			zhi = occ[i];
+			xj = false;
+		}
+		//idx = i;
+	}
+	if(!tag){
+		zhidx = sideLen;
+	}
+	int curPN = -1;
+	//现在dqidx和zhidx存放极小区间
+	for(int i = 0; i < pieceNum; i++){
+		if(state[i] || pieceLen[i] == curPN || pieceLen[i] > zhidx - dqidx || pieceLen[i] + occ[dqidx] > sideLen) continue;
+		//cout << fang << " " << pieceLen[i] << endl;
+		//for(int j = 0; j < sideLen; j++) cout << occ[j] << " ";
+		//cout << endl;
+		curPN = pieceLen[i];
+		state[i] = true;
+		for(int j = dqidx; j < dqidx + pieceLen[i]; j++){
+			occ[j] += pieceLen[i];
+		}
+		if(caking(fang+1, pieceNum, pieceLen, sideLen, occ, state)) return true;
+		state[i] = false;
+		for(int j = dqidx; j < dqidx + pieceLen[i]; j++){
+			occ[j] -= pieceLen[i];
+		}
+	}
+	return false;
+}
+
+
+int main() {
+	//int test[6] = {6, 6, 6, 6, 6, 6};
+	//ff(test, 6);
+	int cases;
+	cin >> cases;
+	for(int ii = 0; ii < cases; ii++){
+		int sideLen;
+		int pieceNum;
+		int pieceLen[16];
+		cin >> sideLen >> pieceNum;
+		for(int i = 0; i < pieceNum; i++){
+			cin >> pieceLen[i];
+		}
+		quickSort(pieceLen, 0, pieceNum - 1);//首先排序
+		int sum = 0;
+		for(int i = 0; i < pieceNum; i++){
+			sum += pieceLen[i] * pieceLen[i];
+		}
+		if(sum != sideLen * sideLen) {
+			cout << "HUTUTU!" << endl;
+			continue;
+		}//判断平方和是否相等
+		bool state[16] = {false};
+		int occ[40] = {0};
+
+		if(caking(0, pieceNum, pieceLen, sideLen, occ, state)){
+			cout << "KHOOOOB!" << endl;
+		}
+		else{
+			cout << "HUTUTU!" << endl;
+		}
+
+	}
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
