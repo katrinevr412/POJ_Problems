@@ -1,0 +1,213 @@
+#include <iostream>
+#include <stdio.h>
+#include <string>
+#include <sstream>
+#include <vector>
+using namespace std;
+
+int main() {
+
+	int rank1[110] = {0}, rank2[110] = {0};
+	int rankGs1[110] = {0}, rankGs2[110] = {0};
+	int rankToID1[110], rankToID2[110];
+	string s;
+	getline(cin, s);
+	stringstream ss1(s);
+	int n1;
+	ss1 >> n1;
+	int cnt = 1;
+	int mc = 1;
+	for(int i = 1; i <= n1; i++){
+		mc = cnt;
+		getline(cin, s);
+		stringstream temp(s);
+		int tmp;
+		while(temp >> tmp){
+			rank1[tmp] = mc;
+			rankGs1[mc] ++;
+			rankToID1[cnt] = tmp;
+			cnt++;
+		}
+	}
+
+	getline(cin, s);//空行忽略
+
+	getline(cin, s);
+	stringstream ss2(s);
+	int n2;
+	ss2 >> n2;
+	cnt = 1;
+	for(int i = 1; i <= n2; i++){
+		mc = cnt;
+		getline(cin, s);
+		stringstream temp(s);
+		int tmp;
+		while(temp >> tmp){
+			rank2[tmp] = mc;
+			rankGs2[mc] ++;
+			rankToID2[cnt] = tmp;
+			cnt++;
+		}
+	}
+	double rankings[110] = {0};//0表示没考慮过，-1表示无法确定
+	int dcjGs = 1;//都参加的人的个数
+	int dcj[110];
+	//for(int i = 0; i < 110; i++) rankings[i] = -1;
+	for(int i = 1; i <= 100; i++){
+		if(rank1[i] != 0 && rank2[i] != 0){
+			//两个都参加鸟
+			rankings[i] = rank1[i] + rank2[i];
+			dcj[dcjGs] = i;
+			dcjGs ++;
+		}
+	}
+	dcjGs --;
+	//蓝后考慮和参加两个的持平的
+	for(int i = 1; i <= dcjGs; i++){
+		int rk1 = rank1[dcj[i]], rk2 = rank2[dcj[i]];
+		double rkg =rankings[dcj[i]];
+		bool keyi1 = true, keyi2 = true;
+		for(int j = rk1; j < rk1+rankGs1[rk1]; j++){
+			int id = rankToID1[j];
+			if(rank2[id] != 0 && rankings[id] != rkg){
+				keyi1 = false;
+				break;
+			}
+		}
+
+			for(int j = rk1; j < rk1+rankGs1[rk1]; j++){
+				int id = rankToID1[j];
+				if(rank2[id] == 0) rankings[id] = keyi1 ? rkg : -1;
+			}
+
+		for(int j = rk2; j < rk2+rankGs2[rk2]; j++){
+			int id = rankToID2[j];
+			if(rank1[id] != 0 && rankings[id] != rkg){
+				keyi2 = false;
+				break;
+			}
+		}
+
+			for(int j = rk2; j < rk2+rankGs2[rk2]; j++){
+				int id = rankToID2[j];
+				if(rank1[id] == 0) rankings[id] = keyi2 ? rkg : -1;
+			}
+
+	}
+
+	//下面是贼麻烦的
+	//首先㞎都参加的排序
+	for(int i = 2; i <= dcjGs; i++){
+		for(int j = i; j > 1; j--){
+			if(rankings[dcj[j]] >= rankings[dcj[j-1]]) break;
+			int temp = dcj[j];
+			dcj[j] = dcj[j-1];
+			dcj[j-1] = temp;
+		}
+	}
+
+	int min1[202] = {0}, max1[202] = {0}, min2[202] = {0}, max2[202] = {0};
+	double rkgs[202] = {1,0};
+	double curRank = 1;
+	int curIdx = 0;
+	for(int i = 1; i <= dcjGs; i++){
+		if(rankings[dcj[i]] != curRank){
+			curIdx ++;
+			curRank = rankings[dcj[i]];
+			rkgs[curIdx] = curRank;
+			min1[curIdx] = rank1[dcj[i]];
+			max1[curIdx] = rank1[dcj[i]];
+			min2[curIdx] = rank2[dcj[i]];
+			max2[curIdx] = rank2[dcj[i]];
+		}
+		else{
+			if(min1[curIdx] > rank1[dcj[i]]) min1[curIdx] = rank1[dcj[i]];
+			if(max1[curIdx] < rank1[dcj[i]]) max1[curIdx] = rank1[dcj[i]];
+			if(min2[curIdx] > rank2[dcj[i]]) min2[curIdx] = rank2[dcj[i]];
+			if(max2[curIdx] < rank2[dcj[i]]) max2[curIdx] = rank2[dcj[i]];
+		}
+	}
+	curIdx ++;
+	rkgs[curIdx] = 202;
+	min1[curIdx] = 101;
+	max1[curIdx] = 101;
+	min2[curIdx] = 101;
+	max2[curIdx] = 101;
+	for(int i = 0; i < curIdx; i++){
+		if(max1[i+1] < max1[i]) max1[i+1] = max1[i];
+		if(max2[i+1] < max2[i]) max2[i+1] = max2[i];
+	}
+	for(int i = curIdx; i > 0; i--){
+		if(min1[i-1] > min1[i]) min1[i-1] = min1[i];
+		if(min2[i-1] > min2[i]) min2[i-1] = min2[i];
+	}
+	for(int i = 0; i < curIdx; i++){
+		double jiRank = rkgs[i];
+		vector<int> coll;
+		vector<int> ranks;
+		for(int j = max1[i] + 1; j < min1[i+1]; j++){
+			if(rankGs1[j] == 0) continue;
+			for(int k = 0; k < rankGs1[j]; k++){
+				coll.push_back(rankToID1[j+k]);
+				ranks.push_back(j);
+			}
+		}
+		for(int j = max2[i] + 1; j < min2[i+1]; j++){
+			if(rankGs2[j] == 0) continue;
+			for(int k = 0; k < rankGs2[j]; k++){
+				coll.push_back(rankToID2[j+k]);
+				ranks.push_back(j);
+			}
+		}
+		int sz = coll.size();
+		if(sz == 0) continue;
+		//内部排序
+		for(int j = 1; j < sz; j++){
+			for(int k = j; k > 0; k--){
+				if(ranks[k] > ranks[k-1] || (ranks[k] == ranks[k-1] && coll[k] > coll[k-1])) continue;
+				int temp = coll[k];
+				coll[k] = coll[k-1];
+				coll[k-1] = temp;
+				temp = ranks[k];
+				ranks[k] = ranks[k-1];
+				ranks[k-1] = temp;
+			}
+		}
+		int curK = 0;
+		for(int j = 0; j < sz; j++){
+			if(ranks[j] != curK){
+				curK = ranks[j];
+				jiRank += 0.001;
+			}
+			rankings[coll[j]] = jiRank;
+		}
+	}
+	vector<int> resIdx;
+	vector<double> resRank;
+	for(int i = 0; i < 110; i++){
+		if(rankings[i] == -1 || rankings[i] == 0) continue;
+		resIdx.push_back(i);
+		resRank.push_back(rankings[i]);
+	}
+	int size = resIdx.size();
+	for(int i = 1; i < size; i++){
+		for(int j = i; j > 0; j--){
+			if(resRank[j] > resRank[j-1] || (resRank[j] == resRank[j-1] && resIdx[j] > resIdx[j-1])) break;
+			int temp = resIdx[j];
+			resIdx[j] = resIdx[j-1];
+			resIdx[j-1] = temp;
+			double tmp = resRank[j];
+			resRank[j] = resRank[j-1];
+			resRank[j-1] = tmp;
+		}
+	}
+	double csRank = 0;
+	for(int i = 0; i < size; i++){
+		if(i > 0 && resRank[i] != csRank) printf("\n");
+		csRank = resRank[i];
+		printf("%d ", resIdx[i]);
+	}
+	printf("\n");
+	return 0;
+
+}
