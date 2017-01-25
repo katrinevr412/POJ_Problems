@@ -1,0 +1,61 @@
+#include <iostream>
+#include <stdio.h>
+#include <cstdlib>
+#include <iomanip>
+using namespace std;
+
+int main() {
+	while(1){
+		int num;
+		cin >> num;
+		if(!num) return num;
+		double *x = new double[num], *y = new double[num];
+		for(int i = 0; i < num; i++){
+			cin >> x[i] >> y[i];
+		}
+		double xmax = x[1];
+		int indexmax = 1;
+		for(int i = 0; i < num-1; i++){
+			for(int j = i+1; j < num; j++){
+				for(int k = 0; k <= 1; k++){
+					double x1 = x[i], x2 = x[j], y1 = y[i]-k, y2 = y[j]-(1-k);
+					double K = (y2-y1)/(x2-x1);
+					int idx = -1;
+					int l;
+					double Yl;
+					for(l = 0; l < num; l++){
+						if(l == i || l == j) Yl = l==i? y1: y2;
+						else Yl = y1 + K * (x[l]-x1);
+						//cout << setprecision(32) << Yl << " " << y[l] << endl;
+						if(Yl > y[l] || Yl < y[l]-1){
+							idx = l-1;
+							break;
+						}
+					}
+					//cout << i << " " << j << " " << k << " " << K << " " << idx << endl;
+
+					if(l == num) {
+						indexmax = num-1;
+						goto daotou;//穿过全部
+					}
+					if(idx < indexmax) continue;//穿过的段数不够
+					indexmax = idx;
+					double offset = Yl > y[idx+1]? 0: -1;
+					double KK = (y[idx+1]-y[idx])/(x[idx+1]-x[idx]);
+					double X = (y[idx]+offset-y1+K*x1-KK*x[idx])/(K-KK);
+					if(X>xmax) xmax = X;
+				}
+			}
+		}
+		daotou:
+		if(indexmax == num-1){
+			cout << "Through all the pipe." << endl;
+			//continue;
+		}
+		else{
+			printf("%.2lf\n", xmax);
+		}
+	}
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
