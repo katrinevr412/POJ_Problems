@@ -1,0 +1,26 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+	int x[16], y[16], z[16];
+	for(int i = 0; i < 16; i++){
+		cin >> x[i] >> y[i] >> z[i];
+	}
+	while(1){
+		int X, Y, Z;
+		cin >> X >> Y >> Z;
+		if(X == -1 && Y == -1 && Z == -1) return X+1;
+		int min = 255*255*3+1;
+		int idx = -1;
+		for(int i = 0; i < 16; i++){
+			int dist = (X-x[i])*(X-x[i]) + (Y-y[i])*(Y-y[i]) + (Z-z[i])*(Z-z[i]);
+			if(dist < min){
+				min = dist;
+				idx = i;
+			}
+		}
+		cout << "(" << X << "," << Y << "," << Z << ") maps to (" << x[idx] << "," << y[idx] << "," << z[idx] << ")\n";
+	}
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
