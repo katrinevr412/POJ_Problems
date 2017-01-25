@@ -1,0 +1,233 @@
+#include <iostream>
+using namespace std;
+
+int Ostate[20][20];
+bool Hstate[40][40];
+int N;
+
+void init(){
+	for(int i = 0; i < 20; i++){
+		for(int j = 0; j < 20; j++){
+			Ostate[i][j] = 0;
+		}
+	}
+	for(int i = 0; i < 40; i++){
+		for(int j = 0; j < 40; j++){
+			Hstate[i][j] = 0;
+		}
+	}
+}
+
+void setZuo(int x, int y){
+	Ostate[x][y] += 2;
+	Hstate[2*x][y] = 1;
+}
+
+void setYou(int x, int y){
+	Ostate[x][y] += 1;
+	Hstate[2*x][y+1] = 1;
+}
+
+void setShang(int x, int y){
+	Ostate[x][y] += 8;
+	Hstate[2*x-1][y] = 1;
+}
+
+void setXia(int x, int y){
+	Ostate[x][y] += 4;
+	Hstate[2*x+1][y] = 1;
+}
+
+bool okZuo(int x, int y){
+	if(y==0) return true;
+	return (Ostate[x][y-1])%2==0;
+}
+
+bool okYou(int x, int y){
+	if(y==N-1) return true;
+	return (Ostate[x][y+1]>>1)%2==0;
+}
+
+bool okShang(int x, int y){
+	if(x==0) return false;
+	return (Ostate[x-1][y]>>2)%2==0;
+}
+
+bool okXia(int x, int y){
+	if(x==N-1) return false;
+	return (Ostate[x+1][y]>>3)%2==0;
+}
+
+bool hasZuo(int x, int y){
+	return (Ostate[x][y]>>1)%2==1;
+}
+
+bool hasYou(int x, int y){
+	return (Ostate[x][y])%2==1;
+}
+
+bool hasShang(int x, int y){
+	if(x==0) return false;
+	return (Ostate[x][y]>>3)%2==1;
+}
+
+bool hasXia(int x, int y){
+	if(x==N-1) return false;
+	return (Ostate[x][y]>>2)%2==1;
+}
+
+bool wyZuo(int x, int y){
+	return okZuo(x,y) && (y==0 || Ostate[x][y-1] > 0);
+}
+
+bool wyYou(int x, int y){
+	return okYou(x,y) && (y==N-1 || Ostate[x][y+1] > 0);
+}
+
+bool wyShang(int x, int y){
+	return okShang(x,y) && Ostate[x-1][y] > 0;
+}
+
+bool wyXia(int x, int y){
+	return okXia(x,y) && Ostate[x+1][y] > 0;
+}
+
+void set(int x, int y, int n){
+	switch(n){
+	case 0:
+		setZuo(x,y);
+		setShang(x,y);
+		break;
+	case 1:
+		setShang(x,y);
+		setYou(x,y);
+		break;
+	case 2:
+		setYou(x,y);
+		setXia(x,y);
+		break;
+	case 3:
+		setXia(x,y);
+		setZuo(x,y);
+		break;
+	default:
+		break;
+	}
+}
+
+void print(){
+	for(int i = 0; i < 4*N+3; i++) cout << "*" ;
+	cout << endl;
+
+	for(int i = 0; i <= N-1; i++){
+		if(i != 0){
+			cout << "* ";
+			for(int j = 0; j <= N-1; j++){
+				cout << " ";
+				if(hasShang(i,j)) cout << "|";
+				else cout << " ";
+				cout << "  ";
+			}
+			cout << "*" << endl;
+		}
+		cout << "*H";
+		for(int j = 0; j <= N-1; j++){
+			if(hasZuo(i,j)) cout << "-";
+			else cout << " ";
+			cout << "O";
+			if(hasYou(i,j)) cout << "-";
+			else cout << " ";
+			cout << "H";
+		}
+		cout << "*\n";
+		if(i != N-1){
+			cout << "* ";
+			for(int j = 0; j <= N-1; j++){
+				cout << " ";
+				if(hasXia(i,j)) cout << "|";
+				else cout << " ";
+				cout << "  ";
+			}
+			cout << "*" << endl << "* ";
+			for(int j = 0; j <= N-1; j++){
+				cout << " H  ";
+			}
+			cout << "*" << endl;
+		}
+	}
+
+	for(int i = 0; i < 4*N+3; i++) cout << "*" ;
+	cout << endl;
+}
+
+int main() {
+	int cases = 0;
+	while(1){
+		cases++;
+		init();
+		cin >> N;
+		if(!N) return N;
+		if(cases != 1) cout << endl;
+		cout << "Case " << cases << ":\n";
+		cout << endl;
+		int ASM[20][20];
+		for(int i = 0; i < N; i++){
+			for(int j = 0; j < N; j++){
+				cin >> ASM[i][j];
+			}
+		}
+		int remain = N*N;
+		for(int i = 0; i < N; i++){
+			for(int j = 0; j < N; j++){
+				if(ASM[i][j] == 1){
+					setZuo(i, j);
+					setYou(i, j);
+					remain--;
+				}
+				else if(ASM[i][j] == -1){
+					setShang(i, j);
+					setXia(i, j);
+					remain--;
+				}
+			}
+		}
+		while(remain > 0){
+			//print();
+			//cout << remain << endl;
+			for(int i = 0; i < N; i++){
+				for(int j = 0; j < N; j++){
+					if(Ostate[i][j] > 0) continue;
+					int kygs = 0;
+					int tag = 0;
+					if(okZuo(i,j) && okShang(i,j)) {kygs++; tag = 0;}
+					if(okShang(i,j) && okYou(i,j)) {kygs++; tag = 1;}
+					if(okYou(i,j) && okXia(i,j)) {kygs++; tag = 2;}
+					if(okXia(i,j) && okZuo(i,j)) {kygs++; tag = 3;}
+					if(kygs == 1){
+						set(i,j,tag);
+						remain--;
+						continue;
+					}
+					if((wyZuo(i,j) && okShang(i,j) && !okXia(i,j)) || (wyShang(i,j) && okZuo(i,j) && !okYou(i,j))){
+						set(i,j,0);
+						remain--;
+					}
+					if((wyShang(i,j) && okYou(i,j) && !okZuo(i,j)) || (wyYou(i,j) && okShang(i,j) && !okXia(i,j))){
+						set(i,j,1);
+						remain--;
+					}
+					if((wyYou(i,j) && okXia(i,j) && !okShang(i,j)) || (wyXia(i,j) && okYou(i,j) && !okZuo(i,j))){
+						set(i,j,2);
+						remain--;
+					}
+					if((wyXia(i,j) && okZuo(i,j) && !okYou(i,j)) || (wyZuo(i,j) && okXia(i,j) && !okShang(i,j))){
+						set(i,j,3);
+						remain--;
+					}
+				}
+			}
+		}
+		print();
+	}
+	return 0;
+}
