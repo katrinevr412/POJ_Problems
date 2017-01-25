@@ -1,0 +1,95 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int main() {
+	int t;
+	scanf("%d", &t);
+	for(int ii = 1; ii <= t; ii++){
+		printf("Feature Set %d\n", ii);
+		int mn, mx, feaNo, cusNo;
+		scanf("%d%d%d%d", &mn, &mx, &feaNo, &cusNo);
+		int feaCost[30];
+		int cusSale[30];
+		int cusState[30] = {0};
+		for(int i = 0; i < feaNo; i++){
+			scanf("%d", &feaCost[i]);
+		}
+		for(int i = 0; i < cusNo; i++){
+			int ct;
+			scanf("%d", &ct);
+			for(int j = 0; j < ct; j++){
+				int temp;
+				scanf("%d", &temp);
+				cusState[i] += (1 << (temp-1));
+			}
+			scanf("%d", &cusSale[i]);
+		}
+		int N2 = (1 << feaNo);
+		int Sale = -1, Cost = -1;
+		double Index = -1.0;
+		int numFea = 32;
+		int numCus = -1;
+		int argState = -1;
+		int Margin = -2147483648;
+		for(int i = 1; i < N2; i++){
+			int numfea = 0;
+			int cost = 0;
+			int sale = 0;
+			int numcus = 0;
+			double index;
+			for(int j = 0; j < feaNo; j++){
+				if((i & (1 << j)) != 0) {
+					numfea ++;
+					cost += feaCost[j];
+				}
+			}
+			if(cost < mn || cost > mx) continue;
+			int feaState = i;
+			for(int j = 0; j < cusNo; j++){
+				if((feaState & cusState[j]) == cusState[j]){
+					numcus ++;
+					sale += cusSale[j];
+				}
+			}
+			index = sale * 1000.0 / cost;
+			int idx = (int)index;
+			if(index - idx >= 0.5){
+				index = (idx+1)/1000.0;
+			}
+			else{
+				index = idx/1000.0;
+			}
+			int margin = sale - cost;
+			if(index > Index || (index==Index && margin > Margin) ||
+					(index==Index && margin == Margin && numfea < numFea) ||
+					(index == Index && margin == Margin && numfea == numFea && numcus > numCus)){
+				argState = feaState;
+				Index = index;
+				Margin = margin;
+				numFea = numfea;
+				numCus = numcus;
+				Sale = sale;
+				Cost = cost;
+			}
+
+		}
+		if(argState == -1){
+			printf("No Solution!\n");
+		}
+		else{
+			printf("%.3lf\n%d\n%d\n", Index, Sale, Cost);
+			for(int j = 0; j < feaNo; j++){
+				if((argState & (1 << j)) != 0) printf("%d ", j+1);
+			}
+			printf("\n");
+			for(int j = 0; j < cusNo; j++){
+				if((argState & cusState[j]) == cusState[j]){
+					printf("%d ", j+1);
+				}
+			}
+			printf("\n");
+		}
+	}
+	return 0;
+}
