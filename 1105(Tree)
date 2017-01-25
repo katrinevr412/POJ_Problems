@@ -1,0 +1,37 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+	int cnt = 0;
+	while(1){
+		cnt ++;
+		int numVar;
+		cin >> numVar;
+		if(numVar == 0) return 0;
+		cout << "S-Tree #" << cnt << ":\n";
+		int state[128];
+		int order[7];
+		string s;
+		for(int i = 0; i < numVar; i++){
+			cin >> s;
+			order[i] = s[1] - '1';
+		}
+		cin >> s;
+		for(int i = 0; i < (1<<numVar); i++){
+			state[i] = s[i] - '0';
+		}
+		int cases;
+		cin >> cases;
+		for(int i = 0; i < cases; i++){
+			cin >> s;
+			int idx = 0;
+			for(int j = 0; j < numVar; j++){
+				idx += (s[order[j]]-'0') << (numVar - 1 - j);
+			}
+			cout << state[idx];
+		}
+		cout << endl << endl;
+	}
+	return 0;
+}
