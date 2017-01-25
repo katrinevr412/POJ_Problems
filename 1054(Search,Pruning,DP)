@@ -1,0 +1,100 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int R, C, N;
+
+struct p{
+	int x, y;
+} points[5005];
+
+bool operator<(p &p1, p &p2){
+	if(p1.x < p2.x) return 1;
+	if(p1.x > p2.x) return 0;
+	return p1.y < p2.y;
+}
+
+inline bool inRange(int x, int y){
+	return x >= 1 && x <= R && y >= 1 && y <= C;
+}
+
+inline int mx(int x, int y){
+	return x>y? x : y;
+}
+
+inline int mn(int x, int y){
+	return x<y? x : y;
+}
+
+void quickSort(p s[], int l, int r)
+{
+    if (l < r)
+    {
+        int i = l, j = r;
+        p x = s[l];
+        while (i < j)
+        {
+            while(i < j && !(s[j] < x))
+                j--;
+            if(i < j)
+                s[i++] = s[j];
+            while(i < j && s[i] < x)
+                i++;
+            if(i < j)
+                s[j--] = s[i];
+        }
+        s[i] = x;
+        quickSort(s, l, i - 1);
+        quickSort(s, i + 1, r);
+    }
+}
+
+bool state[5001][5001] = {0};
+
+int main() {
+	scanf("%d%d%d", &R, &C, &N);
+	for(int i = 0; i < N; i++){
+		int x, y;
+		scanf("%d%d", &x, &y);
+		points[i].x = x;
+		points[i].y = y;
+		state[x][y] = 1;
+	}
+	quickSort(points, 0, N-1);
+	int mx = 0;
+	for(int i = 0; i < N-1; i++){
+		int xi = points[i].x, yi = points[i].y;
+		for(int j = i+1; j < N; j++){
+			int xj = points[j].x, yj = points[j].y;
+			int xcha = xj-xi, ycha = yj-yi;
+			if(xi + mx*xcha > R){
+				break;
+			}
+			int ttt = yi + mx*ycha;
+			if(ttt > C || ttt < 1){
+				continue;
+			}
+			if(inRange(xi-xcha, yi-ycha)) continue;
+			int limit = 2147483647;
+			if(xj != xi) limit = (R-xi)/xcha;
+			if(yj > yi) limit = mn(limit, (C-yi)/ycha);
+			else if(yj < yi) limit = mn(limit, (yi-1)/(-ycha));
+			if(limit < 2) continue;
+			int startx = xj, starty = yj;
+			int k = 0;
+			bool ky = 1;
+			for(; k < limit-1; k++){
+				startx += xcha, starty += ycha;
+				if(!state[startx][starty]){
+					ky = 0;
+					break;
+				}
+			}
+			if(ky){
+				mx = limit + 1;
+			}
+		}
+	}
+	printf("%d\n", mx);
+	return 0;
+}
