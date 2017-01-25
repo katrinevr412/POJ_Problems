@@ -1,0 +1,70 @@
+#include <iostream>
+using namespace std;
+
+const int MIN_INT = -2147483648;
+
+int mini(int a, int b){
+	if(a<b) return a;
+	return b;
+}
+
+int maxi(int a, int b){
+	if(a>b) return a;
+	return b;
+}
+
+
+
+
+int main() {
+	int N, K, T;
+	cin >> N >> K >> T;
+	int t[101] = {0}, p[101] = {0}, s[101] = {0};
+	for(int i = 1; i <= N; i++) cin >> t[i];
+	for(int i = 1; i <= N; i++) cin >> p[i];
+	for(int i = 1; i <= N; i++) cin >> s[i];
+	quickSort(t, p, s, 1, N);
+	//for(int i = 1; i <= N; i++) cout << t[i] << " " << p[i] << " " << s[i] << endl;
+	int moments[101] = {0};
+	int minindex[102] = {0};
+	int cnt = 0;
+	int tag = 0;
+	for(int i = 1; i <= N; i++){
+		if(t[i] == tag) continue;
+		tag = t[i];
+		moments[cnt+1] = t[i];
+		minindex[cnt+1] = i;
+		cnt++;
+	}
+	minindex[cnt+1] = N+1;
+	//for(int i = 1; i <= cnt; i++) cout << moments[i] << " ";
+	int maxPros[101][101];
+	maxPros[0][0] = 0;
+	for(int i = 1; i <= K; i++){
+		maxPros[0][i] = MIN_INT;
+	}
+	for(int i = 1; i <= cnt; i++){
+		int timeDif = moments[i] - moments[i-1];
+		int tempPros[101] = {0};
+		for(int j = minindex[i]; j < minindex[i+1]; j++){
+			tempPros[s[j]] += p[j];
+		}
+		for(int j = 0; j <= K; j++){
+			int lower = maxi(0, j-timeDif);
+			int upper = mini(K, j+timeDif);
+			int mx = MIN_INT;
+			for(int k = lower; k <= upper; k++){
+				mx = maxi(mx, maxPros[i-1][k]);
+			}
+			if(mx < 0) mx = MIN_INT;
+			else mx += tempPros[j];
+			maxPros[i][j] = mx;
+		}
+	}
+	int mxx = MIN_INT;
+	for(int i = 0; i <= K; i++) mxx = maxi(mxx, maxPros[cnt][i]);
+	if(mxx < 0) mxx = 0;
+	cout << mxx << endl;
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
