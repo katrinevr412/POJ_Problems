@@ -1,0 +1,143 @@
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+int cnt = 1;
+string dict[10001];
+
+class node{
+	public:
+	node* sub[27];
+	int num;
+	node(){
+		num = 0;
+		//cnt++;
+		for(int i = 0; i < 27; i++) sub[i] = NULL;
+	}
+};
+node* root;
+void buildTree(){
+	root = new node();
+	string s;
+	while(getline(cin, s)){
+		if(s == "#") return;
+		dict[cnt] = s;
+		node *iter = root;
+		int len = s.length();
+		for(int i = 0; i < len; i++){
+			node *next = iter->sub[s[i] - 'a'];
+			if(next == NULL){
+				node *temp = new node();
+				iter->sub[s[i] - 'a'] = temp;
+				iter = iter->sub[s[i] - 'a'];
+			}
+			else{
+				iter = next;
+			}
+			//if(s == "award")
+		}
+		node *newN = new node();
+		iter->sub[26] = newN;
+		iter = iter->sub[26];
+		iter->num = cnt;
+		cnt++;
+	}
+}
+
+int have(node* start, string suffix){
+	node *iter = start;
+	int len = suffix.length();
+
+	//int prc = len;
+	for(int i = 0; i < len; i++){
+		//cout << (int)(suffix[i]-'a') << endl;
+		if(iter->sub[suffix[i]-'a'] == NULL){
+			return 0;
+		}
+		//cout << 233 << endl;
+		iter = iter->sub[suffix[i] - 'a'];
+	}
+
+	if(iter->sub[26] == NULL) return 0;
+	return iter->sub[26]->num;
+}
+
+int main() {
+
+	string ss = "test";
+	//cout << "q" + ss.substr(4);
+	buildTree();
+	//cout << root << endl;
+	string s;
+	while(getline(cin, s)){
+		if(s == "#") return 0;
+		if(have(root, s) > 0){
+			//cout << have(root, s) << endl;
+			cout << s << " is correct\n";
+			continue;
+		}
+		vector<int> res;
+		int len = s.length();
+		//int cnt = 0;
+		//下面开始考虑增加一个
+		node *iter = root;
+		for(int i = 0; i <= len; i++){
+			string sfx = s.substr(i);
+			//cout << iter << endl;
+			for(char c = 'a'; c <= 'z'; c++){
+				//cout << c + sfx << endl;
+				//cout << iter << endl;
+				int result = have(iter, c + sfx);
+				//cout << i << " " << c << endl;
+				if(result > 0) res.push_back(result);
+				//cout << result << endl;
+
+			}
+			if(i != len) iter = iter->sub[s[i] - 'a'];
+			if(iter == NULL) break;
+		}
+		//cout << 1 << endl;
+		//替换一个
+		iter = root;
+		for(int i = 0; i < len; i++){
+			string sfx = s.substr(i+1);
+			for(char c = 'a'; c <= 'z'; c++){
+				int result = have(iter, c + sfx);
+				if(result > 0) res.push_back(result);
+			}
+			iter = iter->sub[s[i] - 'a'];
+			if(iter == NULL) break;
+		}
+		//删掉一个
+		if(len > 1){
+			iter = root;
+			for(int i = 0; i < len; i++){
+				string sfx = s.substr(i+1);
+				int result = have(iter, sfx);
+				if(result > 0) res.push_back(result);
+				iter = iter->sub[s[i] - 'a'];
+				if(iter == NULL) break;
+			}
+
+		}
+
+		if(res.empty()){
+			cout << s << ":" << endl;
+			continue;
+		}
+		int sz = res.size();
+		quickSort(res, 0, sz-1);
+		cout << s << ":";
+		int idx = 0;
+		for(int i = 0; i < sz; i++) {
+			if(res[i] == idx) continue;
+			idx = res[i];
+			cout << " " << dict[res[i]];
+		}
+		cout << endl;
+
+	}
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
