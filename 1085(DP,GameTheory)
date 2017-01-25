@@ -1,0 +1,106 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int numTri[262144];
+
+int idxLine[11][11];
+
+int idxDots[18][2] = {{1,2},{1,3},{2,3},{2,4},{2,5},{3,5},{3,6},{4,5},{5,6},{4,7},{4,8},{5,8},{5,9},{6,9},{6,10},{7,8},{8,9},{9,10}};
+
+int triangle[9][3] = {{0,1,2},{3,4,7},{2,4,5},{5,6,8},{9,10,15},{7,10,11},{11,12,16},{8,12,13},{13,14,17}};
+
+inline bool hasWei(int n, int w){
+	return (n & (1<<w)) != 0;
+}
+
+int getNumTri(int n){//当前状態下的三国形个擞
+	if(numTri[n] != -1) return numTri[n];
+	if(n == 0) {
+		numTri[0] = 0;
+		return 0;
+	}
+	int cnt = 0;
+	for(int i = 0; i < 9; i++){
+		if(hasWei(n, triangle[i][0]) && hasWei(n, triangle[i][1]) && hasWei(n, triangle[i][2])){
+			cnt ++;
+		}
+	}
+	numTri[n] = cnt;
+	return cnt;
+}
+
+int dp[262144];
+
+void init(){
+	//cout << 1 << endl;
+	for(int i = 0; i < 262144; i++){
+		numTri[i] = -1;
+		dp[i] = -1;
+	}
+	for(int i = 0; i < 18; i++){
+		idxLine[idxDots[i][0]][idxDots[i][1]] = i;
+		idxLine[idxDots[i][1]][idxDots[i][0]] = i;
+	}
+	dp[262143] = 0;
+	//cout << 1 << endl;
+}
+
+int getDp(int n){
+	if(dp[n] != -1) return dp[n];
+	int mx = 0;
+	for(int i = 0; i < 18; i++){
+		if(hasWei(n, i)) continue;
+		int n_ = n | (1<<i);
+		int temp;
+		if(getNumTri(n_) == getNumTri(n)){
+			//下一步该对方走
+			temp = 9 - getNumTri(n) - getDp(n_);
+		}
+		else{
+			temp = getNumTri(n_) - getNumTri(n) + getDp(n_);
+		}
+		if(temp > mx) mx = temp;
+	}
+	dp[n] = mx;
+	return mx;
+}
+
+int main() {
+	init();
+	int cases;
+	scanf("%d", &cases);
+	for(int ii = 0; ii < cases; ii++){
+		printf("Game %d: ", ii+1);
+		int state = 0;//当前状態
+		bool first = 0;//0代表A走，1代表B走
+		int ATri = 0, BTri = 0;
+		int curTri = 0;
+		int bushu;
+		scanf("%d", &bushu);
+		for(int i = 0; i < bushu; i++){
+			int d1, d2;
+			scanf("%d%d", &d1, &d2);
+			int idx = idxLine[d1][d2];
+			int qTri = curTri;
+			state |= (1 << idx);
+			curTri = getNumTri(state);
+			if(curTri == qTri){
+				first = !first;
+			}
+			else{
+				int zengTri = curTri - qTri;
+				if(!first) ATri += zengTri;
+				else BTri += zengTri;
+			}
+		}
+		int moreTri = getDp(state);
+		if((!first && ATri + moreTri > 4) || (first && BTri + moreTri < 5)){
+			printf("A wins.\n");
+		}
+		else{
+			printf("B wins.\n");
+		}
+	}
+	return 0;
+}
