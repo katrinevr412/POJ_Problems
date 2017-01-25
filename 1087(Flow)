@@ -1,0 +1,157 @@
+#include <iostream>
+#include <cmath>
+#include <queue>
+#include <set>
+#include <map>
+#include <string>
+using namespace std;
+
+const int SSS = 2147483647;
+const int TTT = -2147483648;
+int N, M, K;
+int graph[101][101] = {{0}};
+bool s[101] = {false}, t[101] = {false};//false表示可用
+
+bool pushflow(){
+	//如果push不了，返回false
+	queue<int> bfs;
+	bool getT = false;
+	int noT;
+	int S[101] = {0}, T[101] = {0};
+	for(int i = 1; i < N; i++){
+		if(!s[i]){
+			S[i] = SSS;
+			bfs.push(i);
+		}
+	}
+	while(!bfs.empty()){
+		int cur = bfs.front();
+		bfs.pop();
+		if(cur > 0){
+			//是s这边的点
+			for(int j = 1; j <= M; j++){
+				if(graph[cur][j] == 1 && T[j] == 0){
+					bfs.push(-j);
+					T[j] = cur;
+				}
+			}
+		}
+		else{
+			//是t这边的点
+			int j = -cur;
+			if(!t[j]){
+				getT = true;
+				noT = cur;
+				break;
+			}
+			for(int i = 1; i < N; i++){
+				if(graph[i][j] == -1 && S[i] == 0){
+					bfs.push(i);
+					S[i] = cur;
+				}
+			}
+		}
+	}
+	if(!getT) return false;
+	t[-noT] = true;
+	int TtoS = 1;
+	while(1){
+		if(TtoS){
+			//push路径当前从S端到T端
+			int noS = T[-noT];
+			graph[noS][-noT] = -1;
+			noT = noS;
+		}
+		else{
+			//从T端到S端
+			int noS = S[noT];
+			if(noS == SSS){
+				s[noT] = true;
+				break;
+			}
+			graph[noT][-noS] = 1;
+			noT = noS;
+		}
+		TtoS = 1 - TtoS;
+	}
+	return true;
+}
+
+
+int main() {
+	cin >> N;
+	int cnt = 0;
+	map<string, int> plugs;
+	string temp;
+	for(int i = 0; i < N; i++) {
+		cin >> temp;
+		plugs.insert(pair<string, int>(temp, cnt+1));
+		cnt++;
+	}
+	cin >> M;
+	string feiStr;
+	string sinks[101];
+	for(int i = 0; i < M; i++){
+		cin >> feiStr >> sinks[i+1];
+	}
+	bool state[301][301] = {false};
+	bool state_temp[301][301];
+	cin >> K;
+	for(int i = 0; i < K; i++){
+		string dao, fa;
+		cin >> dao >> fa;
+		map<string, int>::iterator it = plugs.find(dao);
+
+		if(it == plugs.end()){
+			plugs.insert(pair<string, int>(dao, cnt+1));
+			cnt++;
+		}
+		it = plugs.find(fa);
+		if(it == plugs.end()){
+			plugs.insert(pair<string, int>(fa, cnt+1));
+			cnt++;
+		}
+		state[plugs[fa]][plugs[dao]] = true;
+	}
+	int zong = plugs.size();
+	for(int i = 1; i <= zong; i++) state[i][i] = true;
+
+	//cout << zong << endl;
+	for(int t = 0; t < 9; t++){
+		for(int i = 1; i <= zong; i++){
+			for(int j = 1; j <= zong; j++){
+				state_temp[i][j] = false;
+				for(int k = 1; k <= zong; k++){
+					if(state[i][k] && state[k][j]){
+						state_temp[i][j] = true;
+						break;
+					}
+				}
+			}
+		}
+		for(int k = 1; k <= zong; k++){
+			for(int j = 1; j <= zong; j++){
+				state[k][j] = state_temp[k][j];
+			}
+		}
+	}
+
+	for(int j = 1; j <= M; j++){
+		map<string, int>::iterator it = plugs.find(sinks[j]);
+		if(it == plugs.end()) continue;
+		int jj = plugs[sinks[j]];
+		//cout << "hehe" << endl;
+		for(int i = 1; i <= N; i++){
+			if(state[i][jj]) graph[i][j] = 1;
+		}
+	}
+
+	cnt = 0;
+	N++;
+	while(pushflow()){
+		cnt++;
+	}
+	cout << M-cnt << endl;
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
