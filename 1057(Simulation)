@@ -1,0 +1,71 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <stack>
+
+using namespace std;
+
+
+bool isFile(string s){
+	return s[0] == 'f';
+}
+
+bool isDir(string s){
+	return s == "ROOT" || s[0] == 'd';
+}
+
+class dir{
+public:
+	string name;
+	vector<string> files;
+	dir(string n){
+		name = n;
+	}
+	dir(){}
+};
+
+int main() {
+	string indent = "|     ";
+	int cases = 0;
+	while(1){
+		cases ++;
+		stack<dir> dirs;
+		dir root("ROOT");
+		dirs.push(root);
+		//cout << "ROOT" << endl;
+		string s;
+		bool printed = false;
+		while(cin >> s){
+			if(s == "#") return 0;
+			//if(s == "*") break;
+			if(!printed){
+				cout << "DATA SET " << cases << ":" << endl;
+				cout << "ROOT" << endl;
+				printed = true;
+			}
+			if(isDir(s)){
+				dir newDir(s);
+				int depth = dirs.size();
+				for(int i = 0; i < depth; i++) cout << indent;
+				cout << newDir.name << endl;
+				dirs.push(newDir);
+			}
+			if(isFile(s)){
+				dirs.top().files.push_back(s);
+			}
+			if(s == "]" || s == "*"){
+				quickSort(dirs.top().files);
+				int filegs = dirs.top().files.size();
+				int depth = dirs.size() - 1;
+				for(int i = 0; i < filegs; i++){
+					for(int j = 0; j < depth; j++) cout << indent;
+					cout << dirs.top().files[i] << endl;
+				}
+				dirs.pop();
+			}
+			if(s == "*") break;
+		}
+		cout << endl;
+	}
+	return 0;
+}
