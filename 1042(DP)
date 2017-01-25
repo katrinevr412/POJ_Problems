@@ -1,0 +1,85 @@
+#include <iostream>
+using namespace std;
+
+int Max(int a, int b){
+	if(a>b) return a;
+	return b;
+}
+
+int main() {
+	int n, T;
+	while(1){
+		cin >> n;
+		if(!n) return 0;
+		cin >> T;
+		T *= 12;
+		int f[30] = {0}, d[30] = {0};
+		int t[30] = {0};
+		for(int i = 1; i <= n; i++){
+			cin >> f[i];
+		}
+		for(int i = 1; i <= n; i++){
+			cin >> d[i];
+		}
+		for(int i = 1; i < n; i++){
+			int temp;
+			cin >> temp;
+			t[i+1] = t[i] + temp;
+			//t[i]为到哒第i个鱼塘所用的废时间
+		}
+		//for(int i = 1; i <= n; i++) cout << t[i] << " ";
+		//cout << endl;
+		int maxi[30][200] = {{0}};
+		int trc[30][200] = {{0}};
+		for(int i = 1; i <= n; i++){
+			int maxT = T - t[i];
+			for(int j = 1; j <= maxT; j++){
+				maxi[i][j] = -1;
+				for(int k = 0; k <= j; k++){
+					int kMax = 0;
+					//int num = 0;
+					int time = 0;
+					int chushi = f[i];
+					while(time < k && chushi > 0){
+						kMax += chushi;
+						time++;
+						chushi -= d[i];
+					}
+					kMax += maxi[i-1][j-k];
+					if(kMax > maxi[i][j] || (kMax == maxi[i][j] && i == 1)){
+						maxi[i][j] = kMax;
+						trc[i][j] = k;
+					}
+				}
+			}
+		}
+		int mx = -1, maxPros = 0;
+		for(int i = 1; i <= n; i++){
+			if(t[i] > T) continue;
+			if(maxi[i][T-t[i]] > mx){
+				mx = maxi[i][T-t[i]];
+				maxPros = i;
+			}
+		}
+		int fishes = mx;
+		int times[30] = {0};
+		//int curTime; //= trc[maxPros][T-t[maxPros]];
+		int zongTime = T-t[maxPros];
+		for(int i = maxPros; i >= 1; i--){
+			//curTime = trc[i][zongTime];
+			times[i] = trc[i][zongTime];
+			zongTime -= times[i];
+
+		}
+
+		for(int i = 1; i <= n; i++){
+			cout << 5 * times[i];
+			if(i != n) cout << ", ";
+		}
+		cout << endl;
+		cout << "Number of fish expected: " << fishes << endl << endl;
+
+	}
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
