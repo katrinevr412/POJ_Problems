@@ -1,0 +1,59 @@
+#include <iostream>
+using namespace std;
+
+class intv{
+public:
+	int start;
+	int end;
+	intv(): start(0), end(0){}
+	intv(int s, int e): start(s) , end(e){}
+};
+
+
+
+int main() {
+	int cases;
+	cin >> cases;
+	for(int ii = 0; ii < cases; ii++){
+		int N;
+		intv vss[200];
+		cin >> N;
+		for(int i = 0; i < N; i++){
+			cin >> vss[i].start >> vss[i].end;
+			if(vss[i].start > vss[i].end){
+				int temp = vss[i].start;
+				vss[i].start = vss[i].end;
+				vss[i].end = temp;
+			}
+		}
+		quickSort(vss, 0, N-1);
+		for(int i = 0; i < N; i++){
+			vss[i].start -=1;
+			vss[i].start /=2;
+			vss[i].end -=1;
+			vss[i].end /=2;
+		}
+		bool state[200] = {false};
+		int remain = N;
+		int cnt = 0;
+		while(remain > 0){
+			int place = -1;
+			int idx = -1;
+			while(idx < N-1){
+				idx++;
+				if(state[idx] || vss[idx].start <= place){
+					//idx++;
+					continue;
+				}
+				state[idx] = true;
+				remain--;
+				place = vss[idx].end;
+			}
+			cnt++;
+		}
+		cout << cnt * 10 << endl;
+	}
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
+
