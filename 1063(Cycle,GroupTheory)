@@ -1,0 +1,29 @@
+
+
+#include <iostream>
+using namespace std;
+
+int main() {
+	int cases;
+	cin >> cases;
+	for(int ii = 0; ii < cases; ii++){
+		int num;
+		cin >> num;
+		if(num%2 == 1){
+			int fei;
+			for(int i = 0; i < num; i++) cin >> fei;
+			cout << "YES" << endl;
+		}
+		else{
+			int feis[32];
+			for(int i = 0; i < num; i++) cin >> feis[i];
+			int ji = 0, ou = 0;
+			for(int i = 0; i < num; i+= 2) ou += (feis[i]==1);
+			for(int i = 1; i < num; i+= 2) ji += (feis[i]==1);
+			if(ou - ji == 1 || ou == ji || ou - ji == -1) cout << "YES" << endl;
+			else cout << "NO" << endl;
+		}
+	}
+	return 0;
+}
+
