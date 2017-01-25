@@ -1,0 +1,60 @@
+#include <iostream>
+#include <map>
+#include <string>
+#include <cmath>
+#include <stdio.h>
+using namespace std;
+
+string getZM(string s){
+	int len = s.length();
+	string res = "";
+	for(int i = 0; i < len; i++){
+		if((s[i] >= 'a' && s[i] <= 'z') || (s[i] >= '0' && s[i] <= '9')) res += s[i];
+		else if(s[i] >= 'A' && s[i] <= 'Z') res += (char)(s[i]-'A'+'a');
+	}
+	return res;
+}
+
+int main() {
+	map<string, int> searchTerms;
+	string s;
+	while(1){
+		cin >> s;
+		if(s == "----------") break;
+		s = getZM(s);
+		if(s.length() == 0) continue;
+		if(searchTerms.find(s) != searchTerms.end()){
+			searchTerms[s] ++;
+		}
+		else{
+			searchTerms.insert(pair<string, int>(s, 1));
+		}
+	}
+	while(1){
+		bool firstLine = 1;
+		map<string, int> fileTerms;
+		while(1){
+			cin >> s;
+			if(s == "----------"){
+				if(firstLine) return 0;
+				else break;
+			}
+			firstLine = 0;
+			s = getZM(s);
+			if(s.length() == 0) continue;
+			if(fileTerms.find(s) != fileTerms.end()){
+				fileTerms[s]++;
+			}
+			else{
+				fileTerms.insert(pair<string, int>(s, 1));
+			}
+		}
+		double ans = 0;
+		for(map<string, int>::iterator it = searchTerms.begin(); it != searchTerms.end(); it++){
+			if(fileTerms.find(it->first) == fileTerms.end()) continue;
+			ans += sqrt(it->second * fileTerms[it->first] + 0.0);
+		}
+		printf("%.2lf\n", ans);
+	}
+	return 0;
+}
