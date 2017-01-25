@@ -1,0 +1,155 @@
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+class tiaosao{
+	public:
+	vector<int> data;
+	int len;
+
+	tiaosao(int num){
+
+		len = 1;
+		//data = new int[len];
+		data.push_back(num);
+
+	}
+
+
+	tiaosao(int num, bool tag){
+		len = num;
+		for(int i = 0; i < len; i++) data.push_back(0);
+	}
+
+	void print(){
+
+		for(int i = len-1; i >= 0; i--) {
+
+			cout << data[i] << " ";
+		}
+	}
+	void normalize(){
+		for(int i = 0; i < len-1; i++){
+				data[i+1] += data[i]/10;
+				data[i] %= 10;
+		}
+		while(data[len-1] >= 10){
+				data.push_back(data[len-1]/10);
+				data[len-1] %= 10;
+				len ++;
+		}
+	}
+
+	void cheng8();
+
+	void addNum(int);
+
+};
+
+void tiaosao::cheng8(){
+	for(int i = 0; i < len; i++){
+		data[i] *= 8;
+	}
+	for(int i = 0; i < len-1; i++){
+		data[i+1] += data[i]/10;
+		data[i]%=10;
+	}
+	if(data[len-1] >= 10){
+		data.push_back(data[len-1]/10);
+		data[len-1] %= 10;
+		len ++;
+	}
+}
+
+void tiaosao::addNum(int num){
+	data[0] += num;
+	for(int i = 0; i < len-1; i++){
+		if(data[i] < 10) break;
+		data[i+1] += data[i]/10;
+		data[i]%=10;
+	}
+	if(data[len-1] >= 10){
+		//cout << "*" << endl;
+		data.push_back(data[len-1]/10);
+		data[len-1] %= 10;
+		len ++;
+	}
+}
+
+tiaosao multiply(tiaosao t1, tiaosao t2){
+	int len = t1.len + t2.len;
+	tiaosao res(len, true);
+	for(int i = 0; i < len - 1; i++){
+		for(int j = 0; j <= i; j++){
+			if(j < t1.len && i-j < t2.len){
+				res.data[i] += t1.data[j] * t2.data[i-j];
+			}
+		}
+	}
+	for(int i = 0; i < len-1; i++){
+		res.data[i+1] += res.data[i]/10;
+		res.data[i] %= 10;
+	}
+	return res;
+}
+
+tiaosao pw(tiaosao t, int m){
+	if(m == 1) {
+		//cout << t.len << endl;
+		tiaosao res(t.data[0]);
+
+		return res;
+	}
+	tiaosao temp = pw(t, m/2);
+	if(m%2 == 0) return multiply(temp, temp);
+	else return multiply(t, multiply(temp, temp));
+}
+
+int main() {
+	string s;
+	while(cin >> s){
+		if(s.length() == 1){
+			if(s[0] == '0') cout << "0 [8] = 0 [10]" << endl;
+			else cout << "1 [8] = 1 [10]" << endl;
+			continue;
+		}
+		int len = s.length();
+		vector<int> digits;
+		for(int i = 2; i < len; i++){
+			digits.push_back(s[i] - '0');
+		}
+
+		tiaosao t(digits[0]);
+		for(int i = 1; i < len-2; i++){
+			//cout << digits[i] << endl;
+			t.cheng8();
+			//t.print();
+			//cout << endl;
+			t.addNum(digits[i]);
+			//t.print();
+			//cout << endl;
+		}
+		//cout << endl;
+		tiaosao five(5);
+		tiaosao mf = pw(five, 3*(len-2));
+		tiaosao res = multiply(mf, t);
+		//t.print();
+		//cout << endl;
+		//mf.print();
+		//cout << endl;
+		res.normalize();
+		//res.print();
+		//cout << endl;
+		//cout << res.len << endl;
+		cout << s << " [8] = 0.";
+		if(res.len < 3*(len-2)){
+			for(int i = 0; i < 3*(len-2)-res.len; i++) cout << 0;
+		}
+		int Len = res.len;
+		if(Len > 3*(len-2)) Len = 3*(len-2);
+		for(int i = 0; i < Len; i++) cout << res.data[Len-1-i];
+		cout << " [10]\n";
+	}
+	return 0;
+}
