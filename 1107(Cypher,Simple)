@@ -1,0 +1,28 @@
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+int main() {
+	int k1, k2, k3;
+	string s;
+	while(cin >> k1 >> k2 >> k3){
+		vector<int> v1, v2, v3;
+		if(k1 + k2 + k3 == 0) break;
+		cin >> s;
+		int len = s.length();
+		for(int i = 0; i < len; i++){
+			if(s[i] >= 'a' && s[i] <= 'i') v1.push_back(i);
+			else if(s[i] >= 'j' && s[i] <= 'r') v2.push_back(i);
+			else v3.push_back(i);
+		}
+		int z1 = v1.size(), z2 = v2.size(), z3 = v3.size();
+		char c[200];
+		for(int i = 0; i < z1; i++) c[v1[(i+k1)%z1]] = s[v1[i]];
+		for(int i = 0; i < z2; i++) c[v2[(i+k2)%z2]] = s[v2[i]];
+		for(int i = 0; i < z3; i++) c[v3[(i+k3)%z3]] = s[v3[i]];
+		for(int i = 0; i < len; i++) cout << c[i];
+		cout << endl;
+	}
+	return 0;
+}
