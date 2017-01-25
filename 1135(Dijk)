@@ -1,0 +1,93 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int MIN(int a, int b){
+	return a>b ? b : a;
+}
+
+int MAX(int a, int b){
+	return a>b ? a : b;
+}
+
+int main() {
+	int N,M, cnt = 0;
+	while(1){
+		cnt ++;
+		scanf("%d%d", &N, &M);
+		if(N == 0 && M == 0) return 0;
+		printf("System #%d\n", cnt);
+		if(N == 1){
+			printf("The last domino falls after 0.0 seconds, at key domino 1.\n\n");
+			continue;
+		}
+		int edges[502][502];
+		for(int i = 1; i <= N; i++){
+			for(int j = 1; j <= N; j++){
+				edges[i][j] = -1;
+				//-1表示不连
+			}
+		}
+		for(int i = 0; i < M; i++){
+			int I, J, L;
+			scanf("%d%d%d", &I, &J, &L);
+			edges[I][J] = L;
+			edges[J][I] = L;
+		}
+		//开始dijkstra
+		int dist[502];
+		dist[1] = 0;
+		for(int i = 2; i <= N; i++) dist[i] = 2147483647;
+		bool in[502] = {0};
+		int numCnt = N;
+		while(numCnt > 0){
+			int min = 2147483647;
+			int arg = -1;
+			for(int i = 1; i <= N; i++){
+				if(in[i]) continue;
+				if(dist[i] < min){
+					min = dist[i];
+					arg = i;
+				}
+			}
+			dist[arg] = min;
+			in[arg] = true;
+			numCnt --;
+			for(int i = 1; i <= N; i++){
+				if(in[i]) continue;
+				if(edges[arg][i] == -1) continue;
+				if(min + edges[arg][i] < dist[i]){
+					dist[i] = min + edges[arg][i];
+				}
+			}
+		}
+		double mx = 0;
+		int argmax = 1;
+		for(int i = 2; i <= N; i++){
+			if(dist[i] > mx){
+				mx = dist[i];
+				argmax = i;
+			}
+		}
+		double maxz = 0;
+		int arg1 = -1, arg2 = -1;
+		for(int i = 1; i <= N; i++){
+			for(int j = 1; j <= N; j++){
+				if(edges[i][j] == -1) continue;
+				double temp = (dist[i] + dist[j] + edges[i][j])/2.0;
+				if(temp > maxz){
+					maxz = temp;
+					arg1 = MIN(i,j);
+					arg2 = MAX(i,j);
+				}
+			}
+		}
+		if(mx >= maxz){
+			printf("The last domino falls after %.1lf seconds, at key domino %d.\n\n", mx, argmax);
+		}
+		else{
+			printf("The last domino falls after %.1lf seconds, between key dominoes %d and %d.\n\n", maxz, arg1, arg2);
+		}
+	}
+	return 0;
+}
