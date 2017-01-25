@@ -1,0 +1,32 @@
+#include <iostream>
+#include <stdio.h>
+#include <string>
+using namespace std;
+
+int main() {
+	string c;
+	while(cin >> c){
+		//char c[260];
+		//if(scanf("%s", c) == 0) break;
+		int len = c.length();
+		int pos = 0;
+		int tobe = 1;
+		for(; pos < len; pos ++){
+			char cc = c[pos];
+			if(cc == 'N') {
+				;
+			}
+			else if(cc == 'C' || cc == 'D' || cc == 'E' || cc == 'I') {
+				tobe++;
+			}
+			else if(cc >= 'p' && cc <= 'z') {
+				tobe--;
+			}
+			else break;
+			if(tobe <= 0) break;
+		}
+		if(pos == len - 1 && tobe == 0) cout << "YES" << endl;
+		else cout << "NO" << endl;
+	}
+	return 0;
+}
