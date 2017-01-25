@@ -1,0 +1,57 @@
+int M, N;
+
+int mn(int a, int b){
+	if(a<b) return a;
+	return b;
+}
+
+int mx(int a, int b){
+	if(a>b) return a;
+	return b;
+}
+
+bool zhany[110] = {false};
+
+class wupin{
+public:
+	int jiage;
+	int dengji;
+	vector<int> tidaipin;
+	vector<int> youhui;
+};
+
+wupin dx[110];
+
+int jisuan(int bh, int di, int gao){
+	int zuixiao = dx[bh].jiage;
+	int gs = dx[bh].tidaipin.size();
+	for(int i = 0; i < gs; i++){
+		int xh = dx[bh].tidaipin[i];
+		int dj = dx[xh].dengji;
+		if(dj < gao - M || dj > di + M || zhany[xh]){
+			continue;
+		}
+		zhany[xh] = true;
+		int temp = dx[bh].youhui[i] + jisuan(xh, mn(di, dj), mx(gao, dj));
+		if(temp < zuixiao) zuixiao = temp;
+		zhany[xh] = false;
+	}
+	return zuixiao;
+}
+
+int main() {
+	cin >> M >> N;
+	for(int i = 1; i <= N; i++){
+		int temp;
+		cin >> dx[i].jiage >> dx[i].dengji >> temp;
+		for(int j = 0; j < temp; j++){
+			int bh, jg;
+			cin >> bh >> jg;
+			dx[i].tidaipin.push_back(bh);
+			dx[i].youhui.push_back(jg);
+		}
+	}
+	zhany[1] = true;
+	cout << jisuan(1, dx[1].dengji, dx[1].dengji) << endl;
+	return 0;
+}
