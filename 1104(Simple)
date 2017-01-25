@@ -1,0 +1,141 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+bool state[110][110][110];
+
+int main() {
+	int W, H, T;
+	int cnt = 0;
+	while(1){
+		scanf("%d%d%d", &W, &H, &T);
+		if(W == 0 && H == 0 && T == 0) return W+H+T;
+		printf("Robbery #%d:\n", cnt+1);
+		cnt++;
+		for(int k = 1; k <= T; k++){
+			for(int i = 1; i <= W; i++){
+				for(int j = 1; j <= H; j++){
+					state[k][i][j] = true;
+				}
+			}
+		}
+		int mes;
+		scanf("%d", &mes);
+		for(int ii = 0; ii < mes; ii++){
+			int t, x1, y1, x2, y2;
+			scanf("%d%d%d%d%d", &t, &x1, &y1, &x2, &y2);
+			for(int i = x1; i <= x2; i++){
+				for(int j = y1; j <= y2; j++){
+					state[t][i][j] = false;
+				}
+			}
+		}
+		bool youjie = true;
+		int stateX[110], stateY[110];
+		bool weiyi[110] = {false};
+		int wygs = 0;
+		int CNT = 0;
+		int II, JJ;
+		for(int i = 1; i <= W; i++){
+			for(int j = 1; j <= H; j++){
+				if(state[1][i][j]){
+					CNT ++;
+					if(CNT == 1){
+						II = i;
+						JJ = j;
+					}
+					//youjie = false;
+					break;
+				}
+			}
+		}
+		if(CNT == 0) {
+			youjie = false;
+			goto meiyoujie;
+		}
+		if(T == 1){
+			if(CNT > 1){
+				printf("Nothing known.\n\n");
+				//continue;
+			}
+			else{
+				printf("Time step 1: The robber has been at %d,%d.\n\n", II, JJ);
+			}
+			continue;
+		}
+		for(int t = 2; t <= T; t++){
+			int cnt = 0;
+			int I, J;
+			for(int i = 1; i <= W; i++){
+				for(int j = 1; j <= H; j++){
+					if(!state[t][i][j]) continue;
+					if(state[t-1][i][j] || (i>1 && state[t-1][i-1][j]) || (i<W && state[t-1][i+1][j]) || (j>1 && state[t-1][i][j-1]) || (j<H && state[t-1][i][j+1])){
+						cnt++;
+						if(cnt == 1){
+							I = i;
+							J = j;
+						}
+					}
+					else{
+						state[t][i][j] = false;
+					}
+				}
+			}
+			if(cnt == 0){
+				youjie = false;
+				break;
+			}
+			if(t == T && cnt == 1){
+				weiyi[T] = true;
+				stateX[T] = I;
+				stateY[T] = J;
+				wygs ++;
+			}
+		}
+		meiyoujie:
+		if(!youjie){
+			printf("The robber has escaped.\n\n");
+			continue;
+		}
+		for(int t = T-1; t >= 1; t--){
+			int cnt = 0;
+			int I, J;
+			for(int i = 1; i <= W; i++){
+				for(int j = 1; j <= H; j++){
+					if(!state[t][i][j]) continue;
+					if(state[t+1][i][j] || (i>1 && state[t+1][i-1][j]) || (i<W && state[t+1][i+1][j]) || (j>1 && state[t+1][i][j-1]) || (j<H && state[t+1][i][j+1])){
+						cnt ++;
+						if(cnt == 1){
+							I = i;
+							J = j;
+						}
+					}
+					else{
+						state[t][i][j] = false;
+					}
+				}
+			}
+			if(cnt == 1){
+				wygs ++;
+				weiyi[t] = true;
+				stateX[t] = I;
+				stateY[t] = J;
+			}
+			if(cnt == 0){
+				youjie = false;
+				goto meiyoujie;
+			}
+		}
+		if(wygs == 0){
+			printf("Nothing known.\n\n");
+		}
+		else{
+			for(int t = 1; t <= T; t ++){
+				if(!weiyi[t]) continue;
+				printf("Time step %d: The robber has been at %d,%d.\n", t, stateX[t], stateY[t]);
+			}
+			printf("\n");
+		}
+	}
+	return 0;
+}
