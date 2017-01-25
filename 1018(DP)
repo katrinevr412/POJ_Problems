@@ -1,0 +1,116 @@
+
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <stdio.h>
+using namespace std;
+
+
+int mini(int a, int b){
+	if(a < b) return a;
+	return b;
+}
+
+class bw_pr{
+	public:
+		int bw;
+		int pr;
+
+	bw_pr(int b, int p): bw(b), pr(p){
+
+	}
+
+	bw_pr(): bw(0), pr(0){
+
+	}
+};
+
+
+
+
+int main() {
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+
+	int testcase;
+	cin >> testcase;
+	for(int ii = 0; ii < testcase; ii++){
+
+		int device;
+		cin >> device;
+		vector<bw_pr> info[100];
+		for(int jj = 0; jj < device; jj++){
+			int manu;
+			cin >> manu;
+			bw_pr temp[100];
+			for(int i = 0; i < manu; i++){
+				int bw, pr;
+				cin >> bw >> pr;
+				//bw_pr* temp_ = new bw_pr(bw, pr);
+				temp[i].bw = bw;
+				temp[i].pr = pr;
+			}
+			quickSort(temp, 0, manu-1);
+			int pr = 2147483647;
+			for(int i = 0; i < manu; i++){
+				if(temp[i].pr < pr){
+					pr = temp[i].pr;
+					info[jj].push_back(temp[i]);
+				}
+			}
+			//for(int i = 0; i < info[jj].size(); i++) cout << info[jj][i].bw << " " <<
+					//info[jj][i].pr << endl;
+			//delete [] temp;
+		}
+
+		vector<bw_pr> res[2];
+		res[0].push_back(bw_pr(2147483647, 0));
+		for(int i = 0; i < device; i++){
+			vector<bw_pr>& from = res[i%2], &to = res[(i+1)%2], &ref = info[i];
+			to.clear();
+			//下面合并from和ref中的内容并放入to中
+			int fromSize = from.size(), refSize = ref.size();
+			int fromIndex = 0, refIndex = 0;
+			int targetBw = mini(from[fromIndex].bw, ref[refIndex].bw);
+
+			while(1){
+				//cout << targetBw << endl;
+				//找到最后一个大于等于targetBw的
+				if(from[fromIndex].bw > targetBw){
+					while(1){
+						fromIndex++;
+						if(fromIndex == fromSize || from[fromIndex].bw < targetBw) break;
+					}
+					fromIndex--;
+				}
+				if(ref[refIndex].bw > targetBw){
+					while(1){
+						refIndex++;
+						if(refIndex == refSize || ref[refIndex].bw < targetBw) break;
+					}
+					refIndex--;
+				}
+				to.push_back(bw_pr(targetBw, from[fromIndex].pr + ref[refIndex].pr));
+				//将结果放入目标中
+				if(fromIndex < fromSize - 1) fromIndex++;
+				if(refIndex < refSize - 1) refIndex++;
+				int newtargetBw = mini(from[fromIndex].bw, ref[refIndex].bw);
+				if(newtargetBw == targetBw) break;
+				targetBw = newtargetBw;
+			}
+		}
+		vector<bw_pr>& po = res[device%2];
+		//for(int i = 0; i < po.size(); i++) cout << po[i].bw << " " <<
+							//po[i].pr << endl;
+		double b_p = 0;
+		int size = po.size();
+		for(int i = 0; i < size; i++){
+			double newb_p = po[i].bw * 1.0 / po[i].pr;
+			if(newb_p > b_p) b_p = newb_p;
+		}
+		printf("%.3f\n", b_p);
+
+	}
+
+
+	return 0;
+}
