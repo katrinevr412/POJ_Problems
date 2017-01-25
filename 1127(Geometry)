@@ -1,0 +1,72 @@
+#include <iostream>
+#include <stdio.h>
+#include <queue>
+using namespace std;
+
+int MAX(int x, int y){
+	return x>y ? x : y;
+}
+
+int MIN(int x, int y){
+	return x<y ? x : y;
+}
+
+bool xj(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4){
+	int s1 = x1*y3+x3*y2+x2*y1-x3*y1-x2*y3-x1*y2;
+	int s2 = x3*y2+x2*y4+x4*y3-x2*y3-x4*y2-x3*y4;
+	int s3 = x2*y4+x4*y1+x1*y2-x4*y2-x1*y4-x2*y1;
+	int s4 = x4*y1+x1*y3+x3*y4-x1*y4-x3*y1-x4*y3;
+	if(s1 != 0 || s2 != 0 || s3 != 0 || s4 != 0){
+		return (s1>=0 && s2>=0 && s3>=0 && s4>=0) || (s1<=0 && s2<=0 && s3<=0 && s4<=0);
+	}
+	//四点共线
+	return MAX(MIN(x1, x2), MIN(x3, x4)) <= MIN(MAX(x1, x2), MAX(x3, x4)) && MAX(MIN(y1, y2), MIN(y3, y4)) <= MIN(MAX(y1, y2), MAX(y3, y4));
+}
+
+int main() {
+	int N;
+	while(1){
+		scanf("%d", &N);
+		if(N == 0) return N;
+		int startX[20], startY[20], endX[20], endY[20];
+		for(int i = 1; i <= N; i++){
+			scanf("%d%d%d%d", startX+i, startY+i, endX+i, endY+i);
+		}
+		bool direct[20][20] = {false};
+		for(int i = 1; i <= N; i++){
+			for(int j = i; j <= N; j++){
+				if(i == j) direct[i][j] = true;
+				else{
+					direct[i][j] = xj(startX[i], startY[i], endX[i], endY[i], startX[j], startY[j], endX[j], endY[j]);
+					direct[j][i] = direct[i][j];
+				}
+			}
+		}
+		bool conn[20][20] = {false};
+		for(int i = 1; i <= N; i++){
+			bool state[20] = {false};
+			state[i] = true;
+			conn[i][i] = true;
+			queue<int> bfs;
+			bfs.push(i);
+			while(!bfs.empty()){
+				int idx = bfs.front();
+				bfs.pop();
+				for(int j = 1; j <= N; j++){
+					if(!direct[idx][j] || state[j]) continue;
+					state[j] = true;
+					conn[i][j] = true;
+					bfs.push(j);
+				}
+			}
+		}
+		int d1, d2;
+		while(1){
+			scanf("%d%d", &d1, &d2);
+			if(d1 == 0 && d2 == 0) break;
+			if(conn[d1][d2]) printf("CONNECTED\n");
+			else printf("NOT CONNECTED\n");
+		}
+	}
+	return 0;
+}
