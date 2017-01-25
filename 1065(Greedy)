@@ -1,0 +1,55 @@
+
+#include <iostream>
+using namespace std;
+
+int MAX_INT = 2147483647;
+
+class stick{
+public:
+	int l;
+	int w;
+	stick(int L, int W): l(L), w(W){}
+	stick(): l(0), w(0){}
+};
+
+bool operator>(stick& s1, stick& s2){
+	if(s1.l > s2.l) return true;
+	if(s1.l < s2.l) return false;
+	return s1.w >= s2.w;
+}
+
+
+
+
+int main() {
+	int cases;
+	cin >> cases;
+	for(int ii = 0; ii < cases; ii++){
+		int st;
+		cin >> st;
+		stick sticks[5000];
+		for(int i = 0; i < st; i++){
+			cin >> sticks[i].l >> sticks[i].w;
+		}
+		quickSort(sticks, 0, st-1);
+		int mei = st;
+		bool state[5000] = {false};
+		int res = 0;
+		while(mei > 0){
+			int curL = MAX_INT, curW = MAX_INT;
+			for(int i = 0; i < st; i++){
+				if(state[i]) continue;
+				if(sticks[i].l <= curL && sticks[i].w <= curW){
+					state[i] = true;
+					curL = sticks[i].l;
+					curW = sticks[i].w;
+					mei--;
+				}
+			}
+			res++;
+		}
+		cout << res << endl;
+	}
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
