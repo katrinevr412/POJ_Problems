@@ -1,0 +1,142 @@
+#include <iostream>
+#include <string>
+#include <map>
+#include <vector>
+using namespace std;
+
+bool isDgt(char c){
+	return c>='0' && c<='9';
+}
+
+bool isCap(char c){
+	return c>='A' && c<='Z';
+}
+
+bool isSml(char c){
+	return c>='a' && c<='z';
+}
+
+void parseSeq(map<string, int> &m, int times, string &equ, int start, int end){
+	if(start >= end) return;
+	if(isCap(equ[start])){
+		if(start+1 == end || !isSml(equ[start+1])){
+			string ele = "" + equ[start];
+			int gs = 0;
+			start ++;
+			while(start < end && isDgt(equ[start])){
+				gs *= 10;
+				gs += equ[start]-'0';
+				start++;
+			}
+			if(gs == 0) gs = 1;
+			int add = gs * times;
+			map<string, int>::iterator it = m.find(ele);
+			if(it == m.end()){
+				m.insert(pair<string, int>(ele, add));
+			}
+			else{
+				it->second += add;
+			}
+			parseSeq(m, times, equ, start, end);
+		}
+		else{
+			string ele = equ.substr(start, 2);
+			start += 2;
+			int gs = 0;
+			while(start < end && isDgt(equ[start])){
+				gs *= 10;
+				gs += equ[start] - '0';
+				start++;
+			}
+			if(gs == 0) gs = 1;
+			int add = gs * times;
+			map<string, int>::iterator it = m.find(ele);
+			if(it == m.end()){
+				m.insert(pair<string, int>(ele, add));
+			}
+			else{
+				it->second += add;
+			}
+			parseSeq(m, times, equ, start, end);
+		}
+	}
+	else{
+		//只能是括號了
+		int khgs = 1;
+		int offset = start+1;
+		while(1){
+			if(equ[offset] == '(') khgs++;
+			else if(equ[offset] == ')'){
+				khgs--;
+				if(khgs == 0) break;
+			}
+			offset++;
+		}
+		int gs = 0;
+		int st = offset+1;
+		while(st < end && isDgt(equ[st])){
+			gs *= 10;
+			gs += equ[st]-'0';
+			st++;
+		}
+		if(gs == 0) gs = 1;
+		parseSeq(m, times*gs, equ, start+1, offset);
+		parseSeq(m, times, equ, st, end);
+	}
+}
+
+void parseNumberedSeq(map<string, int> &m, string &equ, int start, int end){
+	int num = 0;
+	while(isDgt(equ[start])){
+		num *= 10;
+		num += (equ[start] - '0');
+		start++;
+	}
+	if(num == 0) num = 1;
+	parseSeq(m, num, equ, start, end);
+}
+
+void parseEqu(map<string, int> &m, string &equ){
+	int len = equ.length();
+	vector<int> jiahaos;
+	jiahaos.push_back(-1);
+	for(int i = 1; i < len-1; i++){
+		if(equ[i] == '+') jiahaos.push_back(i);
+	}
+	jiahaos.push_back(len);
+	int sz = jiahaos.size();
+	for(int i = 0; i < sz-1; i++){
+		parseNumberedSeq(m, equ, jiahaos[i]+1, jiahaos[i+1]);
+	}
+}
+
+bool eq(map<string, int> &m1, map<string, int> &m2){
+	if(m1.size() != m2.size()) return 0;
+	for(map<string, int>::iterator it = m1.begin(); it != m1.end(); it++){
+		map<string, int>::iterator it_ = m2.find(it->first);
+		if(it_ == m2.end() || it_->second != it->second) return 0;
+	}
+	return 1;
+}
+
+int main() {
+	map<string, int> zuo;
+	string equZuo;
+	cin >> equZuo;
+	parseEqu(zuo, equZuo);
+	int T;
+	cin >> T;
+	for(int ii = 0; ii < T; ii++){
+		string equYou;
+		cin >> equYou;
+		map<string, int> you;
+		parseEqu(you, equYou);
+		if(eq(zuo, you)){
+			cout << equZuo << "==" << equYou << endl;
+		}
+		else{
+			cout << equZuo << "!=" << equYou << endl;
+		}
+	}
+	return 0;
+}
