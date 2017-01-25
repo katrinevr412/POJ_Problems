@@ -1,0 +1,168 @@
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <set>
+using namespace std;
+bool state[16][16] = {false};
+
+bool ok(int i1, int i2, int i3, int i4){
+	return !state[i1][i2] && !state[i1][i3] && !state[i1][i4] && !state[i2][i3] && !state[i2][i4] && !state[i3][i4];
+}
+
+bool ok(string s[]){
+	for(int i = 0; i < 8; i++){
+		if(s[i].length() != 4) return false;
+	}
+	set<int> chong1, chong2;
+	for(int i = 0; i < 4; i++){
+		for(int j = 0; j < 4; j++){
+			chong1.insert(s[i][j]-'A');
+		}
+	}
+	for(int i = 4; i < 8; i++){
+		for(int j = 0; j < 4; j++){
+			chong2.insert(s[i][j]-'A');
+		}
+	}
+	return chong1.size()==16 && chong2.size()==16;
+}
+
+void setTrue(int i1, int i2, int i3, int i4){
+	state[i1][i2] = true;
+	state[i1][i3] = true;
+	state[i1][i4] = true;
+	state[i2][i3] = true;
+	state[i2][i4] = true;
+	state[i3][i4] = true;
+	state[i2][i1] = true;
+	state[i3][i1] = true;
+	state[i4][i1] = true;
+	state[i3][i2] = true;
+	state[i4][i2] = true;
+	state[i4][i3] = true;
+}
+
+void setFalse(int i1, int i2, int i3, int i4){
+	state[i1][i2] = false;
+	state[i1][i3] = false;
+	state[i1][i4] = false;
+	state[i2][i3] = false;
+	state[i2][i4] = false;
+	state[i3][i4] = false;
+	state[i2][i1] = false;
+	state[i3][i1] = false;
+	state[i4][i1] = false;
+	state[i3][i2] = false;
+	state[i4][i2] = false;
+	state[i4][i3] = false;
+}
+
+string getStr(int i1, int i2, int i3, int i4){
+	string res = "";
+	res += (char)(i1+'A');
+	res += (char)(i2+'A');
+	res += (char)(i3+'A');
+	res += (char)(i4+'A');
+	return res;
+}
+
+string getStr(int i){
+	string res = "";
+	res += (char)(i+'A');
+	for(int j = 0; j < 16; j++){
+		if(!state[i][j]){
+			res += (char)(j+'A');
+		}
+	}
+	return res;
+}
+
+int main() {
+	int rub[500000000] = {0};
+	string stemp;
+	while(cin >> stemp){
+	for(int i = 0; i < 16; i++){
+		for(int j = 0; j < 16; j++){
+			state[i][j] = false;
+		}
+	}
+	vector<string> res;
+	for(int i = 0; i < 16; i++) state[i][i] = true;
+	for(int i = 0; i < 12; i++){
+		string temp;
+		if(i != 0) cin >> temp;
+		else temp = stemp;
+		res.push_back(temp);
+		for(int j = 0; j < 3; j++){
+			for(int k = j+1; k < 4; k++){
+				state[temp[j]-'A'][temp[k]-'A'] = true;
+				state[temp[k]-'A'][temp[j]-'A'] = true;
+			}
+		}
+	}
+	/*
+	for(int i = 0; i < 16; i++){
+		for(int j = 0; j < 16; j++){
+			if(!state[i][j]) cout << (char)(j+'A') << " ";
+		}
+		cout << endl;
+	}
+	*/
+	int mk;
+	for(int i = 1; i < 16; i++){
+		if(!state[0][i]){
+			mk = i;
+			break;
+		}
+	}
+	//cout << (char)(mk+'A') << endl;
+	//bool ok = false;
+	for(int i = mk+1; i < 15; i++){
+		for(int j = i+1; j < 16; j++){
+			if(!ok(0, mk, i, j)) continue;
+			setTrue(0, mk, i, j);
+			int temp[3];
+			int cnt = 0;
+			for(int k = 1; k < 16; k++){
+				if(!state[0][k]){
+					temp[cnt] = k;
+					cnt++;
+				}
+			}
+			if(!ok(0, temp[0], temp[1], temp[2])){
+				setFalse(0, mk, i, j);
+				continue;
+			}
+			setTrue(0, temp[0], temp[1], temp[2]);
+			string s[8];
+			s[0] = getStr(0, mk, i, j);
+			s[4] = getStr(0, temp[0], temp[1], temp[2]);
+			s[1] = getStr(temp[0]); s[2] = getStr(temp[1]); s[3] = getStr(temp[2]);
+			s[5] = getStr(mk); s[6] = getStr(i); s[7] = getStr(j);
+			//for(int ii = 0; ii < 8; ii++) cout << s[ii] << " ";
+			//cout << endl;
+			if(ok(s)){
+				for(int k = 0; k < 12; k++){
+					cout << res[k];
+					if(k%4 == 3) cout << endl;
+					else cout << " ";
+				}
+				for(int k = 0; k < 8; k++){
+					cout << s[k];
+					if(k%4 == 3) cout << endl;
+					else cout << " ";
+				}
+				goto rubbish;
+			}
+			setFalse(0, temp[0], temp[1], temp[2]);
+			setFalse(0, mk, i, j);
+		}
+	}
+	cout << "It is not possible to complete this schedule." << endl;
+	rubbish:
+	continue;
+	}
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
