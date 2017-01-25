@@ -1,0 +1,53 @@
+#include <iostream>
+using namespace std;
+
+int gs[30] = {1,1,2,5,14,42,132,429,1430,4862,16796,58786,208012,742900,2674440,9694845,35357670,129644790,477638700,1767263190};
+int lj[30] = {1,2,4,9,23,65,197,626,2056,6918,23714,82500,290512,1033412,3707852,13402697,48760367,178405157,656043857};
+
+void print(int c){
+	if(c == 0) return;
+	int ds;
+	int xs;
+	for(int i = 0; ; i++){
+		if(lj[i] > c){
+			ds = i;
+			xs = c-lj[i-1];
+			break;
+		}
+	}
+	int s = 0;
+	int zd, yd, zx, yx;
+	for(int i = 0; ; i++){
+		s += gs[i] * gs[ds-1-i];
+		if(s > xs){
+			zd = i;
+			yd = ds-1-i;
+			zx = xs - (s-gs[i]*gs[ds-1-i]);
+			break;
+		}
+	}
+	int mg = gs[yd];
+	yx = zx%mg;
+	zx /= mg;
+	if(zd > 0) {
+		cout << "(";
+		print(zx + lj[zd-1]);
+		cout << ")";
+	}
+	cout << "X";
+	if(yd > 0) {
+		cout << "(";
+		print(yx + lj[yd-1]);
+		cout << ")";
+	}
+}
+
+int main() {
+	int che;
+	while(cin >> che){
+		if(che == 0) break;
+		print(che);
+		cout << endl;
+	}
+	return 0;
+}
