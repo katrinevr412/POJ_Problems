@@ -1,0 +1,92 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+
+	int n, r, c, cnt = 0;
+	while(cin >> n >> r >> c){
+		if(n == 0) return n;
+		cnt++;
+		cout << "Test " << cnt << endl;
+		int state[79][11][79];
+		for(int i = 0; i < r; i++){
+			for(int j = 0; j < n; j++){
+				string s;
+				cin >> s;
+				for(int k = 0; k < c; k++){
+					char c = s[k];
+					if(c == '.') state[j][i][k] = 0;
+					else state[j][i][k] = 1;
+				}
+			}
+		}
+		bool Can = true;
+		for(int i = 0; i < n; i++){
+			bool can = false;
+			for(int ii = 0; ii < r*c; ii++){
+				int j = ii/c;
+				int k = ii%c;
+				if(state[i][j][k] == 0) continue;
+				bool chong = true;
+				for(int jj = 0; jj < n; jj++){
+					if(jj != i && state[jj][j][k] > 0){
+						chong = false;
+						break;
+					}
+				}
+				if(chong){
+					can = true;
+					state[i][j][k] = 2;
+					goto yigewanshi;
+				}
+			}
+			for(int ii = 0; ii < r*c-1; ii++){
+				int j = ii/c;
+				int k = ii%c;
+				if(state[i][j][k] == 0) continue;
+				for(int ii_ = ii+1; ii_ < r*c; ii_++){
+					int j_ = ii_/c;
+					int k_ = ii_%c;
+					if(state[i][j_][k_] == 0) continue;
+					bool chong = true;
+					for(int jj = 0; jj < n; jj++){
+						if(jj != i && state[jj][j][k] > 0 && state[jj][j_][k_] > 0){
+							chong = false;
+							break;
+						}
+					}
+					if(chong){
+						can = true;
+						state[i][j][k] = 2;
+						state[i][j_][k_] = 2;
+						goto yigewanshi;
+					}
+				}
+			}
+			yigewanshi:
+			if(!can){
+				Can = false;
+				break;
+			}
+		}
+		if(!Can){
+			cout << "impossible" << endl;
+			continue;
+		}
+		for(int i = 0; i < r; i++){
+			for(int j = 0; j < n; j++){
+				for(int k = 0; k < c; k++){
+					int temp = state[j][i][k];
+					if(temp == 0) cout << '.';
+					if(temp == 1) cout << 'o';
+					if(temp == 2) cout << '#';
+				}
+				cout << ' ';
+			}
+			cout << endl;
+		}
+	}
+
+	return 0;
+}
