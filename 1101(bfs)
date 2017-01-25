@@ -1,0 +1,215 @@
+#include <iostream>
+#include <stdio.h>
+#include <string>
+#include <queue>
+using namespace std;
+
+int w, h;
+
+const int MAXINT = 0x7FFFFFFF;
+
+bool has[100][100] = {0};
+
+void init(){
+	for(int i = 0; i < 100; i++){
+		for(int j = 0; j < 100; j++){
+			has[i][j] = 0;
+		}
+	}
+}
+
+struct pt{
+	int x,y;
+	pt(int x, int y): x(x), y(y){}
+};
+
+struct mp{
+	int cs[100][100];
+	mp(){
+		//cout << 1 << endl;
+		for(int i = 0; i < 100; i++){
+			for(int j = 0; j < 100; j++){
+				cs[i][j] = MAXINT;
+			}
+		}
+	}
+};
+
+void jisuan(int x, int y, mp *res){
+	queue<pt> bfs;
+	bool visited[100][100] = {0};
+	int fx[100][100] = {0};
+	res->cs[x][y] = 0;
+	visited[x][y] = 1;
+	int x_ = x-1;
+	while(x_ >= 0){
+		res->cs[x_][y] = 1;
+		visited[x_][y] = 1;
+		fx[x_][y] = 1;
+		if(has[x_][y]) break;
+		bfs.push(pt(x_, y));
+		x_--;
+	}
+	x_ = x+1;
+	while(x_ <= w+1){
+		res->cs[x_][y] = 1;
+		visited[x_][y] = 1;
+		fx[x_][y] = 1;
+		if(has[x_][y]) break;
+		bfs.push(pt(x_, y));
+		x_++;
+	}
+	int y_ = y-1;
+	while(y_ >= 0){
+		res->cs[x][y_] = 1;
+		visited[x][y_] = 1;
+		fx[x][y_] = -1;
+		if(has[x][y_]) break;
+		bfs.push(pt(x, y_));
+		y_--;
+	}
+	y_ = y+1;
+	while(y_ <= h+1){
+		res->cs[x][y_] = 1;
+		visited[x][y_] = 1;
+		fx[x][y_] = -1;
+		if(has[x][y_]) break;
+		bfs.push(pt(x, y_));
+		y_++;
+	}
+	while(!bfs.empty()){
+		pt p = bfs.front();
+		bfs.pop();
+		int xx = p.x, yy = p.y;
+		int cs = res->cs[xx][yy];
+		if(fx[xx][yy] == 1){
+			int yy_ = yy-1;
+			while(yy_ >= 0){
+				bool acc = 0;
+				if(!visited[xx][yy_]){
+					visited[xx][yy_] = 1;
+					acc = 1;
+					res->cs[xx][yy_] = cs+1;
+					fx[xx][yy_] = -1;
+				}
+				if(has[xx][yy_]) break;
+				if(acc){
+					bfs.push(pt(xx, yy_));
+				}
+				yy_--;
+			}
+			yy_ = yy+1;
+			while(yy_ <= h+1){
+				bool acc = 0;
+				if(!visited[xx][yy_]){
+					visited[xx][yy_] = 1;
+					acc = 1;
+					res->cs[xx][yy_] = cs+1;
+					fx[xx][yy_] = -1;
+				}
+				if(has[xx][yy_]) break;
+				if(acc){
+					bfs.push(pt(xx, yy_));
+				}
+				yy_++;
+			}
+		}
+		else if(fx[xx][yy] == -1){
+			int xx_ = xx-1;
+			while(xx_ >= 0){
+				bool acc = 0;
+				if(!visited[xx_][yy]){
+					visited[xx_][yy] = 1;
+					acc = 1;
+					res->cs[xx_][yy] = cs+1;
+					fx[xx_][yy] = 1;
+				}
+				if(has[xx_][yy]) break;
+				if(acc){
+					bfs.push(pt(xx_, yy));
+				}
+				xx_--;
+			}
+			xx_ = xx+1;
+			while(xx_ <= w+1){
+				bool acc = 0;
+				if(!visited[xx_][yy]){
+					visited[xx_][yy] = 1;
+					acc = 1;
+					res->cs[xx_][yy] = cs+1;
+					fx[xx_][yy] = 1;
+				}
+				if(has[xx_][yy]) break;
+				if(acc){
+					bfs.push(pt(xx_, yy));
+				}
+				xx_++;
+			}
+		}
+	}
+}
+
+int main() {
+	int cnt = 1;
+	while(1){
+		init();
+		cin >> w >> h;
+		if(w == 0 && h == 0) return 0;
+		printf("Board #%d:\n", cnt);
+		cnt++;
+		string s;
+		for(int j = 1; j <= h; j++){
+			s = "";
+			while(s.length() == 0) getline(cin, s);
+			//cout << s << endl;
+			for(int i = 1; i <= w; i++){
+				char c = s[i-1];
+				if(c == 'X') has[i][j] = 1;
+			}
+		}
+		//cout << 1 << endl;
+		mp* rcd[100][100] = {{NULL}};
+		int ct = 1;
+		while(1){
+			int x1,y1,x2,y2;
+			cin >> x1 >> y1 >> x2 >> y2;
+			if(x1==0 && x2==0 && y1==0 && y2==0) break;
+			printf("Pair %d: ", ct);
+			//cout << "Pair " << ct << ": " << endl;
+			ct++;
+			//cout << x1 << " " << y1 << endl;
+			//cout << rcd[x1][y1] << endl;
+			//cout << 4 << endl;
+			if(rcd[x1][y1] != NULL){
+
+				//cout << 1 << endl;
+
+				int jg = rcd[x1][y1]->cs[x2][y2];
+				if(jg == MAXINT) printf("impossible.\n");
+				else printf("%d segments.\n", jg);
+
+			}
+			else if(rcd[x2][y2] != NULL){
+
+				//cout << 2 << endl;
+
+				int jg = rcd[x2][y2]->cs[x1][y1];
+				if(jg == MAXINT) printf("impossible.\n");
+				else printf("%d segments.\n", jg);
+
+			}
+			else{
+				//cout << 0 << endl;
+
+				rcd[x1][y1] = new mp();
+				jisuan(x1, y1, rcd[x1][y1]);
+				int jg = rcd[x1][y1]->cs[x2][y2];
+				if(jg == MAXINT) printf("impossible.\n");
+				else printf("%d segments.\n", jg);
+
+			}
+		}
+		printf("\n");
+	}
+	return 0;
+}
