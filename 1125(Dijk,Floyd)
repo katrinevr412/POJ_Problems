@@ -1,0 +1,91 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+const int MAXINT = 1073741823;
+
+int truncate(int n){
+	if(n > MAXINT) return MAXINT;
+	return n;
+}
+
+int cishu(int N){
+	if(N <= 2) return 1;
+	if(N <= 4) return 2;
+	if(N <= 8) return 3;
+	if(N <= 16) return 4;
+	if(N <= 32) return 5;
+	if(N <= 64) return 6;
+	return 7;
+}
+
+int main() {
+	while(1){
+		int N;
+		cin >> N;
+		if(N == 0) return 0;
+		int cs = cishu(N);
+		int zdl[2][101][101];
+		for(int i = 1; i <= N; i++){
+			for(int j = 1; j <= N; j++){
+				if(i != j)zdl[0][i][j] = MAXINT;
+				else zdl[0][i][i] = 0;
+			}
+		}
+		for(int i = 1; i <= N; i++){
+			int gs;
+			scanf("%d", &gs);
+			for(int j = 0; j < gs; j++){
+				int temp1, temp2;
+				scanf("%d%d", &temp1, &temp2);
+				zdl[0][i][temp1] = temp2;
+			}
+		}
+		for(int i = 0; i < cs; i++){
+			int from, to;
+			if(i%2 == 0){
+				from = 0;
+				to = 1;
+			}
+			else{
+				from = 1;
+				to = 0;
+			}
+			for(int i = 1; i <= N; i++){
+				for(int j = 1; j <= N; j++){
+					if(i == j){
+						zdl[to][i][j] = 0;
+						continue;
+					}
+					int temp = zdl[from][i][j];
+					for(int k = 1; k <= N; k++){
+						int ntemp = zdl[from][i][k] + zdl[from][k][j];
+						if(ntemp < temp) temp = ntemp;
+					}
+					zdl[to][i][j] = temp;
+				}
+			}
+		}
+		int tar = cs%2;
+		int mn = MAXINT, argmin = 0;
+		bool can = false;
+		for(int i = 1; i <= N; i++){
+			int mx = 0;
+			for(int j = 1; j <= N; j++){
+				int val = zdl[tar][i][j];
+				if(val != MAXINT) can = true;
+				if(val > mx) mx = val;
+			}
+			if(mx < mn){
+				mn = mx;
+				argmin = i;
+			}
+		}
+		if(!can){
+			cout << "disjoint" << endl;
+			continue;
+		}
+		cout << argmin << " " << mn << endl;
+	}
+	return 0;
+}
