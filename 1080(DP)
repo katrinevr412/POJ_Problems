@@ -1,0 +1,53 @@
+
+#include <iostream>
+#include <string>
+using namespace std;
+
+int MIN_INT = -1000000000;
+
+int mx(int a, int b){
+	return a>b? a: b;
+}
+
+int fsb[5][5] = {{5,-1,-2,-1,-3}, {-1,5,-3,-2,-4}, {-2,-3,5,-2,-2}, {-1,-2,-2,5,-1}, {-3,-4,-2,-1,MIN_INT}};
+
+int toIdx(char c){
+	switch(c){
+	case 'A': return 0;
+	case 'C': return 1;
+	case 'G': return 2;
+	case 'T': return 3;
+	default: return 4;
+	}
+}
+
+int main() {
+	int cases;
+	cin >> cases;
+	for(int ii = 0; ii < cases; ii++){
+		int len1, len2;
+		string s1, s2;
+		cin >> len1 >> s1 >> len2 >> s2;
+		int fen[110][110];
+		//fen[0][0] = 0;
+		//for(int i = 1; i <= len1; i++) fen[i][0] = MIN_INT;
+		//for(int i = 1; i <= len2; i++) fen[0][i] = MIN_INT;
+		for(int i = 0; i <= len1; i++){
+			for(int j = 0; j <= len2; j++){
+				if(i == 0 && j == 0){
+					fen[i][j] = 0;
+					continue;
+				}
+				int temp = MIN_INT;
+				if(i > 0) temp = mx(temp, fen[i-1][j] + fsb[toIdx(s1[i-1])][4]);
+				if(j > 0) temp = mx(temp, fen[i][j-1] + fsb[4][toIdx(s2[j-1])]);
+				if(i > 0 && j > 0) temp = mx(temp, fen[i-1][j-1] + fsb[toIdx(s1[i-1])][toIdx(s2[j-1])]);
+				fen[i][j] = temp;
+			}
+		}
+		cout << fen[len1][len2] << endl;
+	}
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
+
