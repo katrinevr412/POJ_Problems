@@ -1,0 +1,189 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <queue>
+using namespace std;
+
+int num;
+
+vector<int> adj[26];
+
+vector<int> ltfz[26];
+
+int conn[26][26] = {0};
+
+bool state[26] = {false};
+
+//int state3[26] = {0};
+
+bool kexing[26][3] = {false};
+
+int yx[26][3] = {0};
+
+bool dfs(int, int);
+
+void init(){
+	for(int i = 0; i < 26; i++){
+		for(int j = 0; j < 3; j++){
+			kexing[i][j] = true;
+		}
+	}
+	for(int i = 0; i < 26; i++){
+		for(int j = 0; j < 3; j++) yx[i][j] = -1;
+	}
+	for(int i = 0; i < 26; i++) {
+		adj[i].clear();
+	}
+	for(int i = 0; i < 26; i++){
+		ltfz[26].clear();
+	}
+	for(int i = 0; i < 26; i++){
+		state[i] = false;
+	}
+	for(int i = 0; i < 26; i++){
+		for(int j = 0; j < 26; j++){
+			conn[i][j] = 0;
+		}
+	}
+}
+
+int main() {
+	while(1){
+		init();
+		cin >> num;
+		//cout << num << endl;
+		if(num == 0) return num;
+		int cnt = 0;
+		for(int i = 0; i < num; i++){
+			string s;
+			cin >> s;
+			int len = s.length();
+			for(int j = 2; j < len; j++){
+				conn[i][s[j]-'A'] = 1;
+				adj[i].push_back(s[j]-'A');
+				cnt++;
+			}
+		}
+		if(cnt == 0){
+			cout << "1 channel needed." << endl;
+			continue;
+		}
+		int ltfzgs = 0;
+		bool ers[26];
+		for(int i = 0; i < num; i++){
+			if(state[i]) continue;
+			state[i] = true;
+			ers[i] = true;
+			queue<int> bfs;
+			bfs.push(i);
+			ltfz[ltfzgs].push_back(i);
+			while(!bfs.empty()){
+				int thi = bfs.front();
+				bfs.pop();
+				int sz = adj[thi].size();
+				for(int j = 0; j < sz; j++){
+					int idx = adj[thi][j];
+					if(state[idx]) continue;
+					bfs.push(idx);
+					if(ers[thi]) ers[idx] = false;
+					else ers[idx] = true;
+					ltfz[ltfzgs].push_back(idx);
+					state[idx] = true;
+				}
+			}
+			ltfzgs++;
+		}
+		bool kyers = true;
+		for(int i = 0; i < num; i++){
+			int sz = adj[i].size();
+			for(int j = 0; j < sz; j++){
+				if((ers[i] + ers[adj[i][j]])%2 == 0){
+					kyers = false;
+					goto wanle;
+				}
+			}
+		}
+		wanle:
+		if(kyers){
+			cout << "2 channels needed." << endl;
+			continue;
+		}
+		bool kysrs = true;
+		for(int i = 0; i < ltfzgs; i++){
+			int sz = ltfz[i].size();
+			if(sz <= 3) continue;
+			for(int j = 1; j < sz; j++){
+				for(int k = j; k > 0; k--){
+					if(adj[ltfz[i][k]].size() <= adj[ltfz[i][k-1]].size()) break;
+					int temp = ltfz[i][k];
+					ltfz[i][k] = ltfz[i][k-1];
+					ltfz[i][k-1] = temp;
+				}
+			}
+			for(int j = 0; j < adj[ltfz[i][0]].size(); j++){
+				kexing[adj[ltfz[i][0]][j]][0] = false;
+				yx[adj[ltfz[i][0]][j]][0] = ltfz[i][0];
+			}
+			if(!dfs(i, sz-1)){
+				kysrs = false;
+				break;
+			}
+		}
+		if(kysrs) cout << "3 channels needed." << endl;
+		else cout << "4 channels needed." << endl;
+	}
+	return 0;
+}
+
+
+bool dfs(int i, int gs){
+	if(gs == 0) return true;
+	int sz = ltfz[i].size();
+	int kldd = ltfz[i][sz - gs];
+	if(kexing[kldd][0]){
+		for(int j = 0; j < adj[kldd].size(); j++){
+			if(kexing[adj[kldd][j]][0]){
+				kexing[adj[kldd][j]][0] = false;
+				yx[adj[kldd][j]][0] = kldd;
+			}
+		}
+		if(dfs(i, gs-1)) return true;
+		for(int j = 0; j < adj[kldd].size(); j++){
+			if(!kexing[adj[kldd][j]][0] && yx[adj[kldd][j]][0] == kldd){
+				kexing[adj[kldd][j]][0] = true;
+				yx[adj[kldd][j]][0] = -1;
+			}
+		}
+	}
+	if(kexing[kldd][1]){
+		for(int j = 0; j < adj[kldd].size(); j++){
+					if(kexing[adj[kldd][j]][1]){
+						kexing[adj[kldd][j]][1] = false;
+						yx[adj[kldd][j]][1] = kldd;
+					}
+				}
+				if(dfs(i, gs-1)) return true;
+				for(int j = 0; j < adj[kldd].size(); j++){
+					if(!kexing[adj[kldd][j]][1] && yx[adj[kldd][j]][1] == kldd){
+						kexing[adj[kldd][j]][1] = true;
+						yx[adj[kldd][j]][1] = -1;
+					}
+				}
+	}
+	if(kexing[kldd][2]){
+		for(int j = 0; j < adj[kldd].size(); j++){
+					if(kexing[adj[kldd][j]][2]){
+						kexing[adj[kldd][j]][2] = false;
+						yx[adj[kldd][j]][2] = kldd;
+					}
+				}
+				if(dfs(i, gs-1)) return true;
+				for(int j = 0; j < adj[kldd].size(); j++){
+					if(!kexing[adj[kldd][j]][2] && yx[adj[kldd][j]][2] == kldd){
+						kexing[adj[kldd][j]][2] = true;
+						yx[adj[kldd][j]][2] = -1;
+					}
+				}
+	}
+	return false;
+}
