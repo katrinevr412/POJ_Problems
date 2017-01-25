@@ -1,0 +1,36 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+
+	int N;
+	int che[101][101] = {0};
+	cin >> N;
+	for(int i = 0; i < N*N; i++){
+		cin >> che[i/N+1][i%N+1];
+	}
+	for(int i = 1; i <= N; i++){
+		for(int j = 1; j <= N; j++){
+			che[i][j] += che[i][j-1];
+		}
+	}
+	int maxi = -2147483648;
+	for(int i = 1; i <= N; i++){
+		for(int j = i+1; j <= N+1; j++){
+			//考虑第i列至第j-1列
+			int mx = che[1][j-1] - che[1][i-1];
+			int prevMax = che[1][j-1] - che[1][i-1];
+			for(int k = 2; k <= N; k++){
+				int tempMax;
+				if(prevMax >= 0) tempMax = prevMax + che[k][j-1] - che[k][i-1];
+				else tempMax = che[k][j-1] - che[k][i-1];
+				prevMax = tempMax;
+				if(prevMax > mx) mx = prevMax;
+			}
+			if(mx > maxi) maxi = mx;
+		}
+	}
+	cout << maxi << endl;
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
