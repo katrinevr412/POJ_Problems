@@ -1,0 +1,145 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <string>
+using namespace std;
+
+const double MAXDIST = 10000000.0;
+
+int main() {
+	int N, M, K;
+	cin >> N >> M >> K;
+	double dirDist[32][32];
+	for(int i = 0; i < N; i++){
+		for(int j = 0; j < N; j++){
+			if(i == j) dirDist[i][j] = 0;
+			else dirDist[i][j] = MAXDIST;
+		}
+	}
+	for(int i = 0; i < M; i++){
+		int i1, i2;
+		cin >> i1 >> i2;
+		double rs;
+		cin >> rs;
+
+			dirDist[i1][i2] = rs;
+			dirDist[i2][i1] = rs;
+
+	}
+	//cout << dirDist[0][1] << endl;
+	string cityName[32];
+	//bool isCity[32] = {0};
+	int cityList[32];
+	//int cityNum = 0;
+
+	for(int i = 0; i < K; i++){
+		int no;
+		cin >> no;
+		cin >> cityName[no];
+		//isCity[no] = 1;
+		cityList[i] = no;
+		//cityNum ++;
+	}
+
+	//开始floyd
+	double dist[2][32][32];
+	int prev[2][32][32];
+	for(int i = 0; i < N; i++){
+		for(int j = 0; j < N; j++){
+			if(i == j){
+				prev[0][i][j] = i;
+				dist[0][i][j] = 0;
+				continue;
+			}
+			else{
+				dist[0][i][j] = dirDist[i][j];
+				if(dirDist[i][j]<MAXDIST-1) prev[0][i][j] = i;
+				else prev[0][i][j] = -1;
+			}
+		}
+	}
+
+	for(int i = 0; i < N; i++){
+		int from = i%2, to = (i+1)%2;
+		for(int j = 0; j < N; j++){
+			for(int k = 0; k < N; k++){
+				if(i == j || i == k){
+					dist[to][j][k] = dist[from][j][k];
+					prev[to][j][k] = prev[from][j][k];
+					continue;
+				}
+				if(j == k){
+					dist[to][j][k] = 0;
+					prev[to][j][k] = j;
+				}
+				else{
+					dist[to][j][k] = dist[from][j][k];
+					prev[to][j][k] = prev[from][j][k];
+					double tempDist = dist[from][j][i] + dist[from][i][k];
+					if(tempDist < dist[to][j][k]){
+						dist[to][j][k] = tempDist;
+						prev[to][j][k] = prev[from][i][k];
+					}
+				}
+			}
+		}
+	}
+
+	int resZu = N%2;
+
+	int inq;
+	cin >> inq;
+	for(int ii = 0; ii < inq; ii++){
+		int i1, i2;
+		double dis;
+		//char fei, sf, bf;
+		cin >> i1 >> i2 >> dis;
+		//int dis = zsd * 100 + (sf-'0') * 10 + (bf-'0');
+		vector<int> cityIdx;
+		vector<int> cityDist;
+		for(int i = 0; i < K; i++){
+			int idx = cityList[i];
+			bool keyi = false;
+			int idx1 = i1;
+			while(idx1 != idx){
+				idx1 = prev[resZu][idx][idx1];
+				if(idx1 == -1) break;
+				if(idx1 == i2){
+					keyi = true;
+					break;
+				}
+			}
+			if(!keyi) continue;
+			cityIdx.push_back(idx);
+			double Dis = dist[resZu][idx][i1] - dis;
+			int cityDis;
+			int intDis = (int) Dis;
+			if(Dis - intDis < 0.495) cityDis = intDis;
+			else cityDis = intDis+1;
+			cityDist.push_back(cityDis);
+		}
+		int sz = cityIdx.size();
+		for(int i = 1; i < sz; i++){
+			for(int j = i; j > 0; j--){
+				if(cityDist[j] > cityDist[j-1] || (cityDist[j] == cityDist[j-1] && cityName[cityIdx[j]] > cityName[cityIdx[j-1]])){
+					break;
+				}
+				int temp = cityDist[j];
+				cityDist[j] = cityDist[j-1];
+				cityDist[j-1] = temp;
+				temp = cityIdx[j];
+				cityIdx[j] = cityIdx[j-1];
+				cityIdx[j-1] = temp;
+			}
+		}
+		for(int i = 0; i < sz; i++){
+			cout << cityName[cityIdx[i]];
+			int lenn = cityName[cityIdx[i]].length();
+			for(int j = 0; j < 20-lenn; j ++) cout << " ";
+			cout << cityDist[i] << endl;
+		}
+		cout << endl;
+	}
+
+	return 0;
+}
