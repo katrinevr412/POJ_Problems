@@ -1,0 +1,140 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int row, column;
+char pic[40][40];
+bool used[26];
+char zimu[26];
+int zimuGs;
+bool tu[26][26];
+int rbGs[26];//入边的条数
+int zimuIdx[26];
+int stk[26];
+int pxIdx[26];
+
+bool visited[26];
+
+void init(){
+	for(int i = 0; i < 26; i++) used[i] = 0;
+	for(int i = 0; i < 26; i++)
+		for(int j = 0; j < 26; j++)
+			tu[i][j] = 0;
+	zimuGs = 0;
+	for(int i = 0; i < 26; i++) rbGs[i] = 0;
+	for(int i = 0; i < 26; i++) visited[i] = 0;
+}
+
+void dfs(int gs);
+
+int main() {
+	while(scanf("%d%d", &row, &column) > 0){
+		if(row == -1 && column == -1) return 0;
+		init();
+		int minX[26], maxX[26], minY[26], maxY[26];
+		for(int i = 0; i < row; i++){
+			char s[64];
+			scanf("%s", s);
+			for(int j = 0; j < column; j++){
+				pic[i][j] = s[j];
+				if(s[j] != '.' && !used[s[j]-'A']){
+					used[s[j]-'A'] = true;
+					zimuIdx[s[j]-'A'] = zimuGs;
+					zimu[zimuGs] = s[j];
+					zimuGs ++;
+				}
+			}
+		}
+		int pos = 0;
+		for(int i = 0; i < 26; i++){
+			if(!used[i]) continue;
+			pxIdx[pos] = zimuIdx[i];
+			pos ++;
+		}
+		//cout << zimuGs << endl;
+		for(int i = 0; i < zimuGs; i++){
+			minX[i] = minY[i] = 2147483647;
+			maxX[i] = maxY[i] = 0;
+		}
+		for(int i = 0; i < row; i++){
+			for(int j = 0; j < column; j++){
+				if(pic[i][j] == '.') continue;
+				int zmIdx = zimuIdx[pic[i][j] - 'A'];
+				if(i < minX[zmIdx]) minX[zmIdx] = i;
+				if(i > maxX[zmIdx]) maxX[zmIdx] = i;
+				if(j < minY[zmIdx]) minY[zmIdx] = j;
+				if(j > maxY[zmIdx]) maxY[zmIdx] = j;
+			}
+		}
+		//建圖
+		for(int i = 0; i < zimuGs; i++){
+			int x1 = minX[i], y1 = minY[i], x2 = maxX[i], y2 = maxY[i];
+			for(int j = y1; j < y2; j++){
+				if(pic[x1][j] != zimu[i] && pic[x1][j] != '.'){
+					tu[i][zimuIdx[pic[x1][j]-'A']] = 1;
+					//rbGs[zimuIdx[pic[x1][j]-'A']] ++;
+				}
+			}
+			for(int j = x1; j < x2; j++){
+				if(pic[j][y2] != zimu[i] && pic[j][y2] != '.'){
+					tu[i][zimuIdx[pic[j][y2]-'A']] = 1;
+					//rbGs[zimuIdx[pic[j][y2]-'A']] ++;
+				}
+			}
+			for(int j = y2; j > y1; j--){
+				if(pic[x2][j] != zimu[i] && pic[x2][j] != '.'){
+					tu[i][zimuIdx[pic[x2][j]-'A']] = 1;
+					//rbGs[zimuIdx[pic[x2][j]-'A']] ++;
+				}
+			}
+			for(int j = x2; j > x1; j--){
+				if(pic[j][y1] != zimu[i] && pic[j][y1] != '.'){
+					tu[i][zimuIdx[pic[j][y1]-'A']] = 1;
+					//rbGs[zimuIdx[pic[j][y1]-'A']] ++;
+				}
+			}
+		}
+		for(int i = 0; i < zimuGs; i++){
+			for(int j = 0; j < zimuGs; j++){
+				if(tu[i][j]) rbGs[j]++;
+			}
+		}
+		/*
+		for(int i = 0; i < zimuGs; i++) cout << zimu[i] << " "; cout << endl;
+		for(int i = 0; i < zimuGs; i++){
+			for(int j = 0; j < zimuGs; j++){
+				cout << tu[i][j] << " ";
+			}
+			cout << endl;
+		}
+		for(int i = 0; i < zimuGs; i++) cout << rbGs[i] << " "; cout << endl;
+	*/
+		dfs(0);
+	}
+	return 0;
+}
+
+
+void dfs(int gs){
+	if(gs == zimuGs){
+		for(int i = 0; i < gs; i++){
+			printf("%c", zimu[stk[i]]);
+		}
+		printf("\n");
+		return;
+	}
+	for(int ii = 0; ii < zimuGs; ii++){
+		int i = pxIdx[ii];
+		if(visited[i] || rbGs[i] > 0) continue;
+		visited[i] = true;
+		stk[gs] = i;
+		for(int j = 0; j < zimuGs; j++){
+			if(tu[i][j]) rbGs[j] --;
+		}
+		dfs(gs+1);
+		for(int j = 0; j < zimuGs; j++){
+			if(tu[i][j]) rbGs[j] ++;
+		}
+		visited[i] = false;
+	}
+}
