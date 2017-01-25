@@ -1,0 +1,54 @@
+#include <iostream>
+#include <stack>
+using namespace std;
+
+int main() {
+	int cases;
+	cin >> cases;
+	for(int ii = 0; ii < cases; ii++){
+		int num;
+		cin >> num;
+		int kuohao[400];
+		int al = 0;
+		int cnt = 0;
+		for(int i = 0; i < num; i++){
+			int temp;
+			cin >> temp;
+			for(int j = al; j < temp; j++){
+				kuohao[cnt] = 0;
+				cnt++;
+			}
+			kuohao[cnt] = 1;
+			cnt++;
+			al = temp;
+		}
+		int khNo[400], youNo[400], idx[400];
+		cnt = -1;
+		stack<int> No;
+		for(int i = 2 * num - 1; i >= 0; i--){
+			if(kuohao[i]){
+				//1表示右括號，0表示左括號
+				cnt++;
+				youNo[i] = cnt;
+				khNo[i] = cnt;
+				No.push(cnt);
+				//cnt++;
+			}
+			else{
+				khNo[i] = No.top();
+				idx[khNo[i]] = i;
+				No.pop();
+				youNo[i] = cnt;
+			}
+		}
+		//for(int i = 0; i < 2 * num; i++) cout << khNo[i] << " "; cout << endl;
+		//for(int i = 0; i < 2 * num; i++) cout << youNo[i] << " "; cout << endl;
+		//for(int i = 0; i < num; i++) cout << idx[i] << " "; cout << endl;
+		for(int i = num-1; i >= 0; i--){
+			cout << youNo[idx[i]] - khNo[idx[i]] + 1 << " ";
+		}
+		cout << endl;
+	}
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
