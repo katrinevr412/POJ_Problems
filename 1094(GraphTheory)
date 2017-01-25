@@ -1,0 +1,134 @@
+#include <iostream>
+using namespace std;
+
+int state[26][26];
+
+int cnt = 0;
+
+void init(){
+	for(int i = 0; i < 26; i++){
+		for(int j = 0; j < 26; j++){
+			state[i][j] = 0;
+		}
+	}
+	cnt = 0;
+}
+
+bool ok(char A, char B){
+	if(A == B) return false;
+	return state[A-'A'][B-'A'] >= 0;
+}
+
+int main() {
+	int zm, tj;
+
+	while(1){
+		int res = 0;
+		cin >> zm >> tj;
+		if(zm == 0 && tj == 0) return 0;
+		init();
+		bool can = true;
+		char A, B, fei;
+		bool flag = true;
+		bool guale = false;
+		for(int ii = 0; ii < tj; ii++){
+			cin >> A >> fei >> B;
+			if(guale || cnt == zm * (zm-1) / 2) continue;
+			/*
+			if(cnt == zm * (zm-1) / 2){
+				if(ok(A,B)) continue;
+				else{
+					can = false;
+				}
+			}*/
+			if(!ok(A, B)){
+				can = false;
+			}
+			else if(state[A-'A'][B-'A'] == 0){
+				state[A-'A'][B-'A'] = 1;
+				state[B-'A'][A-'A'] = -1;
+				cnt++;
+			}
+			if(can){
+				for(int i = 0; i < zm; i++){
+					if(state[B-'A'][i] != 1) continue;
+					if(!ok(A, i+'A')){
+						can = false;
+						break;
+					}
+					else if(state[A-'A'][i] == 0){
+						state[A-'A'][i] = 1;
+						state[i][A-'A'] = -1;
+						cnt++;
+					}
+				}
+			}
+			if(can){
+				for(int i = 0; i < zm; i++){
+					if(state[i][A-'A'] != 1) continue;
+					if(!ok(i+'A', B)){
+						can = false;
+						break;
+					}
+					else if(state[i][B-'A'] == 0){
+						state[i][B-'A'] = 1;
+						state[B-'A'][i] = -1;
+						cnt++;
+					}
+				}
+			}
+			if(can){
+				for(int i = 0; i < zm; i++){
+					for(int j = 0; j < zm; j++){
+						if(state[i][A-'A']!= 1 || state[B-'A'][j] != 1) continue;
+						if(!ok(i+'A', j+'A')){
+							can = false;
+							goto lqbz;
+						}
+						if(state[i][j] == 0){
+							state[i][j] = 1;
+							state[j][i] = -1;
+							cnt++;
+						}
+					}
+				}
+			}
+			lqbz:
+			if(!can){
+				res = ii;
+				//flag = false;
+				guale = true;
+				//cout << "Inconsistency found after " << ii+1 << " relations." << endl;
+				//break;
+			}
+			if(can && cnt == zm * (zm-1) / 2 && flag){
+				res = ii;
+				flag = false;
+			}
+		}
+		if(can){
+			if(cnt < zm * (zm-1) / 2){
+				cout << "Sorted sequence cannot be determined." << endl;
+			}
+			else{
+				int resq[26];
+				for(int i = 0; i < zm; i++) resq[i] = i;
+				for(int i = 1; i < zm; i++){
+					for(int j = i; j >= 1; j--){
+						if(state[resq[j-1]][resq[j]] == 1) break;
+						int temp = resq[j-1];
+						resq[j-1] = resq[j];
+						resq[j] = temp;
+					}
+				}
+				cout << "Sorted sequence determined after " << res+1 << " relations: ";
+				for(int i = 0; i < zm; i++) cout << (char)(resq[i] + 'A');
+				cout << ".\n";
+			}
+		}
+		else{
+			cout << "Inconsistency found after " << res+1 << " relations." << endl;
+		}
+	}
+	return 0;
+}
