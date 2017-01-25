@@ -1,0 +1,67 @@
+#include <iostream>
+#include <map>
+#include <string>
+using namespace std;
+
+string s[30] = {"01", "1000", "1010", "100", "0",
+				"0010", "110", "0000", "00", "0111",
+				"101", "0100", "11", "10", "111",
+				"0110", "1101", "010", "000", "1",
+				"001", "0001", "011", "1001", "1011",
+				"1100", "0011", "0101", "1110", "1111"};
+
+map<string, int> mp;
+
+void loadMap(){
+	for(int i = 0; i < 30; i++){
+		mp.insert(pair<string, int>(s[i], i));
+	}
+}
+
+char getChar(int idx){
+	if(idx < 26) return (char)idx+'A';
+	switch(idx){
+	case 26: return '_';
+	case 27: return ',';
+	case 28: return '.';
+	case 29: return '?';
+	}
+}
+
+int getIdx(char c){
+	if(c >= 'A' && c <= 'Z') return c-'A';
+	switch(c){
+	case '_': return 26;
+	case ',': return 27;
+	case '.': return 28;
+	case '?': return 29;
+	}
+}
+
+int main() {
+	loadMap();
+	int cases;
+	cin >> cases;
+	for(int ii = 0; ii < cases; ii++){
+		cout << ii+1 << ": ";
+		string code;
+		cin >> code;
+		string morse = "";
+		int len = code.length();
+		int num[100];
+		for(int i = 0; i < len; i++){
+			string temp = s[getIdx(code[i])];
+			morse += temp;
+			num[i] = temp.length();
+		}
+		int start = 0;
+		for(int i = len-1; i >= 0; i--){
+			string enc = morse.substr(start, num[i]);
+			start += num[i];
+			cout << getChar(mp[enc]);
+		}
+		cout << endl;
+	}
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
