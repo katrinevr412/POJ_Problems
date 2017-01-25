@@ -1,0 +1,157 @@
+
+#include <string>
+#include <iostream>
+using namespace std;
+
+//int cnt;
+int maxi;
+
+int getCnt(int colour[][15], int rep[][15], int cnt[][15], int x, int y, bool isFirst){
+	//if(rep[x][y] != -1) return cnt[x][y];
+	int count = 1;
+	if(isFirst) rep[x][y] = 10*y+x;
+	int col = colour[x][y];
+	if(y+1 < 15 && rep[x][y+1] == -1 && colour[x][y+1] == col){
+		rep[x][y+1] = rep[x][y];
+		count += getCnt(colour, rep, cnt, x, y+1, false);
+	}
+	if(x+1 < 10 && rep[x+1][y] == -1 && colour[x+1][y] == col){
+		rep[x+1][y] = rep[x][y];
+		count += getCnt(colour, rep, cnt, x+1, y, false);
+	}
+	if(x>0 && rep[x-1][y] == -1 && colour[x-1][y] == col){
+		rep[x-1][y] = rep[x][y];
+		count += getCnt(colour, rep, cnt, x-1, y, false);
+	}
+	if(y>0 && rep[x][y-1] == -1 && colour[x][y-1] == col){
+		rep[x][y-1] = rep[x][y];
+		count += getCnt(colour, rep, cnt, x, y-1, false);
+	}
+	cnt[x][y] = count;
+	return count;
+}
+
+void getRep(int colour[][15], int rep[][15], int cnt[][15]){
+	maxi = 0;
+	for(int j = 0; j < 15; j++){
+		for(int i = 0; i < 10; i++){
+			if(rep[i][j] != -1 || colour[i][j] == 0) continue;
+			//rep[i][j] = 10*j+i;
+			int temp = getCnt(colour, rep, cnt, i, j, true);
+			if(temp > maxi) maxi = temp;
+		}
+	}
+}
+
+int main() {
+
+	int cases;
+	cin >> cases;
+	for(int ii = 0; ii < cases; ii++){
+		cout << "Game " << (ii+1) << ":" << endl << endl;
+		int colour[10][15] = {0};
+		for(int i = 0; i < 10; i++){
+			string s;
+			cin >> s;
+			for(int j = 0; j < 15; j++){
+				colour[9-i][j] = (int)s[j];
+			}
+		}
+		int round = 0;
+		int remain = 10 * 15;
+		int score = 0;
+		while(1){
+			round++;
+			int rep[10][15];
+			int cnt[10][15] = {0};
+			for(int i = 0; i < 10; i++){
+				for(int j = 0; j < 15; j++){
+					rep[i][j] = -1;
+				}
+			}
+			getRep(colour, rep, cnt);
+			int tar, ii, jj;
+			for(int k = 0; k < 150; k++){
+				ii = k%10;
+				jj = k/10;
+				if(cnt[ii][jj] == maxi){
+					tar = k;
+					break;
+				}
+			}
+			if(maxi <= 1) break;
+			//round++;
+			remain -= maxi;
+			score += (maxi-2)*(maxi-2);
+			cout << "Move " << round << " at (" << ii+1 << "," << jj+1 << "): removed " << maxi << " balls of color " << (char)colour[ii][jj] << ", got " << (maxi-2)*(maxi-2) << " points." << endl;
+			//Move 1 at (4,1): removed 32 balls of color B, got 900 points.
+			for(int i = 0; i < 10; i++){
+				for(int j = 0; j < 15; j++){
+					if(rep[i][j] == tar){
+						colour[i][j] = 0;
+					}
+				}
+			}
+			for(int j = 0; j < 15; j++){
+				int yuan = 0, xian = 0;
+				while(1){
+					while(yuan < 10 && colour[yuan][j] == 0){
+						yuan++;
+					}
+					if(yuan == 10)break;
+
+						colour[xian][j] = colour[yuan][j];
+						xian++;
+						yuan++;
+
+
+				}
+				//if(yuan == 10){
+					for(int q = xian; q < 10; q++) colour[q][j] = 0;
+				//}
+
+			}
+			int Xi = 0, Yu = 0;
+			while(1){
+				while(Yu < 15 && colour[0][Yu] == 0){
+					Yu ++;
+				}
+				if(Yu == 15) break;
+				for(int i = 0; i < 10; i++){
+					colour[i][Xi] = colour[i][Yu];
+				}
+				Xi++;
+				Yu++;
+			}
+			for(int q = Xi; q < 15; q++){
+				for(int i = 0; i < 10; i++){
+					colour[i][q] = 0;
+				}
+			}
+			/*
+			for(int i = 0; i < 10; i ++){
+
+				for(int j = 0; j < 15; j ++){
+					cout << rep[9-i][j] << " ";
+				}
+				cout << endl;
+			}
+			for(int i = 0; i < 10; i ++){
+
+							for(int j = 0; j < 15; j ++){
+								cout << cnt[9-i][j] << " ";
+							}
+							cout << endl;
+						}
+			cout << maxi << endl;*/
+		}
+
+		if(remain == 0) score += 1000;
+		cout << "Final score: " << score << ", with " << remain << " balls remaining." << endl << endl;
+				//Final score: 3661, with 1 balls remaining.
+
+	}
+
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
