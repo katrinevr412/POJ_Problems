@@ -1,0 +1,70 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+const double PI = 3.141592654;
+
+class node{
+public:
+	int x;
+	int y;
+	node *next;
+	node *prev;
+	node(int X, int Y): x(X), y(Y){
+		next = this;
+		prev = this;
+	}
+};
+
+bool you(node *n1, node *n2, node *n3){
+	int x1 = n2->x - n1->x, y1 = n2->y - n1->y, x2 = n3->x - n2->x, y2 = n3->y - n2->y;
+	return x1*y2>y1*x2;
+}
+
+double dist(node *n1, node *n2){
+	return sqrt(0.0 + (n2->x - n1->x) * (n2->x - n1->x) + (n2->y - n1->y) * (n2->y - n1->y));
+}
+
+int main() {
+	int n, l;
+	cin >> n >> l;
+	node *head, *tail;
+	int x1, y1;
+	cin >> x1 >> y1;
+	node *temp = new node(x1, y1);
+	head = temp;
+	tail = temp;
+	for(int i = 0; i < n-1; i++){
+		cin >> x1 >> y1;
+		node *tmp = new node(x1, y1);
+		head->prev = tmp;
+		tail->next = tmp;
+		tmp->prev = tail;
+		tmp->next = head;
+		tail = tmp;
+	}
+	int cnt = 0;
+	while(1){
+		if(you(head->prev, head, head->next)){
+			n--;
+			cnt=0;
+			head->prev->next = head->next;
+			head->next->prev = head->prev;
+			head = head->next;
+		}
+		else{
+			head = head->next;
+			cnt++;
+			if(cnt >= n) break;
+		}
+	}
+	double sum = 2 * PI * l;
+	for(int i = 0; i < n; i++){
+		sum += dist(head, head->next);
+		head = head->next;
+	}
+	int isum = (int) sum;
+	if(sum-isum < 0.5) cout << isum << endl;
+	else cout << isum+1 << endl;
+	return 0;
+}
