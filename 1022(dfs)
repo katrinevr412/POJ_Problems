@@ -1,0 +1,134 @@
+
+#include <iostream>
+#include <map>
+using namespace std;
+
+int maxi[5], mini[5];
+int cnt;
+map<int, int> bh;
+int Max(int a, int b){
+	if(a < b) return b;
+	return a;
+}
+
+int inv(int k){
+	if(k%2) return k-1;
+	return k+1;
+}
+
+int Min(int a, int b){
+	if(a > b) return b;
+	return a;
+}
+
+void visit(int idx, int v1, int v2, int v3, int v4, int nb[][8], bool *state, int n){
+	state[idx] = true;
+	maxi[1] = Max(v1, maxi[1]); mini[1] = Min(v1, mini[1]);
+	maxi[2] = Max(v2, maxi[2]); mini[2] = Min(v2, mini[2]);
+	maxi[3] = Max(v3, maxi[3]); mini[3] = Min(v3, mini[3]);
+	maxi[4] = Max(v4, maxi[4]); mini[4] = Min(v4, mini[4]);
+	for(int i = 0; i < 8; i++){
+		if(!nb[idx][i] || !bh[nb[idx][i]]) continue;
+		int dx = bh[nb[idx][i]];
+		if(state[dx]) continue;
+		switch(i){
+		case 0:
+			visit(dx, v1-1, v2, v3, v4, nb, state, n);
+			break;
+
+		case 1:
+			visit(dx, v1+1, v2, v3, v4, nb, state, n);
+			break;
+		case 2:
+			visit(dx, v1, v2-1, v3, v4, nb, state, n);
+			break;
+		case 3:
+			visit(dx, v1, v2+1, v3, v4, nb, state, n);
+			break;
+		case 4:
+			visit(dx, v1, v2, v3-1, v4, nb, state, n);
+			break;
+		case 5:
+			visit(dx, v1, v2, v3+1, v4, nb, state, n);
+			break;
+		case 6:
+			visit(dx, v1, v2, v3, v4-1, nb, state, n);
+			break;
+		case 7:
+			visit(dx, v1, v2, v3, v4+1, nb, state, n);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+int main() {
+
+	int cases;
+	cin >> cases;
+	for(int ii = 0; ii < cases; ii++){
+		int n;
+		cin >> n;
+		int nb[101][8] = {{0}};
+		bh.clear();
+		//int cnt = 0;
+		for(int i = 0; i < n; i++){
+			int no;
+			cin >> no;
+			bh.insert(pair<int, int>(no, i+1));
+			for(int j = 0; j < 8; j++){
+				cin >> nb[i+1][j];
+			}
+		}
+		for(int i = 1; i <= 100; i++){
+			//cout << bh[i] << endl;
+		}
+		//首先检查方向对不对
+		bool cs = true;
+		for(int i = 0; i < n; i++){
+			for(int j = 0; j < 8; j++){
+				if(!nb[i][j]) continue;
+				int idx = bh[nb[i][j]];
+				if(!idx){
+					cs = false;
+					break;
+				}
+				int dx = nb[idx][inv(j)];
+				cs = (i == bh[dx]);
+				if(!cs) break;
+			}
+			if(!cs){
+				break;
+			}
+		}
+		if(!cs){
+			cout << "Inconsistent" << endl;
+			continue;
+		}
+		bool state[101] = {false};
+		for(int i = 1; i <= 4; i++){
+			maxi[i] = 0;
+			mini[i] = 0;
+		}
+		cnt = 0;
+		visit(1, 0, 0, 0, 0, nb, state, n);
+		for(int i = 1; i <= n; i++){
+			if(!state[i]){
+				cs = false;
+				break;
+			}
+		}
+		if(!cs){
+			cout << "Inconsistent" << endl;
+			continue;
+		}
+		int prod = 1;
+		for(int i = 1; i <= 4; i++){
+			prod *= (maxi[i] - mini[i] + 1);
+		}
+		cout << prod << endl;
+	}
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
