@@ -1,0 +1,43 @@
+#include <iostream>
+using namespace std;
+
+long long int NI(long long int p, long long int q){
+	//p对q的逆
+	if(p > q) return NI(p%q, q);
+	if(p == 1 || q == 1) return 1;
+	int y = NI(q%p, p);
+	int ans = ((q*y-1)/p)%q;
+	return q-ans;
+}
+
+long long int GCD(long long int a, long long int b){
+	if(a == 0) return b;
+	if(b == 0) return a;
+	if(a == 1 || b == 1) return 1;
+	if(a <= b) return GCD(a, b%a);
+	return GCD(b, a%b);
+}
+
+long long int solve(long long int a, long long int b, long long int M){
+	a %= M; b %= M;
+	if(a < 0) a += M;
+	if(b < 0) b += M;
+	long long int gcd = GCD(a, M);
+	if(b%gcd != 0) return -1;
+	a /= gcd;
+	M /= gcd;
+	b /= gcd;
+	long long int ni = NI(a, M);
+	return (ni * b) % M;
+	//return 0;
+}
+
+int main() {
+	long long int x, y, m, n, L;
+	cin >> x >> y >> m >> n >> L;
+	long long int res = solve(m-n, y-x, L);
+	if(res == -1) cout << "Impossible" << endl;
+	else cout << res << endl;
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
