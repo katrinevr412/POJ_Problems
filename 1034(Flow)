@@ -1,0 +1,122 @@
+#include <iostream>
+#include <cmath>
+#include <queue>
+//#include <list>
+using namespace std;
+
+const int SSS = 2147483647;
+const int TTT = -2147483648;
+int N, M;
+int graph[101][101] = {{0}};
+bool s[101] = {false}, t[101] = {false};//false表示可用
+
+bool pushflow(){
+	//如果push不了，返回false
+	queue<int> bfs;
+	bool getT = false;
+	int noT;
+	int S[101] = {0}, T[101] = {0};
+	for(int i = 1; i < N; i++){
+		if(!s[i]){
+			S[i] = SSS;
+			bfs.push(i);
+		}
+	}
+	while(!bfs.empty()){
+		int cur = bfs.front();
+		bfs.pop();
+		if(cur > 0){
+			//是s这边的点
+			for(int j = 1; j <= M; j++){
+				if(graph[cur][j] == 1 && T[j] == 0){
+					bfs.push(-j);
+					T[j] = cur;
+				}
+			}
+		}
+		else{
+			//是t这边的点
+			int j = -cur;
+			if(!t[j]){
+				getT = true;
+				noT = cur;
+				break;
+			}
+			for(int i = 1; i < N; i++){
+				if(graph[i][j] == -1 && S[i] == 0){
+					bfs.push(i);
+					S[i] = cur;
+				}
+			}
+		}
+	}
+	if(!getT) return false;
+	t[-noT] = true;
+	int TtoS = 1;
+	while(1){
+		if(TtoS){
+			//push路径当前从S端到T端
+			int noS = T[-noT];
+			graph[noS][-noT] = -1;
+			noT = noS;
+		}
+		else{
+			//从T端到S端
+			int noS = S[noT];
+			if(noS == SSS){
+				s[noT] = true;
+				break;
+			}
+			graph[noT][-noS] = 1;
+			noT = noS;
+		}
+		TtoS = 1 - TtoS;
+	}
+	return true;
+}
+
+int main() {
+	//int graph[101][101] = {{0}};
+	//int N, M;
+	cin >> N >> M;
+	int xn[101], yn[101], xm[101], ym[101];
+	//bool s[101] = {false}, t[101] = {false};//false表示可用
+	for(int i = 1; i <= N; i++) cin >> xn[i] >> yn[i];
+	for(int i = 1; i <= M; i++) cin >> xm[i] >> ym[i];
+	for(int i = 1; i < N; i++){
+		for(int j = 1; j <= M; j++){
+			double renDist = sqrt((xn[i]-xn[i+1]) * (xn[i]-xn[i+1]) + (yn[i]-yn[i+1]) * (yn[i]-yn[i+1]) + 0.0);
+			double gouDist = sqrt((xm[j]-xn[i])*(xm[j]-xn[i]) + (ym[j]-yn[i])*(ym[j]-yn[i]) + 0.0)
+					+ sqrt((xm[j]-xn[i+1])*(xm[j]-xn[i+1]) + (ym[j]-yn[i+1])*(ym[j]-yn[i+1]) + 0.0);
+			if(gouDist <= 2 * renDist) graph[i][j] = 1;
+		}
+	}
+	/*
+	for(int i = 1; i < N; i++){
+		for(int j = 1; j <= M; j++){
+			cout << graph[i][j] << " ";
+		}
+		cout << endl;
+	}*/
+	int cnt = 0;
+	while(pushflow()){
+		cnt++;
+	}
+	cout << N+cnt << endl;
+	for(int i = 1; i < N; i++){
+		cout << xn[i] << " " << yn[i] << " ";
+		int jNo = 0;
+		for(int j = 1; j <= M; j++){
+			if(graph[i][j] == -1){
+				jNo = j;
+				break;
+			}
+		}
+		if(jNo){
+			cout << xm[jNo] << " " << ym[jNo] << " ";
+		}
+	}
+	cout << xn[N] << " " << yn[N];
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
