@@ -1,0 +1,257 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+const int MAX = 2333333;
+
+bool heng[100][100] = {false};//横向墙
+bool zong[100][100] = {false};//纵向墙
+
+int dS[100][100];//到源点的距离
+int dT[100][100];//到汇点的距离
+
+class zb{
+public:
+	int x;
+	int y;
+	zb(int x, int y): x(x), y(y){
+
+	}
+};
+
+bool CQ(zb& zb1, zb& zb2){
+	int x1 = zb1.x, y1 = zb1.y, x2 = zb2.x, y2 = zb2.y;
+	if(x1 == x2 + 1) return zong[x2][y2];
+	if(x2 == x1 + 1) return zong[x1][y1];
+	if(y1 == y2 + 1) return heng[x2][y2];
+	if(y2 == y1 + 1) return heng[x1][y1];
+	return false;
+}
+
+bool CQ(int x1, int y1, int x2, int y2){
+	if(x1 == x2 + 1) return zong[x2][y2];
+		if(x2 == x1 + 1) return zong[x1][y1];
+		if(y1 == y2 + 1) return heng[x2][y2];
+		if(y2 == y1 + 1) return heng[x1][y1];
+		return false;
+}
+
+int main() {
+	int cases;
+	cin >> cases;
+	for(int ii = 0; ii < cases; ii++){
+		for(int i = 0; i < 100; i++){
+			for(int j = 0; j < 100; j++){
+				heng[i][j] = false;
+				zong[i][j] = false;
+			}
+		}
+		int M, N;
+		cin >> M >> N;
+		vector<zb> path;
+		string s;
+		cin >> s;
+		int x = 0, y = 0;
+		int len = s.length();
+		zb S = zb(0,0);
+		path.push_back(S);
+		for(int i = 0; i < len; i++){
+			switch(s[i]){
+			 case 'R':
+				 x += 1;
+				 break;
+			 case 'L':
+				 x -= 1;
+				 break;
+			 case 'U':
+				 y += 1;
+				 break;
+			 case 'D':
+				 y -= 1;
+				 break;
+			}
+			path.push_back(zb(x, y));
+		}
+		int pathLen = path.size() - 1;
+		zb T = path[pathLen];
+		int nQ;
+		cin >> nQ;
+		for(int i = 0; i < nQ; i++){
+			int x1, y1, x2, y2;
+			cin >> x1 >> y1 >> x2 >> y2;
+			if(x1 == x2 + 1) zong[x2][y2] = true;
+			if(x2 == x1 + 1) zong[x1][y1] = true;
+			if(y1 == y2 + 1) heng[x2][y2] = true;
+			if(y2 == y1 + 1) heng[x1][y1] = true;
+		}
+		//首先检查路径是否穿墙
+		int k = 0;
+		for(; k < pathLen; k++){
+			if(CQ(path[k], path[k+1])) break;
+		}
+
+		if(k != pathLen){
+			cout << "INCORRECT" << endl;
+			continue;
+		}
+
+		//下面开始计算任意一个点到源、汇点的距离
+
+		//首先初始化
+		for(int i = 0; i < M; i++){
+			for(int j = 0; j < N; j++){
+				dS[i][j] = MAX;
+				dT[i][j] = MAX;
+			}
+		}
+		dS[0][0] = 0;
+		dT[T.x][T.y] = 0;
+
+		//BFS
+		queue<zb> qS;
+		qS.push(S);
+		while(!qS.empty()){
+			zb z = qS.front();
+			qS.pop();
+			int x = z.x, y = z.y;
+			int dist = dS[x][y];
+			if(x+1 < M && !CQ(x, y, x+1, y) && dS[x+1][y] > dist+1){
+				dS[x+1][y] = dist+1;
+				qS.push(zb(x+1, y));
+			}
+			if(x-1 >= 0 && !CQ(x, y, x-1, y) && dS[x-1][y] > dist + 1){
+				dS[x-1][y] = dist+1;
+				qS.push(zb(x-1, y));
+			}
+			if(y+1 < N && !CQ(x, y, x, y+1) && dS[x][y+1] > dist+1){
+				dS[x][y+1] = dist+1;
+				qS.push(zb(x, y+1));
+			}
+			if(y-1 >= 0 && !CQ(x, y, x, y-1) && dS[x][y-1] > dist+1){
+				dS[x][y-1] = dist+1;
+				qS.push(zb(x, y-1));
+			}
+		}
+		queue<zb> qT;
+		qT.push(T);
+		while(!qT.empty()){
+					zb z = qT.front();
+					qT.pop();
+					int x = z.x, y = z.y;
+					int dist = dT[x][y];
+					if(x+1 < M && !CQ(x, y, x+1, y) && dT[x+1][y] > dist+1){
+						dT[x+1][y] = dist+1;
+						qT.push(zb(x+1, y));
+					}
+					if(x-1 >= 0 && !CQ(x, y, x-1, y) && dT[x-1][y] > dist + 1){
+						dT[x-1][y] = dist+1;
+						qT.push(zb(x-1, y));
+					}
+					if(y+1 < N && !CQ(x, y, x, y+1) && dT[x][y+1] > dist+1){
+						dT[x][y+1] = dist+1;
+						qT.push(zb(x, y+1));
+					}
+					if(y-1 >= 0 && !CQ(x, y, x, y-1) && dT[x][y-1] > dist+1){
+						dT[x][y-1] = dist+1;
+						qT.push(zb(x, y-1));
+					}
+		}
+
+/*
+
+
+		for(int j = N-1; j >= 0; j--){
+			for(int i = 0; i < M; i++){
+				if(dS[i][j] < 10){
+					cout << " " << dS[i][j] << " ";
+				}
+				else{
+					cout << dS[i][j] << " ";
+				}
+			}
+			cout << endl;
+		}
+		for(int j = N-1; j >= 0; j--){
+					for(int i = 0; i < M; i++){
+						if(dT[i][j] < 10){
+							cout << " " << dT[i][j] << " ";
+						}
+						else{
+							cout << dT[i][j] << " ";
+						}
+					}
+					cout << endl;
+				}
+
+*/
+
+		//是否为最短路径
+		if(dS[T.x][T.y] != pathLen){
+			cout << "INCORRECT" << endl;
+			continue;
+		}
+		//检查路径是否唯一
+		int c = pathLen;
+		for( ; c > 0; c--){
+			int x = path[c].x, y = path[c].y;
+			int cnt = 0;
+			if(x+1 < M && !CQ(x, y, x+1, y) && dS[x+1][y] == c-1) cnt++;
+			if(x-1 >=0 && !CQ(x, y, x-1, y) && dS[x-1][y] == c-1) cnt++;
+			if(y+1 < N && !CQ(x, y, x, y+1) && dS[x][y+1] == c-1) cnt++;
+			if(y-1 >=0 && !CQ(x, y, x, y-1) && dS[x][y-1] == c-1) cnt++;
+			if(cnt > 1) break;
+		}
+
+		if(c != 0){
+			cout << "INCORRECT" << endl;
+			continue;
+		}
+
+		bool chai = false;
+		//检查每一个墙是否可以拆掉
+		for(int p = 0; p < M; p++){
+			for(int q = 0; q < N-1; q++){
+				if(!heng[p][q]) continue;
+				int path1 = dS[p][q] + dT[p][q+1] + 1;
+				int path2 = dT[p][q] + dS[p][q+1] + 1;
+				if(path1 > pathLen && path2 > pathLen){
+					//说明这个墙可以拆掉
+					//cout << p << " " << q << endl;
+					chai = true;
+					break;
+				}
+
+			}
+			if(chai == true) break;
+		}
+		if(chai == true){
+			cout << "INCORRECT" << endl;
+			continue;
+		}
+
+		for(int p = 0; p < M-1; p++){
+				for(int q = 0; q < N; q++){
+						if(!zong[p][q]) continue;
+						int path1 = dS[p][q] + dT[p+1][q] + 1;
+						int path2 = dT[p][q] + dS[p+1][q] + 1;
+						if(path1 > pathLen && path2 > pathLen){
+							//说明这个墙可以拆掉
+							chai = true;
+							break;
+						}
+
+				}
+				if(chai == true) break;
+		}
+		if(chai == true){
+				cout << "INCORRECT" << endl;
+				continue;
+		}
+		cout << "CORRECT" << endl;
+	}
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
