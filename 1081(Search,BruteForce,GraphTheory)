@@ -1,0 +1,65 @@
+#include <iostream>
+using namespace std;
+int Min = 16;
+int Max = 0;
+bool state[31] = {0};
+bool renshi[31][31] = {0};
+void getMin(int lower, int already, int all){
+	if(already < all){
+		if(lower > Max - all + already + 1) return;
+		for(int i = lower; i <= Max - all + already + 1; i++){
+			state[i] = 1;
+			getMin(i+1, already+1, all);
+			state[i] = 0;
+		}
+	}
+	else{
+		int ban1[16], ban2[16];
+		int B1 = 0, B2 = 0;
+		for(int i = 1; i <= Max; i++){
+			if(state[i]){
+				ban1[B1] = i;
+				B1++;
+			}
+			else{
+				ban2[B2] = i;
+				B2++;
+			}
+		}
+		int tempMax = 0;
+		for(int i = 0; i < B1; i++){
+			int tM = 0;
+			for(int j = 0; j < B1; j++){
+				if(!renshi[ban1[i]][ban1[j]]) tM++;
+			}
+			if(tM>tempMax) tempMax = tM;
+		}
+		for(int i = 0; i < B2; i++){
+			int tM = 0;
+			for(int j = 0; j < B2; j++){
+				if(!renshi[ban2[i]][ban2[j]]) tM++;
+			}
+			if(tM>tempMax) tempMax = tM;
+		}
+		if(tempMax < Min) Min = tempMax;
+	}
+}
+int main() {
+	int bianhao;
+	while(cin >> bianhao){
+		if(bianhao > Max) Max = bianhao;
+		int geshu;
+		cin >> geshu;
+		for(int i = 0; i < geshu; i++){
+			int temp;
+			cin >> temp;
+			renshi[bianhao][temp] = 1;
+		}
+	}
+	for(int i = 1; i <= Max; i++) renshi[i][i] = 1;
+	state[1] = 1;
+	getMin(2, 1, Max/2);
+	if(Max%2 == 1) getMin(2, 1, Max/2+1);
+	cout << Min << endl;
+	return 0;
+}
