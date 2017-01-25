@@ -1,0 +1,59 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+long long int cables[10001];
+long long int N, K;
+
+long long int truncate(long long int n, long long int k){
+	if(n >= k) return n-k;
+	return 0;
+}
+
+bool isOK(long long int r){
+	long long int sum = 0;
+	for(long long int i = 0; i < N; i++){
+		sum += cables[i]/r;
+	}
+	return sum >= K;
+}
+
+long long int binary(long long int low, long long int up){
+	if(up - low == 1) return low;
+	long long int middle = (low + up)/2;
+	if(isOK(middle)){
+		return binary(middle, up);
+	}
+	else{
+		return binary(low, middle);
+	}
+}
+
+int main() {
+	//int N, K;
+	cin >> N >> K;
+	long long int sum = 0;
+	//bool zc = true;
+	for(long long int i = 0; i < N; i++) {
+		long long int zs;
+		char dian, shifen, baifen;
+		//double temp;
+		cin >> zs >> dian >> shifen >> baifen;
+		cables[i] = zs * 100 + (shifen-'0') * 10 + (baifen-'0');
+		//cout << cables[i] << endl;
+		sum += cables[i];
+		//if(cables[i]%)
+		//int mx, mn;
+	}
+	long long int mx, mn;
+	mx = sum / K;
+	long long int i_sum = 0;
+	for(long long int i = 0; i < N; i++) i_sum += truncate(cables[i], mx);
+	mn = i_sum / K;
+	//cout << mn << " " << mx << endl;
+	long long int res = binary(mn, mx+1);
+	//cout << res << endl;
+	printf("%.2lf", (res / 100.0));
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
