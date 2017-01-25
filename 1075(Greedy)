@@ -1,0 +1,107 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+class student{
+public:
+	int fenshu;
+	int diqu;
+	int gs;
+	vector<int> FDUs;
+	int next;
+};
+
+class studentPtr{
+public:
+	int idx;
+	int diqu;//想去的地区
+	studentPtr(int i, int dq): idx(i), diqu(dq){}
+};
+
+class FDU{
+public:
+	int diqu;
+	int cap;
+	//priority_queue<studentPtr> pq;
+};
+
+FDU FDUs[151];
+student students[151];
+
+bool operator<(studentPtr s1, studentPtr s2){
+	if(students[s1.idx].diqu == s1.diqu && students[s2.idx].diqu == s2.diqu) {
+		return students[s1.idx].fenshu > students[s2.idx].fenshu;
+	}
+	if(students[s1.idx].diqu != s1.diqu && students[s2.idx].diqu != s2.diqu) {
+		return students[s1.idx].fenshu > students[s2.idx].fenshu;
+	}
+	if(students[s1.idx].diqu == s1.diqu && students[s2.idx].diqu != s2.diqu) {
+		return 10 * students[s1.idx].fenshu > 7 * students[s2.idx].fenshu;
+	}
+	if(students[s1.idx].diqu != s1.diqu && students[s2.idx].diqu == s2.diqu) {
+		return 7 * students[s1.idx].fenshu >= 10 * students[s2.idx].fenshu;
+	}
+	return true;
+}
+
+int main() {
+	int cases;
+	cin >> cases;
+	for(int ii = 0; ii < cases; ii++){
+		priority_queue<studentPtr> pq[151];//給每个FDU一个pq
+		int N, M;
+		cin >> N >> M;
+		for(int i = 1; i <= N; i++) students[i].FDUs.clear();
+		for(int i = 1; i <= N; i++){
+			cin >> students[i].diqu >> students[i].fenshu;
+			int gs;
+			cin >> gs;
+			for(int j = 0; j < gs; j++) {
+				int temp;
+				cin >> temp;
+				students[i].FDUs.push_back(temp);
+			}
+			students[i].next = 0;
+			students[i].gs = gs;
+		}
+		for(int i = 1; i <= M; i++){
+			cin >> FDUs[i].diqu >> FDUs[i].cap;
+		}
+		int state[151] = {0};
+		int falseNum = N;
+		while(falseNum > 0){
+			for(int i = 1; i <= N; i++){
+				if(state[i] != 0) continue;
+				if(students[i].next == students[i].gs){
+					state[i] = -1;
+					falseNum --;
+					continue;
+				}
+				int to = students[i].FDUs[students[i].next];
+				studentPtr temp(i, FDUs[to].diqu);
+				pq[to].push(temp);
+				state[i] = to;
+				falseNum --;
+				students[i].next++;
+			}
+			for(int i = 1; i <= M; i++){
+				int duoyu = pq[i].size() - FDUs[i].cap;
+				if(duoyu <= 0) continue;
+				for(int j = 0; j < duoyu; j++){
+					studentPtr tmp = pq[i].top();
+					int studentNo = tmp.idx;
+					state[studentNo] = 0;
+					falseNum ++;
+					pq[i].pop();
+				}
+			}
+		}
+		for(int i = 1; i <= N; i++){
+			if(state[i] == -1) cout << "not accepted" << endl;
+			else cout << state[i] << endl;
+		}
+		cout << endl;
+	}
+	return 0;
+}
