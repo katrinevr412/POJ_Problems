@@ -1,0 +1,119 @@
+#include <iostream>
+using namespace std;
+
+const int UP = 1;
+const int DOWN = 0;
+
+int main() {
+	long long int num[21][21][2] = {{{0}}};//第一维：个数 第二维：开头的数 第三维：上升为1，下降为0
+	num[2][1][UP] = 1;
+	num[2][2][DOWN] = 1;
+	for(int i = 3; i <= 20; i++){
+		for(int j = 1; j <= i; j++){
+			for(int k = j; k <= i-1; k++){
+				num[i][j][UP] += num[i-1][k][DOWN];
+			}
+			for(int k = 1; k < j; k++){
+				num[i][j][DOWN] += num[i-1][k][UP];
+			}
+		}
+	}/*
+	for(int i = 3; i <= 20; i++){
+		for(int j = 1; j <= i; j++){
+			cout << num[i][j][DOWN] << " " << num[i][j][UP] << endl;
+		}
+	}*/
+	int cases;
+	cin >> cases;
+	for(int ii = 0; ii < cases; ii++){
+		int len;
+		long long int ord;
+		cin >> len >> ord;
+		if(len == 1){
+			cout << 1 << endl;
+			continue;
+		}
+		int state[21] = {0};
+		int res[21] = {0};
+		long long int sum = 0;
+		int ud, kt;
+		for(int j = 1; j <= len; j++){
+			for(int k = DOWN; k <= UP; k++){
+				sum += num[len][j][k];
+				if(sum >= ord){
+					ud = k;
+					kt = j;
+					ord -= (sum - num[len][j][k]);
+					goto rub;
+				}
+			}
+		}
+		rub:
+		state[kt] = 1;
+		res[0] = kt;
+		int cnt = 1;
+		//cout << res[0] << " ";
+		for(int i = len-1; i > 1; i--){
+			ud = 1-ud;
+			long long int sum = 0;
+			int ks = 0;
+			if(ud == UP) ks = 1;
+			else{
+				for(int j = kt+1; ; j++){
+					if(state[j] == 0){
+						ks = j;
+						break;
+					}
+				}
+				//算情况内的开始
+				int s = 0;
+				for(int j = 1; j <= ks; j++){
+					if(state[j] == 0) s++;
+
+				}
+				ks = s;
+
+			}
+			for(int j = ks; j <= i; j++){
+				sum += num[i][j][ud];
+				if(sum >= ord){
+					kt = j;
+					ord -= (sum - num[i][j][ud]);
+					break;
+				}
+			}
+			//cout << kt << endl;
+			//下面确定这一轮真正的开头
+			int zzkt = 0;
+			for(int j = 1; j <= len; j++){
+				if(state[j] == 0) zzkt++;
+				if(zzkt == kt) {
+					kt = j;
+					break;
+				}
+			}
+			//cout << kt << endl;
+			state[kt] = 1;
+			res[cnt] = kt;
+			//cout << kt << " ";
+			cnt++;/*
+			for(int j = 1; j <= len; j++){
+				cout << state[j] << " ";
+			}
+			cout << endl;*/
+		}
+		int zh = 0;
+		for(int i = 1; i <= len; i++){
+			if(state[i] == 0){
+				state[i] = 1;
+				zh = i;
+				break;
+			}
+		}
+		for(int i = 0; i < len-1; i++) cout << res[i] << " ";
+		cout << zh << endl;
+
+	}
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
