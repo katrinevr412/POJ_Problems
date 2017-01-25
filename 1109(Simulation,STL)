@@ -1,0 +1,228 @@
+#include <iostream>
+#include <map>
+#include <vector>
+#include <string>
+using namespace std;
+
+struct sec{
+	vector<int> pages;
+};
+
+struct pri{
+	vector<int> pages;
+	vector<string> secVec;
+	map<string, sec> secIdx;
+};
+
+char toLr(char c){
+	if(c >= 'A' && c <= 'Z') return c-'A'+'a';
+	return c;
+}
+
+bool smaller(string &s1, string &s2){
+	int l1 = s1.length(), l2 = s2.length();
+	for(int i = 0; i < l1 && i < l2; i++){
+		if(toLr(s1[i]) < toLr(s2[i])) return 1;
+		if(toLr(s1[i]) > toLr(s2[i])) return 0;
+	}
+	if(l1 < l2) return 1;
+	return 0;
+}
+
+void sort(vector<string> &vs){
+	int sz = vs.size();
+	for(int i = 1; i < sz; i++){
+		for(int j = i; j > 0; j--){
+			if(smaller(vs[j-1], vs[j])) break;
+			string tmp = vs[j-1];
+			vs[j-1] = vs[j];
+			vs[j] = tmp;
+		}
+	}
+}
+
+int main() {
+	string s;
+	int docuNo = 1;
+	while(1){
+		//cout << "DOCUMENT " << docuNo << endl;
+		bool firstLine = 1;
+		int page = 1;
+		bool inIdx = 0;
+		bool hasPri = 0, hasSec = 0;
+		string tempIdxCont = "";
+		map<string, pri> priIdx;
+		vector<string> priVec;
+		while(1){
+			getline(cin, s);
+			if(s == "**") return 0;
+			if(firstLine) cout << "DOCUMENT " << docuNo << endl;
+			firstLine = 0;
+			if(s == "*"){
+				//统计,并输出之
+				sort(priVec);
+				int sz = priVec.size();
+				for(int i = 0; i < sz; i++){
+					string searchPri = priVec[i];
+					pri& Pri = priIdx[searchPri];
+					cout << searchPri;
+					int pg = -1;
+					for(int j = 0; j < Pri.pages.size(); j++){
+						if(Pri.pages[j] != pg){
+							cout << ", " << Pri.pages[j];
+							pg = Pri.pages[j];
+						}
+					}
+					cout << endl;
+					if(!Pri.secVec.empty()){
+						sort(Pri.secVec);
+						int szz = Pri.secVec.size();
+						for(int j = 0; j < szz; j++){
+							sec& Sec = Pri.secIdx[Pri.secVec[j]];
+							cout << "+ " << Pri.secVec[j];
+							int pgg = -1;
+							for(int k = 0; k < Sec.pages.size(); k++){
+								if(Sec.pages[k] != pgg){
+									cout << ", " << Sec.pages[k];
+									pgg = Sec.pages[k];
+								}
+							}
+							cout << endl;
+						}
+					}
+				}
+				break;
+			}
+			else{
+				s += " ";
+				int len = s.length();
+				int plc = 0;
+				while(plc < len){
+					char c = s[plc];
+					if(c == '&') {
+						page++;
+					}
+					else if(c == '{'){
+						tempIdxCont = "";
+						hasPri = 0;
+						hasSec = 0;
+						inIdx = 1;
+					}
+					else if(c == '}'){
+						inIdx = 0;
+						int l = tempIdxCont.length();
+						//处理这个index
+						if(!hasPri && !hasSec){
+
+							int first, last;
+							for(first = 0; first < l; first++){
+								if(tempIdxCont[first] != ' ') break;
+							}
+							if(first == l) continue;
+							for(last = l-1; last >= 0; last--){
+								if(tempIdxCont[last] != ' ') break;
+							}
+							tempIdxCont = tempIdxCont.substr(first, last-first+1);
+							map<string, pri>::iterator it = priIdx.find(tempIdxCont);
+							if(it == priIdx.end()){
+								pri temp;
+								temp.pages.push_back(page);
+								priIdx.insert(pair<string, pri>(tempIdxCont, temp));
+								priVec.push_back(tempIdxCont);
+							}
+							else{
+								it->second.pages.push_back(page);
+							}
+						}
+						if(hasPri && !hasSec){
+							int bfhP;
+							for(bfhP = 0; bfhP < l; bfhP ++){
+								if(tempIdxCont[bfhP] == '%') break;
+							}
+							int first = bfhP+1, last = l-1;
+							while(tempIdxCont[first] == ' ') first++;
+							while(tempIdxCont[last] == ' ') last--;
+							tempIdxCont = tempIdxCont.substr(first, last-first+1);
+							map<string, pri>::iterator it = priIdx.find(tempIdxCont);
+							if(it == priIdx.end()){
+								pri temp;
+								temp.pages.push_back(page);
+								priIdx.insert(pair<string, pri>(tempIdxCont, temp));
+								priVec.push_back(tempIdxCont);
+							}
+							else{
+								it->second.pages.push_back(page);
+							}
+						}
+						if(hasSec){
+							string priStr = "", secStr = "";
+							if(!hasPri){
+								int dP;
+								for(dP = 0; dP < l; dP ++){
+									if(tempIdxCont[dP] == '$') break;
+								}
+								int first = 0, last = dP-1;
+								while(tempIdxCont[first] == ' ') first++;
+								while(tempIdxCont[last] == ' ') last--;
+								priStr = tempIdxCont.substr(first, last-first+1);
+								first = dP+1, last = l-1;
+								while(tempIdxCont[first] == ' ') first++;
+								while(tempIdxCont[last] == ' ') last--;
+								secStr = tempIdxCont.substr(first, last-first+1);
+							}
+							else{
+								int dP, dBFH;
+								for(dP = 0; dP < l; dP ++){
+									if(tempIdxCont[dP] == '$') break;
+								}
+								for(dBFH = 0; dBFH < l; dBFH++){
+									if(tempIdxCont[dBFH] == '%') break;
+								}
+								int first = dBFH+1, last = dP-1;
+								while(tempIdxCont[first] == ' ') first++;
+								while(tempIdxCont[last] == ' ') last--;
+								priStr = tempIdxCont.substr(first, last-first+1);
+								first = dP+1, last = l-1;
+								while(tempIdxCont[first] == ' ') first++;
+								while(tempIdxCont[last] == ' ') last--;
+								secStr = tempIdxCont.substr(first, last-first+1);
+							}
+							map<string, pri>::iterator it = priIdx.find(priStr);
+							if(it == priIdx.end()){
+								priVec.push_back(priStr);
+								pri temp;
+								sec tmp;
+								tmp.pages.push_back(page);
+								temp.secVec.push_back(secStr);
+								temp.secIdx.insert(pair<string, sec>(secStr, tmp));
+								priIdx.insert(pair<string, pri>(priStr, temp));
+							}
+							else{
+								pri& thisPri = it->second;
+								map<string, sec>::iterator itt = thisPri.secIdx.find(secStr);
+								if(itt == thisPri.secIdx.end()){
+									sec tmp;
+									tmp.pages.push_back(page);
+									thisPri.secIdx.insert(pair<string, sec>(secStr, tmp));
+									thisPri.secVec.push_back(secStr);
+								}
+								else{
+									sec& thisSec = itt->second;
+									thisSec.pages.push_back(page);
+								}
+							}
+						}
+					}
+					else if(inIdx){
+						tempIdxCont += c;
+						if(c == '%') hasPri = 1;
+						if(c == '$') hasSec = 1;
+					}
+					plc++;
+				}
+			}
+		}
+		docuNo ++;
+	}
+	return 0;
+}
