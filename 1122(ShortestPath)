@@ -1,0 +1,80 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+void print(int n){
+	printf("%d	", n);
+}
+
+int main() {
+	int N;
+	scanf("%d", &N);
+	int dir[22][22];
+	for(int i = 1; i <= N; i++){
+		for(int j = 1; j <= N; j++){
+			int temp;
+			scanf("%d", &temp);
+			if(temp >= 0){
+				dir[i][j] = temp;
+			}
+			else{
+				dir[i][j] = 1000000000;
+			}
+		}
+	}
+	int fire;
+	scanf("%d", &fire);
+	int statCnt = 0;
+	int stat[22];
+	int tmp;
+	while(scanf("%d", &tmp) > 0){
+		stat[statCnt] = tmp;
+		statCnt++;
+	}
+	int dist[2][22][22];
+	int prev[2][22][22];
+	for(int i = 1; i <= N; i++){
+		for(int j = 1; j <= N; j++){
+			dist[0][i][j] = dir[i][j];
+			if(dir[i][j] < 1000000000) prev[0][i][j] = j;
+			else prev[0][i][j] = -1;
+		}
+	}
+	for(int i = 1; i <= N; i++){
+		int from = (i-1)%2, to = i%2;
+		for(int j = 1; j <= N; j++){
+			for(int k = 1; k <= N; k++){
+				if(dist[from][j][i] + dist[from][i][k] < dist[from][j][k]){
+					dist[to][j][k] = dist[from][j][i] + dist[from][i][k];
+					prev[to][j][k] = prev[from][j][i];
+				}
+				else{
+					dist[to][j][k] = dist[from][j][k];
+					prev[to][j][k] = prev[from][j][k];
+				}
+			}
+		}
+	}
+	int tar = N%2;
+	for(int i = 1; i < statCnt; i++){
+		for(int j = i; j > 0; j--){
+			if(dist[tar][stat[j]][fire] >= dist[tar][stat[j-1]][fire]) break;
+			int temp = stat[j];
+			stat[j] = stat[j-1];
+			stat[j-1] = temp;
+		}
+	}
+	printf("Org	Dest	Time	Path\n");
+	for(int i = 0; i < statCnt; i++){
+		print(stat[i]);
+		print(fire);
+		print(dist[tar][stat[i]][fire]);
+		int init = stat[i];
+		while(init != fire){
+			print(init);
+			init = prev[tar][init][fire];
+		}
+		printf("%d\n", fire);
+	}
+	return 0;
+}
