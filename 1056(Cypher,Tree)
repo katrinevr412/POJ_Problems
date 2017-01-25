@@ -1,0 +1,75 @@
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class node{
+public:
+	node *left;
+	node *right;
+	bool isLeaf;
+	node(){left = NULL; right = NULL; isLeaf = false;}
+};
+
+
+node *root;
+
+int main() {
+	int cnt = 0;
+	string s;
+	vector<string> vec;
+	while(getline(cin, s)){
+		if(s != "9"){
+			vec.push_back(s);
+			continue;
+		}
+		cnt ++;
+		cout << "Set " << cnt << " is ";
+		int size = vec.size();
+		root = new node();
+		bool dec = true;
+		for(int i = 0; i < size; i++){
+			string st = vec[i];
+			int len = st.length();
+			node *curN = root;
+			for(int j = 0; j < len; j++){
+				if(st[j] == '0'){
+					if(curN->left == NULL){
+						node *temp = new node();
+						curN->left = temp;
+						curN = curN->left;
+					}
+					else{
+						curN = curN->left;
+					}
+				}
+				else{
+					if(curN->right == NULL){
+						node *temp = new node();
+						curN->right = temp;
+						curN = curN->right;
+					}
+					else{
+						curN = curN->right;
+					}
+				}
+				if(curN->isLeaf) {
+					dec = false;
+					break;
+				}
+				//curN->isLeaf = true;
+			}
+			if(!dec) break;
+			curN->isLeaf = true;
+		}
+		if(!dec){
+			cout << "not immediately decodable" << endl;
+		}
+		else{
+			cout << "immediately decodable" << endl;
+		}
+		vec.clear();
+	}
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
