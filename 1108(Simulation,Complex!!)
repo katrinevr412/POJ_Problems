@@ -1,0 +1,173 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+char coal[1600][1600] = {{'\0'}};
+
+struct node{
+	int X;
+	int Y;
+	int posX;
+	int posY;
+	node *left, *right;
+	char tag;
+	bool isLeaf(){
+		return tag >= 'A' && tag <= 'Z';
+	}
+};
+
+bool isZiM(char c){
+	return c >= 'A' && c <= 'Z';
+}
+
+bool isZiMAst(char c){
+	return isZiM(c) || c == '*';
+}
+
+int parse(node *root, char *s, int idx){
+	//返回的是新的idx值
+	if(isZiM(s[idx])){
+		root->tag = s[idx];
+		root->left = NULL;
+		root->right = NULL;
+		return idx+1;
+	}
+	root->tag = s[idx];
+	node *temp = new node();
+	root->left = temp;
+	int you = parse(root->left, s, idx+1);
+	node *tp = new node();
+	root->right = tp;
+	return parse(root->right, s, you);
+}
+
+void resize(node *root, int newX, int newY){
+	int oldX = root->X, oldY = root->Y;
+	root->X = newX, root->Y = newY;
+	if(root->isLeaf()){
+		return;
+	}
+	if(oldX == newX && root->tag == '|'){
+		resize(root->left, root->left->X, newY);
+		resize(root->right, root->right->X, newY);
+	}
+	else if(oldY == newY && root->tag == '-'){
+		resize(root->left, newX, root->left->Y);
+		resize(root->right, newX, root->right->Y);
+	}
+	else if(oldX == newX && root->tag == '-'){
+		int olt = root->left->Y, ort = root->right->Y;
+		int nlt = (newY * olt - 1) / (olt + ort) + 1;
+		int nrt = newY - nlt;
+		resize(root->left, newX, nlt);
+		resize(root->right, newX, nrt);
+	}
+	else if(oldY == newY && root->tag == '|'){
+		int olt = root->left->X, ort = root->right->X;
+		int nlt = (newX * olt - 1) / (olt + ort) + 1;
+		int nrt = newX - nlt;
+		resize(root->left, nlt, newY);
+		resize(root->right, nrt, newY);
+	}
+	return;
+}
+
+void getSize(node *root){
+	if(root->isLeaf()){
+		root->X = 2;
+		root->Y = 2;
+		return;
+	}
+	getSize(root->left);
+	getSize(root->right);
+	if(root->tag == '|'){
+		root->X = root->left->X + root->right->X;
+		if(root->left->Y > root->right->Y){
+			root->Y = root->left->Y;
+			resize(root->right, root->right->X, root->left->Y);
+		}
+		else if(root->left->Y < root->right->Y){
+			root->Y = root->right->Y;
+			resize(root->left, root->left->X, root->right->Y);
+		}
+		else{
+			root->Y = root->left->Y;
+		}
+	}
+	if(root->tag == '-'){
+		root->Y = root->left->Y + root->right->Y;
+		if(root->left->X > root->right->X){
+			root->X = root->left->X;
+			resize(root->right, root->left->X, root->right->Y);
+		}
+		else if(root->left->X < root->right->X){
+			root->X = root->right->X;
+			resize(root->left, root->right->X, root->left->Y);
+		}
+		else{
+			root->X = root->left->X;
+		}
+	}
+}
+
+void getPos(node *root, int x, int y, char coal[1600][1600]){
+	root->posX = x;
+	root->posY = y;
+	if(root->isLeaf()) {
+		coal[x][y] = root->tag;
+		if(!isZiM(coal[x+root->X][y])) coal[x+root->X][y] = '*';
+		if(!isZiM(coal[x+root->X][y+root->Y])) coal[x+root->X][y+root->Y] = '*';
+		if(!isZiM(coal[x][y+root->Y])) coal[x][y+root->Y] = '*';
+		for(int i = 1; i < root->X; i++){
+			if(!isZiMAst(coal[x+i][y])) coal[x+i][y] = '-';
+			if(!isZiMAst(coal[x+i][y+root->Y])) coal[x+i][y+root->Y] = '-';
+		}
+		for(int j = 1; j < root->Y; j++){
+			if(!isZiMAst(coal[x+root->X][y+j])) coal[x+root->X][y+j] = '|';
+			if(!isZiMAst(coal[x][y+j])) coal[x][y+j] = '|';
+		}
+		return;
+	}
+	getPos(root->left, x, y, coal);
+	if(root->tag == '|'){
+		getPos(root->right, x+root->left->X, y, coal);
+	}
+	else{
+		getPos(root->right, x, y+root->left->Y, coal);
+	}
+}
+
+void printSize(node *root){
+	if(root->isLeaf()){
+		cout << root->tag << " " << root->X <<  " " << root->Y << endl;
+		return;
+	}
+
+}
+
+int main() {
+	int cases;
+	scanf("%d", &cases);
+	for(int ii = 1; ii <= cases; ii++){
+		cout << ii << endl;
+		char s[4096];
+		scanf("%s", s);
+		node *root = new node();
+		parse(root, s, 0);
+		getSize(root);
+
+		for(int i = 0; i <= root->Y; i++){
+			for(int j = 0; j <= root->X; j++){
+				coal[j][i] = ' ';
+			}
+		}
+		getPos(root, 0, 0, coal);
+		for(int i = 0; i <= root->Y; i++){
+			for(int j = 0; j <= root->X; j++){
+				cout << coal[j][i];
+			}
+			cout << endl;
+		}
+	}
+	return 0;
+}
