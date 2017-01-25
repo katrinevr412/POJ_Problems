@@ -1,0 +1,81 @@
+#include <iostream>
+
+using namespace std;
+
+
+
+
+
+void c2(int *res){
+	for(int i = 0; i < 303; i++){
+		res[i] *= 2;
+	}
+	for(int i = 0; i < 303; i++){
+		res[i+1] += res[i]/10;
+		res[i] %= 10;
+	}
+}
+
+void j1(int *res){
+	res[0]++;
+	for(int i = 0; i < 303; i++){
+		if(res[i]/10 == 0) break;
+		res[i+1] += res[i]/10;
+		res[i] %= 10;
+	}
+}
+
+void print(int *res){
+	bool nonzero = false;
+	for(int i = 303; i >= 0; i--){
+		if(nonzero || res[i] != 0){
+			nonzero = true;
+			cout << res[i];
+		}
+	}
+}
+
+int main() {
+
+	int len;
+	cin >> len;
+	int state[1001];
+	int gui[1001];
+	int cnt = 1;
+	for(int i = 1; i <= len; i++){
+		cin >> state[i];
+		if(state[i] == 1){
+			gui[cnt] = i;
+			cnt++;
+		}
+	}
+	cnt--;
+
+	if(cnt == 0) {
+		cout << 0 << endl;
+		return 0;
+	}
+
+	int offset;
+	if(cnt%2 == 1){
+		gui[0] = 0;
+		offset = -1;
+	}
+	else{
+		offset = 0;
+	}
+	int a[1001] = {0};
+	for(int i = 1 + offset; i <= cnt; i += 2){
+		for(int j = gui[i]; j < gui[i+1]; j++){
+			a[j] = 1;
+		}
+	}
+	int res[1000] = {0};
+	for(int i = len-1; i >= 0; i--){
+		c2(res);
+		if(a[i]) j1(res);
+	}
+
+	print(res);
+	return 0;
+}
