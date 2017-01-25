@@ -1,0 +1,58 @@
+#include <iostream>
+using namespace std;
+
+int hx[101][101];
+int R, C;
+
+int Max(int a, int b){
+	if(a < b) return b;
+	return a;
+}
+
+
+
+
+int main() {
+	//int R, C;
+
+	cin >> R >> C;
+	for(int i = 0; i < R; i++){
+		for(int j = 0; j < C; j++){
+			cin >> hx[i][j];
+		}
+	}
+	int px[10001];
+	for(int i = 0; i < R*C; i++) px[i] = i;
+	quickSort(px, 0, R*C-1);
+	//for(int i = 0; i < R*C; i++) cout << px[i] << " "; cout << endl;
+	int maxi = 1;
+	int res[101][101] = {{0}};
+	for(int i = 0; i < R*C; i++){
+		int row = px[i]/C, col = px[i]%C;
+		bool isJBx = true;
+		if(row != 0 && hx[row-1][col] < hx[row][col]){
+			isJBx = false;
+			res[row][col] = Max(res[row][col], res[row-1][col]+1);
+		}
+		if(col != 0 && hx[row][col-1] < hx[row][col]){
+			isJBx = false;
+			res[row][col] = Max(res[row][col], res[row][col-1]+1);
+		}
+		if(row != R-1 && hx[row+1][col] < hx[row][col]){
+			isJBx = false;
+			res[row][col] = Max(res[row][col], res[row+1][col]+1);
+		}
+		if(col != C-1 && hx[row][col+1] < hx[row][col]){
+			isJBx = false;
+			res[row][col] = Max(res[row][col], res[row][col+1]+1);
+		}
+		if(isJBx){
+			res[row][col] = 1;
+		}
+		maxi = Max(maxi, res[row][col]);
+		//cout << isJBx << " " << row << " " << col << " " << res[row][col] << endl;
+	}
+	cout << maxi << endl;
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
