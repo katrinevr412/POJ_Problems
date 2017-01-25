@@ -1,0 +1,94 @@
+#include <stdio.h>
+#include <queue>
+
+using namespace std;
+
+int MIN(int a, int b){
+	return a<b ? a : b;
+}
+
+int main() {
+	bool doors[50][50] = {0};
+	int N, ET;
+	scanf("%d%d", &N, &ET);
+	int temp1, temp2;
+	while(scanf("%d%d", &temp1, &temp2) > 0){
+		if(temp1 == -1 && temp2 == -1) break;
+		doors[temp1][temp2] = 1;
+	}
+	queue<int> bfs0;
+	int prev[50];
+	for(int i = 0; i < N; i++) prev[i] = -1;
+	bool state[50] = {0};
+	bfs0.push(0);
+	state[0] = 1;
+	prev[0] = 0;
+	while(!bfs0.empty()){
+		int idx = bfs0.front();
+		bfs0.pop();
+		for(int i = 0; i < N; i++){
+			if(state[i] || !doors[idx][i]) continue;
+			state[i] = 1;
+			bfs0.push(i);
+			prev[i] = idx;
+		}
+	}
+	queue<int> bfsET;
+	int distET[50];
+	for(int i = 0; i < N; i++) distET[i] = 2147483647;
+	bool stateET[50] = {0};
+	bfsET.push(ET);
+	stateET[ET] = 1;
+	distET[ET] = 0;
+	while(!bfsET.empty()){
+		int idx = bfsET.front();
+		bfsET.pop();
+		for(int i = 0; i < N; i++){
+			if(stateET[i] || !doors[i][idx]) continue;
+			stateET[i] = 1;
+			distET[i] = distET[idx] + 1;
+			bfsET.push(i);
+		}
+	}
+	int dist = 2147483647;
+	int zxDist = 0;
+	int tar;
+	int cur = ET;
+	int tempDist;
+	while(1){
+		cur = prev[cur];
+		zxDist ++;
+		if(cur == 0) break;
+		bool can = true;
+		bool state1[50] = {0};
+		state1[0] = 1;
+		queue<int> bfs1;
+		bfs1.push(0);
+		while(!bfs1.empty()){
+			int idx = bfs1.front();
+			bfs1.pop();
+			for(int i = 0; i < N; i++){
+				if(state1[i] || !doors[idx][i] || i == cur) continue;
+				state1[i] = true;
+				if(i == ET){
+					can = false;
+					break;
+				}
+				bfs1.push(i);
+			}
+			if(!can) break;
+		}
+		if(!can) continue;
+		tempDist = MIN(zxDist, distET[cur]);
+		if(tempDist < dist){
+			dist = tempDist;
+			tar = cur;
+		}
+	}
+	int kaishiDist = MIN(zxDist, distET[0]);
+	if(kaishiDist < dist){
+		tar = 0;
+	}
+	printf("Put guards in room %d.\n", tar);
+	return 0;
+}
