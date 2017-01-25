@@ -1,0 +1,54 @@
+#include <stdio.h>
+#include <string.h>
+using namespace std;
+
+int main() {
+	int N;
+	scanf("%d", &N);
+	for(int ii = 0; ii < N; ii++){
+		printf("Bitmap #%d\n", ii+1);
+		int startX, startY;
+		char lj[1025] = {'\0'};
+		scanf("%d%d%s", &startX, &startY, lj);
+		int len = strlen(lj);
+		len --;
+		bool state[32][32] = {false};
+		int x = startX, y = startY;
+		for(int i = 0; i < len; i++){
+			char c = lj[i];
+			switch(c){
+				case 'E':{
+					state[x][y-1] = true;
+					x++;
+					break;
+				}
+				case 'N':{
+					state[x][y] = true;
+					y++;
+					break;
+				}
+				case 'W':{
+					state[x-1][y] = true;
+					x--;
+					break;
+				}
+				case 'S':{
+					state[x-1][y-1] = true;
+					y--;
+					break;
+				}
+				default:
+					break;
+			}
+		}
+		for(int i = 31; i >= 0; i--){
+			for(int j = 0; j < 32; j++){
+				if(!state[j][i])printf(".");
+				else printf("X");
+			}
+			printf("\n");
+		}
+		printf("\n");
+	}
+	return 0;
+}
