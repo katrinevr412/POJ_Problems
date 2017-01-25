@@ -1,0 +1,81 @@
+#include <iostream>
+using namespace std;
+
+int maxi = 0;
+int cur = 0;
+int state[10] = {0};
+int n;
+
+void clear(){
+	maxi = 0;
+	cur = 0;
+	for(int i = 0; i < 10; i++) state[i] = 0;
+}
+
+int Max(int a, int b){
+	if(a < b) return b;
+	return a;
+}
+
+class order{
+public:
+	int start;
+	int end;
+	int num;
+	int price;
+	order(int s, int e, int n): start(s), end(e), num(n), price(0){}
+	order():start(0), end(0), num(0), price(0){}
+};
+
+
+void findMax(order* orders, int *psum, int ord, int plc){
+	//最初plc为orders的长度
+	if(plc == 0) return;
+	//首先判断当前的order是否可以被接受
+	int idx = ord - plc;
+	order temp = orders[idx];
+	bool can = true;
+	for(int i = temp.start; i < temp.end; i++){
+		if(state[i] + temp.num > n){
+			can = false;
+			break;
+		}
+	}
+	if(can){
+		cur += temp.price;
+		for(int i = temp.start; i < temp.end; i++) state[i] += temp.num;
+		maxi = Max(maxi, cur);
+		findMax(orders, psum, ord, plc-1);
+		cur -= temp.price;
+		for(int i = temp.start; i < temp.end; i++) state[i] -= temp.num;
+	}
+	//如果不选这个，看看剩下的是否能达到max，不能达到就不理
+	if(cur + psum[idx+1] <= maxi) return;
+	findMax(orders, psum, ord, plc-1);
+
+}
+
+int main() {
+	while(1){
+		int  m, ord;
+		cin >> n >> m >> ord;
+		if(n == 0 && m == 0 && ord == 0) return 0;
+		order *orders = new order[ord];
+		for(int i = 0; i < ord; i++){
+			int s, e, N;
+			cin >> s >> e >> N;
+			orders[i].start = s;
+			orders[i].end = e;
+			orders[i].num = N;
+			orders[i].price = (e-s)*N;
+		}
+		quickSort(orders, 0, ord-1);
+		clear();
+		int psum[30] = {0};
+		for(int i = ord-1; i >= 0; i--) psum[i] = psum[i+1] + orders[i].price;
+		findMax(orders, psum, ord, ord);
+		cout << maxi << endl;
+	}
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
