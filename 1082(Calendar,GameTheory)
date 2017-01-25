@@ -1,0 +1,106 @@
+#include <iostream>
+using namespace std;
+
+int NofD[13] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+int nextRi, nextYue, nextNian;
+int lastRi, lastYue, lastNian;
+
+bool isDate(int nian, int yue, int ri){
+	if(yue != 2 || (nian%4 != 0 || (nian%100 == 0 && nian%400 != 0))){
+		return ri <= NofD[yue];
+	}
+	else{
+		return ri <= 29;
+	}
+}
+
+int nofD(int nian, int yue){
+	if(yue != 2 || (nian%4 != 0 || (nian%100 == 0 && nian%400 != 0))){
+			return NofD[yue];
+	}
+	return 29;
+}
+
+void getNext(int nian, int yue, int ri){
+	ri++;
+	if(ri > nofD(nian, yue)){
+		ri -= nofD(nian, yue);
+		yue++;
+	}
+	if(yue == 13){
+		yue = 1;
+		nian++;
+	}
+	nextRi = ri;
+	nextYue = yue;
+	nextNian = nian;
+}
+
+void getLast(int nian, int yue, int ri){
+	ri--;
+	if(ri == 0){
+		yue--;
+		if(yue == 0){
+			yue = 12;
+			nian--;
+		}
+		ri = nofD(nian, yue);
+	}
+	lastRi = ri;
+	lastYue = yue;
+	lastNian = nian;
+}
+
+void printLast(){
+	cout << lastNian << " " << lastYue << " " << lastRi << endl;
+}
+
+void printNext(){
+	cout << nextNian << " " << nextYue << " " << nextRi << endl;
+}
+
+int main() {
+	bool state[102][13][32];
+	state[101][11][4] = false;
+	for(int i = 5; i <= 30; i++) state[101][11][i] = true;
+	for(int i = 1; i <= 31; i++) state[101][12][i] = true;
+	int nian = 2001, yue = 11, ri = 3;
+	while(nian >= 1900){
+		getNext(nian, yue, ri);
+		if(!state[nextNian-1900][nextYue][nextRi]){
+			state[nian-1900][yue][ri] = true;
+		}
+		else{
+			int tempYue = yue+1;
+			int tempNian = nian;
+			if(tempYue == 13){
+				tempYue = 1;
+				tempNian++;
+			}
+			if(!isDate(tempNian, tempYue, ri)){
+				state[nian-1900][yue][ri] = false;
+			}
+			else{
+				state[nian-1900][yue][ri] = !state[tempNian-1900][tempYue][ri];
+			}
+		}
+		getLast(nian, yue, ri);
+		//printLast();
+		nian = lastNian;
+		yue = lastYue;
+		ri = lastRi;
+		//cout << 2 << endl;
+	}
+	int cases;
+	cin >> cases;
+	for(int i = 0; i < cases; i++){
+		int n, y, r;
+		cin >> n >> y >> r;
+		if(state[n-1900][y][r]) cout << "YES" << endl;
+		else cout << "NO" << endl;
+	}
+	//cout << 1 << endl;
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
