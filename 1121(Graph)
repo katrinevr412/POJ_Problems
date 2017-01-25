@@ -1,0 +1,60 @@
+#include <iostream>
+#include <stdio.h>
+#include <string.h>
+using namespace std;
+
+int main() {
+	int N;
+	scanf("%d", &N);
+	int adjNum[55] = {0};
+	int adjList[55][55];
+	int cs[55] = {0}, bxc[55];
+	for(int i = 1; i <= N; i++) bxc[i] = (1<<26) - 1;
+	for(int i = 1; i <= N; i++){
+		char chs[30], xc[30];
+		scanf("%s%s", chs, xc);
+		if(chs[0] != '.'){
+			int len = strlen(chs);
+			for(int j = 0; j < len; j++){
+				cs[i] += (1 << (chs[j]-'A'));
+			}
+		}
+		if(xc[0] != '.'){
+			int len = strlen(xc);
+			for(int j = 0; j < len; j++){
+				bxc[i] -= (1 << (xc[j]-'A'));
+			}
+		}
+	}
+	while(1){
+		int I, J;
+		scanf("%d%d", &I, &J);
+		if(I == 0 && J == 0) break;
+		adjList[I][adjNum[I]] = J;
+		adjNum[I] ++;
+	}
+	int state[55] = {0};
+	for(int i = 1; i <= N; i++){
+		state[i] |= cs[i];
+		for(int j = 1; j <= N-1; j++){
+			for(int k = 1; k <= N; k++){
+				if(state[k] == 0) continue;
+				for(int l = 0; l < adjNum[k]; l++){
+					int to = adjList[k][l];
+					state[to] |= (state[k] & bxc[to]);
+				}
+			}
+		}
+	}
+	for(int i = 1; i <= N; i++){
+		printf(":");
+		int st = state[i];
+		for(int j = 0; j < 26; j++){
+			if((st & (1<<j)) > 0){
+				printf("%c", j+'A');
+			}
+		}
+		printf(":\n");
+	}
+	return 0;
+}
