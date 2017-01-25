@@ -1,0 +1,68 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int powOf10[10] = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000};
+
+int ws(int n){
+	for(int i = 1; i <= 9; i++){
+		if(powOf10[i] > n) return i;
+	}
+	return 10;
+}
+
+int main() {
+	int N;
+	vector<int> res;
+	cin >> N;
+	if(N%11 != 10){
+		int A = N/11;
+		res.push_back(N-A);
+	}
+	if(N%2 == 0){
+		for(int b = 1; powOf10[b] <= N; b++){
+			int B = (N%powOf10[b])/2;
+			int A11_K = (N-2*B)/powOf10[b];
+			if(A11_K%11 != 10){
+				int A = A11_K / 11;
+				int k = A11_K % 11;
+				res.push_back((10*A+k)*powOf10[b] + B);
+			}
+			if(N/powOf10[b] == 1) break;
+			B = (powOf10[b] + N%powOf10[b])/2;
+			A11_K = (N-2*B)/powOf10[b];
+			if(A11_K%11 != 10){
+				int A = A11_K / 11;
+				int k = A11_K % 11;
+				res.push_back((10*A+k)*powOf10[b] + B);
+			}
+		}
+	}
+	int gs = res.size();
+	for(int i = 1; i < gs; i++){
+		for(int j = i; j > 0; j--){
+			if(res[j] > res[j-1]) break;
+			int temp = res[j];
+			res[j] = res[j-1];
+			res[j-1] = temp;
+		}
+	}
+	int gui = 0;
+	int cnt = 0;
+	for(int i = 0; i < gs; i++){
+		if(res[i] == gui) continue;
+		gui = res[i];
+		cnt++;
+	}
+	cout << cnt << endl;
+	int shou = 0;
+	for(int i = 0; i < gs; i++){
+		if(shou == res[i]) continue;
+		shou = res[i];
+		int wsA = ws(res[i]), wsB = ws(N - res[i]);
+		cout << res[i] << " + ";
+		for(int j = 0; j < wsA-wsB-1; j++) cout << 0;
+		cout << N-res[i] << " = " << N << endl;
+	}
+	return 0;
+}
