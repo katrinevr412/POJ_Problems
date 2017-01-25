@@ -1,0 +1,69 @@
+#include <iostream>
+using namespace std;
+
+int dices[1010];
+
+int main() {
+	int temp;
+	int cnt = 0;
+	while(cin >> temp){
+		if(temp == 0) break;
+		dices[cnt] = temp;
+		cnt++;
+	}
+	while(1){
+		int player;
+		cin >> player;
+		if(player == 0) return 0;
+		int jump[101];
+		for(int i = 0; i <= 100; i++) jump[i] = -1;
+		int start, end;
+		while(1){
+			cin >> start >> end;
+			if(start == 0 && end == 0) break;
+			jump[start] = end;
+		}
+		int turn[101] = {0};
+		while(1){
+			int temp;
+			cin >> temp;
+			if(temp == 0) break;
+			if(temp > 0) turn[temp] = 1;
+			else turn[-temp] = -1;
+		}
+		int dicePlace = 0;
+		int curPlayer = 0;
+		bool miss[10] = {false};
+		int state[10] = {0};
+		while(1){
+			int offset = dices[dicePlace];
+			dicePlace++;
+			while(miss[curPlayer]){
+				miss[curPlayer] = false;
+				curPlayer = (curPlayer+1)%player;
+			}
+			int togo = state[curPlayer] + offset;
+			if(togo > 100) togo = state[curPlayer];
+			else{
+				while(jump[togo] != -1){
+					togo = jump[togo];
+				}
+			}
+			state[curPlayer] = togo;
+			if(togo == 100){
+				cout << curPlayer + 1 << endl;
+				break;
+			}
+			if(turn[togo] == 1){
+				miss[curPlayer] = false;
+				continue;
+			}
+			if(turn[togo] == -1){
+				miss[curPlayer] = true;
+			}
+			curPlayer = (curPlayer+1)%player;
+		}
+	}
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
