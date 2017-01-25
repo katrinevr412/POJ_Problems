@@ -1,0 +1,62 @@
+
+#include <iostream>
+using namespace std;
+
+int gcd(int a, int b){
+	if(!a) return b;
+	if(!b) return a;
+	if(a > b) return gcd(b, a%b);
+	else return gcd(a, b%a);
+}
+
+int lcm(int a, int b){
+	return a / gcd(a, b) * b;
+}
+
+int main() {/*
+	while(1){
+		int testa, testb;
+		cin >> testa >> testb;
+		if(!(testa+testb)) break;
+		cout << gcd(testa, testb) << endl;
+	}*/
+	int cnt = 0;
+	while(1){
+		cnt++;
+		int n;
+		cin >> n;
+		if(!n) return n;
+		cout << "Case #" << cnt << ":" << endl;
+		int y[21], b[21], a[21];
+		for(int i = 0; i < n; i++){
+			cin >> y[i] >> a[i] >> b[i];
+		}
+		bool bugious = false;
+		int start = y[0];
+		int step = b[0] - a[0];
+		for(int i = 1; i < n; i++){
+			while(1){
+				if(start >= 10000){
+					bugious = true;
+					break;
+				}
+				if(start >= y[i] && !((start-y[i])%(b[i]-a[i]))){
+					break;
+				}
+				start += step;
+			}
+			if(bugious){
+				break;
+			}
+			step = lcm(step, b[i]-a[i]);
+		}
+		//cout << start << endl;
+		if(bugious){
+			cout << "Unknown bugs detected." << endl << endl;
+			continue;
+		}
+		cout << "The actual year is " << start << "." << endl << endl;
+	}
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
