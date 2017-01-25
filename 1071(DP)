@@ -1,0 +1,217 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+using namespace std;
+
+int main() {
+	int cases;
+	scanf("%d", &cases);
+	for(int ii = 0; ii < cases; ii++){
+		int m, n;
+		scanf("%d%d", &m, &n);
+		bool isOK[2][110][110];
+		bool obs[110][110];
+		for(int i = 0; i < m; i++){
+			for(int j = 0; j < n; j++){
+				int temp;
+				scanf("%d", &temp);
+				isOK[0][i][j] = 1 - temp;
+				obs[i][j] = temp;
+			}
+		}
+		vector<int> lower, upper;
+		vector<char> dir;
+		while(1){
+			int l, u;
+			char c[3];
+			scanf("%d%d", &l, &u);
+			if(l == 0 && u == 0) break;
+			scanf("%s", c);
+			//cout << l << " " << u << " " << cs << endl;
+			lower.push_back(l);
+			upper.push_back(u);
+			dir.push_back(c[0]);
+		}
+		int sz = lower.size();
+		//cout << sz << endl;
+		int cnt;
+		for(int i = 0; i < sz; i++){
+			int from = i%2, to = (i+1)%2;
+			int l = lower[sz-1-i], u = upper[sz-1-i];
+			char c = dir[sz-1-i];
+			cnt = 0;
+			if(c == 'L'){
+				for(int x = 0; x < m; x++){
+					for(int y = 0; y < n; y++){
+						if(y < l) {
+							isOK[to][x][y] = false;
+							continue;
+						}
+						bool duzhu = false;
+						for(int k = 0; k <= l; k++){
+							if(obs[x][y-k]){
+								duzhu = true;
+								break;
+							}
+						}
+						if(duzhu){
+							isOK[to][x][y] = false;
+							continue;
+						}
+						bool keyi = false;
+						for(int k = l; k <= u; k++){
+
+							if(y-k<0 || obs[x][y-k]){
+								keyi = false;
+								break;
+							}
+
+							if(isOK[from][x][y-k]){
+								keyi = true;
+								break;
+							}
+
+						}
+						isOK[to][x][y] = keyi;
+						if(keyi) cnt++;
+					}
+				}
+			}
+
+
+			if(c == 'R'){
+				for(int x = 0; x < m; x++){
+					for(int y = 0; y < n; y++){
+						if(y > n-l-1) {
+							isOK[to][x][y] = false;
+							continue;
+						}
+						bool duzhu = false;
+						for(int k = 0; k <= l; k++){
+							if(obs[x][y+k]){
+								duzhu = true;
+								break;
+							}
+						}
+						if(duzhu){
+							isOK[to][x][y] = false;
+							continue;
+						}
+						bool keyi = false;
+						for(int k = l; k <= u; k++){
+
+							if(y+k>=n || obs[x][y+k]){
+								keyi = false;
+								break;
+							}
+
+							if(isOK[from][x][y+k]){
+								keyi = true;
+								break;
+							}
+
+
+
+						}
+						isOK[to][x][y] = keyi;
+						if(keyi) cnt++;
+					}
+				}
+			}
+
+
+
+			if(c == 'U'){
+				for(int x = 0; x < m; x++){
+					for(int y = 0; y < n; y++){
+						if(x < l) {
+							isOK[to][x][y] = false;
+							continue;
+						}
+						bool duzhu = false;
+						for(int k = 0; k <= l; k++){
+							if(obs[x-k][y]){
+								duzhu = true;
+								break;
+							}
+						}
+						if(duzhu){
+							isOK[to][x][y] = false;
+							continue;
+						}
+						bool keyi = false;
+						for(int k = l; k <= u; k++){
+
+
+							if(x-k<0 || obs[x-k][y]){
+								keyi = false;
+								break;
+							}
+
+							if(isOK[from][x-k][y]){
+								keyi = true;
+								break;
+							}
+
+						}
+						isOK[to][x][y] = keyi;
+						if(keyi) cnt++;
+					}
+				}
+			}
+
+
+
+			if(c == 'D'){
+				for(int x = 0; x < m; x++){
+					for(int y = 0; y < n; y++){
+						if(x > m-l-1) {
+							isOK[to][x][y] = false;
+							continue;
+						}
+						bool duzhu = false;
+						for(int k = 0; k <= l; k++){
+							if(obs[x+k][y]){
+								duzhu = true;
+								break;
+							}
+						}
+						if(duzhu){
+							isOK[to][x][y] = false;
+							continue;
+						}
+						bool keyi = false;
+						for(int k = l; k <= u; k++){
+
+							if(x+k>=m || obs[x+k][y]){
+								keyi = false;
+								break;
+							}
+
+							if(isOK[from][x+k][y]){
+								keyi = true;
+								break;
+							}
+
+						}
+						isOK[to][x][y] = keyi;
+						if(keyi) cnt ++;
+					}
+				}
+			}
+			/*
+			for(int iii = 0; iii < m; iii++){
+				for(int j = 0; j < n; j++){
+					cout << isOK[to][iii][j]  << " ";
+				}
+				cout << endl;
+			}
+			cout << endl;
+			cout << cnt << endl;
+			*/
+			if(cnt == 0) break;
+		}
+		printf("%d\n", cnt);
+	}
+	return 0;
+}
