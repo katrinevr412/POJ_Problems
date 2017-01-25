@@ -1,0 +1,17 @@
+#include <iostream>
+#include <cmath>
+#include <stdio.h>
+using namespace std;
+
+int main() {
+	double C, R, VS;
+	int n;
+	cin >> VS >> R >> C >> n;
+	for(int i = 0; i < n; i++){
+		double W;
+		cin >> W;
+		double V2 = R*C*W*VS/(R*R*C*C*W*W+1)/sin(atan(1/R/C/W));
+		printf("%.3lf\n", V2);
+	}
+	return 0;
+}
