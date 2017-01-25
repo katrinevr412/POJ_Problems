@@ -1,0 +1,78 @@
+import java.util.Scanner;
+
+
+public class Main {
+	
+	public static int[] start = {0, 1, 11, 192, 2893, 38894};
+	public static int[] offsets = {0, 1, 10, 100, 1000, 10000};
+	public static int[] hehe = {0, 9, 180, 2700, 36000, 450000};
+	
+	public static void main(String args[]) throws Exception
+    {
+		//System.out.println((-1)/4);
+		Scanner cin = new Scanner(System.in);
+		int num = cin.nextInt();
+		for(int ii = 0; ii < num; ii++){
+			int idx = cin.nextInt() - 1;
+			int weishu = 0, offset = -1;
+			if(idx < 45) {
+				weishu = 1;
+				offset = idx;
+			}
+			else if(idx < 45 + 9000) {
+				weishu = 2;
+				offset = idx - 45;
+			}
+			else if(idx < 45 + 9000 + 1386450) {
+				weishu = 3;
+				offset = idx - (45 + 9000);
+			}
+			else if(idx < 45 + 9000 + 1386450 + 188019000) {
+				weishu = 4;
+				offset = idx - (9045 + 1386450);
+			}
+			else{
+				weishu = 5;
+				offset = idx - (9045 + 1386450 + 188019000);
+			}
+			//System.out.println(weishu + " " + offset);
+			int cnt = -1;
+			int st = start[weishu];
+			int os = 0;
+			while(offset >= 0){
+				cnt++;
+				os = offset;
+				offset -= st;
+				st += weishu;
+			}
+			//int wz = offsets[weishu] + cnt;
+			int tgNum, tgWei;
+			if(os < 9) {
+				tgNum = os + 1;
+				tgWei = 0;
+			}
+			else if(os < 189){
+				tgNum = (os-9)/2+10;
+				tgWei = (os-9)%2;
+			}
+			else if(os < 2889){
+				tgNum = (os-189)/3+100;
+				tgWei = (os-189)%3;
+			}
+			else if(os < 38889){
+				tgNum = (os-2889)/4+1000;
+				tgWei = (os-2889)%4;
+			}
+			else{
+				tgNum = (os-38889)/5+10000;
+				tgWei = (os-38889)%5;
+			}
+			
+			System.out.println(((Integer)tgNum).toString().charAt(tgWei));
+			
+		}
+		
+		//int weishu = 0;
+		
+    }
+}
