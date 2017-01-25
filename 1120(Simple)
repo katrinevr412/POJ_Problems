@@ -1,0 +1,48 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+void print(int n){
+	char c;
+	if(n==0) c='.';
+	if(n==1) c='!';
+	if(n==2) c='X';
+	if(n==3) c='#';
+	printf("%c", c);
+}
+
+int main() {
+	int d[16];
+	int days;
+	scanf("%d", &days);
+	for(int i = 0; i < 16; i++) scanf("%d", d+i);
+	int val[2][20][20];
+	for(int i = 0; i < 20; i++){
+		for(int j = 0; j < 20; j++){
+			scanf("%d", &val[0][i][j]);
+		}
+	}
+	for(int i = 0; i < days; i++){
+		int from = i%2, to = (i+1)%2;
+		for(int i = 0; i < 20; i++){
+			for(int j = 0; j < 20; j++){
+				int K = val[from][i][j];
+				if(i > 0) K += val[from][i-1][j];
+				if(i < 19) K += val[from][i+1][j];
+				if(j > 0) K += val[from][i][j-1];
+				if(j < 19) K += val[from][i][j+1];
+				val[to][i][j] = val[from][i][j] + d[K];
+				if(val[to][i][j] > 3) val[to][i][j] = 3;
+				if(val[to][i][j] < 0) val[to][i][j] = 0;
+			}
+		}
+	}
+	int ft = days%2;
+	for(int i = 0; i < 20; i++){
+		for(int j = 0; j < 20; j++){
+			print(val[ft][i][j]);
+		}
+		printf("\n");
+	}
+	return 0;
+}
