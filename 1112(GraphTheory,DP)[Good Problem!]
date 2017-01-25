@@ -1,0 +1,151 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <queue>
+using namespace std;
+
+int main() {
+	bool brs[101][101] = {false};//双向记不认识的为true
+	bool rs[101][101] = {false};//单向认识
+	vector<int> brsdr[101];//记录每个人不认识的人
+	int N;
+	scanf("%d", &N);
+	for(int i = 1; i <= N; i++){
+		int temp;
+		while(1){
+			scanf("%d", &temp);
+			if(temp == 0) break;
+			rs[i][temp] = true;
+		}
+	}
+	for(int i = 1; i <= N-1; i++){
+		for(int j = i+1; j <= N; j++){
+			//if(i == j) continue;
+			if(!rs[i][j] || !rs[j][i]){
+				brs[i][j] = true;
+				brs[j][i] = true;
+				brsdr[i].push_back(j);
+				brsdr[j].push_back(i);
+			}
+		}
+	}
+	//vector<int> ltfz[100];
+	vector<int> yiIdx[100], fuyiIdx[100];
+	int yigs[100] = {0}, fuyigs[100] = {0};
+	int ltfzgs = 0;//连通分支个数
+	int used[101] = {0};//0表示木有加入连通分支，1，-1表示两个子集
+	//bool keyi = true;
+	for(int i = 1; i <= N; i++){
+		if(used[i] != 0) continue;
+		used[i] = 1;
+		yigs[ltfzgs] ++;
+		yiIdx[ltfzgs].push_back(i);
+		//ltfz[ltfzgs].push_back(i);
+		queue<int> bfs;
+		bfs.push(i);
+		while(!bfs.empty()){
+			int top = bfs.front();
+			bfs.pop();
+			int gs = brsdr[top].size();
+			for(int j = 0; j < gs; j++){
+				int idx = brsdr[top][j];
+				if(used[idx] != 0) continue;
+				bfs.push(idx);
+				//ltfz[ltfzgs].push_back(idx);
+				used[idx] = -used[top];
+				if(used[idx] == 1){
+					yigs[ltfzgs] ++;
+					yiIdx[ltfzgs].push_back(idx);
+				}
+				else{
+					fuyigs[ltfzgs] ++;
+					fuyiIdx[ltfzgs].push_back(idx);
+				}
+			}
+		}
+		int sz = yiIdx[ltfzgs].size();
+		for(int ii = 0; ii < sz-1; ii++){
+			for(int j = ii+1; j < sz; j++){
+				int idx1 = yiIdx[ltfzgs][ii], idx2 = yiIdx[ltfzgs][j];
+				if(brs[idx1][idx2]){
+					cout << "No solution" << endl;
+					return 0+0;
+				}
+			}
+		}
+		sz = fuyiIdx[ltfzgs].size();
+		for(int ii = 0; ii < sz-1; ii++){
+			for(int j = ii+1; j < sz; j++){
+				int idx = fuyiIdx[ltfzgs][ii], idx2 = fuyiIdx[ltfzgs][j];
+				if(brs[idx][idx2]){
+					cout << "No solution" << endl;
+					return 0-0;
+				}
+			}
+		}
+		ltfzgs ++;
+	}
+	bool gss[102][102] = {false};
+	bool trace[102][102];
+	gss[0][0] = true;
+	for(int i = 0; i < ltfzgs; i++){
+		for(int j = 0; j <= N/2; j++){
+			if(j >= yigs[i] && gss[i][j-yigs[i]]){
+				gss[i+1][j] = true;
+				trace[i+1][j] = true;
+			}
+			else if(j >= fuyigs[i] && gss[i][j-fuyigs[i]]){
+				gss[i+1][j] = true;
+				trace[i+1][j] = false;
+			}
+		}
+	}
+	int arg = -1;
+	for(int i = N/2; i >= 0; i--){
+		if(gss[ltfzgs][i]){
+			arg = i;
+			break;
+		}
+	}
+	int Arg = arg;
+	bool zfs[102];
+	for(int i = ltfzgs; i > 0; i--){
+		zfs[i-1] = trace[i][arg];
+		if(i == 1) break;
+		if(zfs[i-1]){
+			arg -= yigs[i-1];
+		}
+		else{
+			arg -= fuyigs[i-1];
+		}
+	}
+	printf("%d", Arg);
+	for(int i = 0; i < ltfzgs; i++){
+		if(zfs[i]){
+			for(int j = 0; j < yigs[i]; j++){
+				printf(" %d", yiIdx[i][j]);
+			}
+		}
+		else{
+			for(int j = 0; j < fuyigs[i]; j++){
+				printf(" %d", fuyiIdx[i][j]);
+			}
+		}
+	}
+	printf("\n");
+	printf("%d", N-Arg);
+	for(int i = 0; i < ltfzgs; i++){
+		if(zfs[i]){
+			for(int j = 0; j < fuyigs[i]; j++){
+				printf(" %d", fuyiIdx[i][j]);
+			}
+		}
+		else{
+			for(int j = 0; j < yigs[i]; j++){
+				printf(" %d", yiIdx[i][j]);
+			}
+		}
+	}
+	printf("\n");
+	return 0;
+}
