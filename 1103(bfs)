@@ -1,0 +1,253 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int M, N;
+bool mmp[100][100];
+
+struct r{
+	int i,j,dir;
+};
+
+bool bianjie(int i, int j, int dir){
+	if(dir == 0) return i==0 || i==N;
+	return j==0 || j==M;
+}
+
+bool valid(r &R){
+	return R.i != -1 && R.j != -1 && R.dir != -1;
+}
+
+void getAdj(int i, int j, int dir, r &r1, r &r2){
+	if(!bianjie(i,j,dir)){
+		if(dir == 0){
+			if(mmp[i-1][j]){
+				r1.dir = 1; r1.i = i-1; r1.j = j;
+			}
+			else{
+				r1.dir = 1; r1.i = i-1; r1.j = j+1;
+			}
+			if(mmp[i][j]){
+				r2.dir = 1; r2.i = i; r2.j = j+1;
+			}
+			else{
+				r2.dir = 1; r2.i = i; r2.j = j;
+			}
+		}
+		else{
+			if(mmp[i][j-1]){
+				r1.dir = 0; r1.i = i; r1.j = j-1;
+			}
+			else{
+				r1.dir = 0; r1.i = i+1; r1.j = j-1;
+			}
+			if(mmp[i][j]){
+				r2.dir = 0; r2.i = i+1; r2.j = j;
+			}
+			else{
+				r2.dir = 0; r2.i = i; r2.j = j;
+			}
+		}
+	}
+	else{
+		r2.dir = -1; r2.i = -1; r2.j = -1;
+		if(dir == 0 && i == 0){
+			r1.dir = 1;
+			if(mmp[i][j]){
+				r1.i = i; r1.j = j+1;
+			}
+			else{
+				r1.i = i; r1.j = j;
+			}
+		}
+		else if(dir == 0){
+			r1.dir = 1;
+			if(mmp[i-1][j]){
+				r1.i = i-1; r1.j = j;
+			}
+			else{
+				r1.i = i-1; r1.j = j+1;
+			}
+		}
+		if(dir == 1 && j == 0){
+			r1.dir = 0;
+			if(mmp[i][j]){
+				r1.i = i+1; r1.j = j;
+			}
+			else{
+				r1.i = i; r1.j = j;
+			}
+		}
+		else if(dir == 1){
+			r1.dir = 0;
+			if(mmp[i][j-1]){
+				r1.i = i; r1.j = j-1;
+			}
+			else{
+				r1.i = i+1; r1.j = j-1;
+			}
+		}
+	}
+}
+
+int main() {
+	int gs = 0;
+	while(1){
+		gs++;
+		scanf("%d%d", &M, &N);
+		if(M==0 && N==0) return 0;
+		bool used[100][100][2] = {0};
+		int quanCnt = 0;
+		int maxLen = 0;
+		char temp[100];
+		for(int i = 0; i < N; i++){
+			scanf("%s", temp);
+			for(int j = 0; j < M; j++){
+				char c = temp[j];
+				if(c == '/') mmp[i][j] = 0;
+				else mmp[i][j] = 1;
+			}
+		}
+		for(int j = 0; j < M; j++){
+			if(used[0][j][0]) continue;
+			used[0][j][0] = 1;
+			int curI = 0, curJ = j, curDir = 0;
+			while(1){
+				r R1, R2;
+				getAdj(curI, curJ, curDir, R1, R2);
+				int nextI, nextJ, nextDir;
+				if(used[R1.i][R1.j][R1.dir]){
+					nextI = R2.i, nextJ = R2.j, nextDir = R2.dir;
+				}
+				else{
+					nextI = R1.i, nextJ = R1.j, nextDir = R1.dir;
+				}
+				used[nextI][nextJ][nextDir] = 1;
+				if(bianjie(nextI, nextJ, nextDir)) break;
+				curI = nextI, curJ = nextJ, curDir = nextDir;
+			}
+		}
+		//cout << 1 << endl;
+		for(int j = 0; j < M; j++){
+			if(used[N][j][0]) continue;
+			used[N][j][0] = 1;
+			int curI = N, curJ = j, curDir = 0;
+			while(1){
+				r R1, R2;
+				getAdj(curI, curJ, curDir, R1, R2);
+				int nextI, nextJ, nextDir;
+				if(used[R1.i][R1.j][R1.dir]){
+					nextI = R2.i, nextJ = R2.j, nextDir = R2.dir;
+				}
+				else{
+					nextI = R1.i, nextJ = R1.j, nextDir = R1.dir;
+				}
+				used[nextI][nextJ][nextDir] = 1;
+				if(bianjie(nextI, nextJ, nextDir)) break;
+				curI = nextI, curJ = nextJ, curDir = nextDir;
+			}
+		}
+		for(int i = 0; i < N; i++){
+			if(used[i][0][1]) continue;
+			used[i][0][1] = 1;
+			int curI = i, curJ = 0, curDir = 1;
+			while(1){
+				r R1, R2;
+				getAdj(curI, curJ, curDir, R1, R2);
+				int nextI, nextJ, nextDir;
+				if(used[R1.i][R1.j][R1.dir]){
+					nextI = R2.i, nextJ = R2.j, nextDir = R2.dir;
+				}
+				else{
+					nextI = R1.i, nextJ = R1.j, nextDir = R1.dir;
+				}
+				used[nextI][nextJ][nextDir] = 1;
+				if(bianjie(nextI, nextJ, nextDir)) break;
+				curI = nextI, curJ = nextJ, curDir = nextDir;
+			}
+		}
+		for(int i = 0; i < N; i++){
+			if(used[i][M][1]) continue;
+			used[i][M][1] = 1;
+			int curI = i, curJ = M, curDir = 1;
+			while(1){
+				r R1, R2;
+				getAdj(curI, curJ, curDir, R1, R2);
+				int nextI, nextJ, nextDir;
+				if(used[R1.i][R1.j][R1.dir]){
+					nextI = R2.i, nextJ = R2.j, nextDir = R2.dir;
+				}
+				else{
+					nextI = R1.i, nextJ = R1.j, nextDir = R1.dir;
+				}
+				used[nextI][nextJ][nextDir] = 1;
+				if(bianjie(nextI, nextJ, nextDir)) break;
+				curI = nextI, curJ = nextJ, curDir = nextDir;
+			}
+		}
+		//cout << 1 << endl;
+		for(int i = 1; i < N; i++){
+			for(int j = 0; j < M; j++){
+				if(used[i][j][0]) continue;
+				quanCnt++;
+				used[i][j][0] = 1;
+				int len = 1;
+				int curI = i, curJ = j, curDir = 0;
+				//int firstI = i, firstJ = j, firstDir = 0;
+				while(1){
+					r R1, R2;
+					getAdj(curI, curJ, curDir, R1, R2);
+					int nextI, nextJ, nextDir;
+					if(used[R1.i][R1.j][R1.dir] && used[R2.i][R2.j][R2.dir]) break;
+					if(used[R1.i][R1.j][R1.dir]){
+						nextI = R2.i, nextJ = R2.j, nextDir = R2.dir;
+					}
+					else{
+						nextI = R1.i, nextJ = R1.j, nextDir = R1.dir;
+					}
+					//if(nextI == firstI && nextJ == firstJ && nextDir == firstDir) break;
+					used[nextI][nextJ][nextDir] = 1;
+					len++;
+					curI = nextI, curJ = nextJ, curDir = nextDir;
+				}
+				if(len > maxLen) maxLen = len;
+			}
+		}
+		//cout << 1 << endl;
+		for(int i = 0; i < N; i++){
+			for(int j = 1; j < M; j++){
+				if(used[i][j][1]) continue;
+				quanCnt++;
+				used[i][j][1] = 1;
+				int len = 1;
+				int curI = i, curJ = j, curDir = 1;
+				//int firstI = i, firstJ = j, firstDir = 1;
+				while(1){
+					r R1, R2;
+					getAdj(curI, curJ, curDir, R1, R2);
+					int nextI, nextJ, nextDir;
+					if(used[R1.i][R1.j][R1.dir] && used[R2.i][R2.j][R2.dir]) break;
+					if(used[R1.i][R1.j][R1.dir]){
+						nextI = R2.i, nextJ = R2.j, nextDir = R2.dir;
+					}
+					else{
+						nextI = R1.i, nextJ = R1.j, nextDir = R1.dir;
+					}
+					//if(nextI == firstI && nextJ == firstJ && nextDir == firstDir) break;
+					used[nextI][nextJ][nextDir] = 1;
+					len++;
+					curI = nextI, curJ = nextJ, curDir = nextDir;
+				}
+				if(len > maxLen) maxLen = len;
+			}
+		}
+		printf("Maze #%d:\n", gs);
+		if(quanCnt == 0){
+			printf("There are no cycles.\n\n");
+		}
+		else{
+			printf("%d Cycles; the longest has length %d.\n\n", quanCnt, maxLen);
+		}
+	}
+	return 0;
+}
