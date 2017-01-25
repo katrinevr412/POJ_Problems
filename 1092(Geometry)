@@ -1,0 +1,123 @@
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <cmath>
+using namespace std;
+
+int X[202], Y[202];
+
+const double PI = 3.141592654;
+
+double angle(int idx1, int idx2){
+	if(X[idx1] == X[idx2]){
+		if(Y[idx1] < Y[idx2]) return PI/2;
+		else return PI*3/2;
+	}
+	if(Y[idx1] == Y[idx2]){
+		if(X[idx1] < X[idx2]) return 0;
+		else return PI;
+	}
+	double k = atan((Y[idx2] + 0.0 - Y[idx1]) / (X[idx2] + 0.0 - X[idx1]));
+	if(k < 0) k += PI;
+	if(Y[idx1] < Y[idx2]) return k;
+	return k+PI;
+}
+
+double rotAngle(int idx1, int idx2, int idx3){
+	double h = angle(idx2, idx1) - angle(idx2, idx3);
+	if(h <= 0) h += 2*PI;
+	return h;
+}
+
+void quickSort(int s[], int l, int r, int curIdx)
+{
+    if (l < r)
+    {
+        int i = l, j = r, x = s[l];
+        while (i < j)
+        {
+            while(i < j && angle(curIdx, s[j]) <= angle(curIdx, x))//s[j]>= x) // 从右向左找第一个小于x的数
+                j--;
+            if(i < j)
+                s[i++] = s[j];
+            while(i < j && angle(curIdx, s[i]) > angle(curIdx, x))//s[i]< x) // 从左向右找第一个大于等于x的数
+                i++;
+            if(i < j)
+                s[j--] = s[i];
+        }
+        s[i] = x;
+        quickSort(s, l, i - 1, curIdx); // 递归调用
+        quickSort(s, i + 1, r, curIdx);
+    }
+}
+
+int main() {
+	int M;
+	scanf("%d", &M);
+	for(int ii = 0; ii < M; ii++){
+		int N;
+		scanf("%d", &N);
+		bool adj[202][202] = {false};
+		int adjList[202][202];
+		int adjNum[202] = {0};
+		for(int i = 0; i < N; i++){
+			int I, deg;
+			scanf("%d", &I);
+			scanf("%d%d%d", X+I, Y+I, &deg);
+			for(int j = 0; j < deg; j++){
+				int temp;
+				scanf("%d", &temp);
+				adj[I][temp] = true;
+				adjList[I][adjNum[I]] = temp;
+				adjNum[I] ++;
+			}
+		}
+		for(int i = 1; i <= N; i++){
+			quickSort(adjList[i], 0, adjNum[i]-1, i);
+		}
+		int adjIdx[202][202];
+		for(int i = 1; i <= N; i++){
+			for(int j = 0; j < adjNum[i]; j++){
+				adjIdx[i][adjList[i][j]] = j;
+			}
+		}
+		int propNum[202] = {0};
+		for(int i = 1; i <= N; i++){
+			for(int j = 1; j <= N; j++){
+				if(!adj[i][j]) continue;
+				bool proper = true;
+				bool used[202] = {false};
+				double njh = 0;
+				int sides = 1;
+				int i1 = i, i2 = j;
+				used[i] = true;
+				//used[j] = true;
+				adj[i][j] = false;
+				while(1){
+					//cout << i1 << " " << i2 << endl;
+					//system("PAUSE");
+					int idxofi1 = adjIdx[i2][i1];
+					int idxofi3 = (idxofi1 + 1) % adjNum[i2];
+					int i3 = adjList[i2][idxofi3];
+					if(proper) njh += rotAngle(i1,i2,i3);
+					adj[i2][i3] = false;
+					if(i2 == i && i3 == j) break;
+					if(used[i2]){
+						proper = false;
+					}
+					used[i2] = true;
+					sides ++;
+					i1 = i2;
+					i2 = i3;
+				}
+				if(proper && abs(njh - (sides-2)*PI) < 1e-4){
+					propNum[sides] ++;
+				}
+			}
+		}
+		int k;
+		scanf("%d", &k);
+		cout << propNum[k] << endl;
+	}
+	return 0;
+}
