@@ -1,0 +1,86 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+
+class node{
+public:
+	int num;
+	node* next;//置换中下一个位置
+	node* rep;//代表的元素
+	int cirlen;
+};
+
+int main() {
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	while(1){
+		int len;
+		cin >> len;
+		if(len <= 0) return 0;
+		node* zh = new node[len + 1];
+		for(int i = 1; i <= len; i++){
+			cin >> zh[i].num;
+		}
+
+		//下面开始求置换
+		for(int i = 1; i <= len; i++){
+			zh[i].next = NULL;
+		}
+		for(int i = 1; i <= len; i++){
+			if(zh[i].next != NULL) continue;//已经计算了置换
+			zh[i].rep = zh + i;
+			node* iter = zh + zh[i].num;
+			int cL = 1;
+			zh[i].next = iter;
+			while(iter != zh + i){
+				iter->rep = zh + i;
+				iter->next = zh + iter->num;
+				iter = iter->next;
+				cL++;
+			}
+			zh[i].cirlen = cL;
+		}
+
+		//cout << "ehe" << endl;
+		while(1){
+			int ci;
+			cin >> ci;
+			if(ci <= 0) break;
+			string s;
+			getline(cin, s);
+			//cout << s << endl;
+			s = s.substr(1);
+			//cout << s << endl;
+			char* chars = new char[len + 1];
+			char* resChars = new char[len + 1];
+			int slen = s.length();
+			for(int i = 0; i < slen; i++){
+				chars[i+1] = s[i];
+			}
+			for(int i = slen; i < len; i++){
+				chars[i+1] = ' ';
+			}
+			//cout << "1" << endl;
+			for(int i = 1; i <= len; i++){
+				node* idx = zh + i;
+				int py = ci % zh[i].rep->cirlen;
+				for(int j = 0; j < py; j++){
+					idx = idx->next;
+				}
+				//cout  << zh << " " << idx << endl;
+				resChars[idx - zh] = chars[i];
+			}
+			for(int i = 1; i <= len; i++){
+				cout << resChars[i];
+			}
+			cout << endl;
+			delete [] chars;
+			delete [] resChars;
+		}
+
+
+		cout << endl;
+		delete [] zh;
+	}
+	return 0;
+}
