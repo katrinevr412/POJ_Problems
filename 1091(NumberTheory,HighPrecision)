@@ -1,0 +1,199 @@
+#include <iostream>
+#include <cmath>
+#include <vector>
+using namespace std;
+
+int primes[1229];
+
+bool isPrime(int n){
+	//if(n == 1) return false;
+	if(n == 2) return true;
+	if(n%2 == 0) return false;
+	int sq = (int)sqrt(n*1.0);
+	//cout << sq << endl;
+	for(int i = 3; i <= sq; i+= 2){
+		if(n%i == 0) return false;
+	}
+	return true;
+}
+
+int Max(int a, int b){
+	if(a > b) return a;
+	return b;
+}
+
+class tiaosao{
+	public:
+	vector<int> data;
+	int len;
+	tiaosao(int ln){
+		len = ln;
+		//data = new int[len];
+		for(int i = 0; i < ln; i++) data.push_back(0);
+	}
+	tiaosao(int num, bool flag){
+		int prod = 1;
+		int ln = 0;
+		while(prod <= num){
+			prod *= 10;
+			ln++;
+		}
+		len = ln;
+		//data = new int[len];
+		for(int i = 0; i < len; i++){
+			//data[i] = num%10;
+			data.push_back(num%10);
+			num /= 10;
+		}
+
+	}
+	void print(){
+		bool tag = false;
+		for(int i = len-1; i >= 0; i--) {
+			if(data[i] == 0 && !tag) continue;
+			tag = true;
+			cout << data[i];
+		}
+	}
+	void normalize(){
+		for(int i = 0; i < len-1; i++){
+			if(data[i] >= 0 || data[i]%10 == 0){
+				data[i+1] += data[i]/10;
+				data[i] %= 10;
+			}
+			else{
+				int shang, ys;
+				shang = data[i]/10 - 1;
+				ys = data[i] - shang * 10;
+				data[i+1] += shang;
+				data[i] = ys;
+			}
+		}
+	}
+
+};
+
+tiaosao add(tiaosao t1, tiaosao t2){
+	int len = Max(t1.len, t2.len);
+	tiaosao res(len);
+	for(int i = 0; i < len; i++){
+		if(i < t1.len) res.data[i] += t1.data[i];
+		if(i < t2.len) res.data[i] += t2.data[i];
+	}
+	return res;
+}
+
+tiaosao subtract(tiaosao t1, tiaosao t2){
+	int len = Max(t1.len, t2.len);
+	tiaosao res(len);
+	for(int i = 0; i < len; i++){
+		if(i < t1.len) res.data[i] += t1.data[i];
+		if(i < t2.len) res.data[i] -= t2.data[i];
+	}
+	return res;
+}
+
+tiaosao multiply(tiaosao t1, tiaosao t2){
+	int len = t1.len + t2.len;
+	tiaosao res(len);
+	for(int i = 0; i < len - 1; i++){
+		for(int j = 0; j <= i; j++){
+			if(j < t1.len && i-j < t2.len){
+				res.data[i] += t1.data[j] * t2.data[i-j];
+			}
+		}
+	}
+	for(int i = 0; i < len-1; i++){
+		res.data[i+1] += res.data[i]/10;
+		res.data[i] %= 10;
+	}
+	return res;
+}
+
+tiaosao pw(tiaosao t, int m){
+	if(m == 1) {
+		//cout << t.len << endl;
+		tiaosao res(t.len);
+		for(int i = 0; i < t.len; i++) {
+			//cout << t.data[i] <<" ";
+			res.data[i] = t.data[i];
+			//cout << res.data[i] << " ";
+		}
+		//res.print();
+		return res;
+	}
+	tiaosao temp = pw(t, m/2);
+	if(m%2 == 0) return multiply(temp, temp);
+	else return multiply(t, multiply(temp, temp));
+}
+
+int main() {
+	//tiaosao test(992859534, true);
+	//tiaosao test2(94235543, true);
+	//tiaosao temp = pw(test, 9);
+	//temp.print();
+	//cout << (-20)%10 << endl;
+	//cout << (16)/10 << endl;
+	//tiaosao test(10, true);
+	//test = pw(test, 15);
+	//test.print();
+	int N , M;
+	cin >> N >> M;
+	if(M == 1){
+		cout << 1 << endl;
+		return 0;
+	}
+	if(N == 0){
+		cout << 0 << endl;
+		return 0;
+	}
+	vector<int> factors;
+	int m = M;
+	for(int i = 0; i < 1229; i++){
+		if(M < primes[i] * primes[i]) break;
+		if(M%primes[i] == 0){
+			factors.push_back(primes[i]);
+			while(M%primes[i] == 0){
+				M /= primes[i];
+			}
+		}
+	}
+	if(M > 1) factors.push_back(M);
+	M = m;
+	tiaosao res(0, true);
+	int nFac = factors.size();
+	int cases = (int)pow(2.0, nFac);
+	for(int state = 0; state < cases; state++){
+		int ds = M;
+		int cnt = 0;
+		for(int i = 0; i < nFac; i++){
+			if((state >> i)%2 == 1) {
+				ds /= factors[i];
+				cnt++;
+			}
+		}
+		tiaosao temp(ds, true);
+		if(cnt%2 == 0){
+			res = add(res, pw(temp, N));
+		}
+		else{
+			res = subtract(res, pw(temp, N));
+		}
+	}
+	res.normalize();
+	res.print();
+	//for(int i = 0; i < factors.size(); i++) cout << factors[i] << " ";
+	/*
+	int cnt = 0;
+	for(int i = 2; i <= 10000; i++){
+		if(isPrime(i)){
+			cout << i << ",";
+			cnt++;
+		}
+	}
+	cout << endl << cnt;
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	 * */
+
+	return 0;
+}
