@@ -1,0 +1,32 @@
+import java.util.Scanner;
+
+
+public class Main {
+	
+	public static double ratio = (1 + Math.sqrt(5))/2.0;
+	public static double rem = (3 - Math.sqrt(5))/2.0;
+	
+	public static void main(String args[]) throws Exception
+    {
+		
+		Scanner cin=new Scanner(System.in);
+		while(cin.hasNext()){
+			int a = cin.nextInt(), b = cin.nextInt();
+			if(a > b) {
+				int temp = b;
+				b = a;
+				a = temp;
+			}
+			if(a == 0 && b == 0) System.out.println(0);
+			else if(a == 0) System.out.println(1);
+			else{
+				double aR = a * ratio;
+				int ar = (int)aR + 1;
+				if(b != ar) System.out.println(1);
+				else if(aR - (ar-1) < rem) System.out.println(1);
+				else System.out.println(0);
+			}
+		}
+		
+    }
+}
