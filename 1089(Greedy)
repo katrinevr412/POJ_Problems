@@ -1,0 +1,44 @@
+#include <iostream>
+using namespace std;
+
+
+int dao[1000001] = {0};
+
+int main() {
+	int N;
+	cin >> N;
+	//intv l[50000];
+
+	int min = 1000001, max = 0;
+	for(int i = 0; i < N; i++){
+		int temps, tempe;
+		cin >> temps >> tempe;
+		if(dao[temps] < tempe) dao[temps] = tempe;
+		if(temps < min) min = temps;
+		if(tempe > max) max = tempe;
+
+	}
+	int start = min, end = dao[min];
+	for(int i = min+1; i <= max; i++){
+		if(dao[i] == 0) continue;
+		if(i > end){
+			cout << start << " " << end << endl;
+			start = i;
+			end = dao[i];
+		}
+		else{
+			if(end < dao[i]) end = dao[i];
+		}
+		/*
+		if(end == max){
+			cout << start << " " << end << endl;
+			break;
+		}
+		*/
+	}
+	cout << start << " " << end << endl;
+	//quickSort(l, 0, N-1);
+
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
