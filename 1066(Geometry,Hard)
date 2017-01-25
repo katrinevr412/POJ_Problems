@@ -1,0 +1,248 @@
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <queue>
+using namespace std;
+
+class xianduan;
+class jiaodian;
+class quyu;
+
+class zhixian{
+public:
+
+	int x_shi, y_shi, x_zhong, y_zhong;
+	vector<int> jiaodians;
+	void sortJD();
+};
+
+int xd_cnt = 0, jd_cnt = 0, qy_cnt = 0;
+double trea_x, trea_y;
+
+class xianduan{
+public:
+	int qidian;
+	int zhongdian;
+	int mian;
+	bool bianjie;
+	int fan;
+	xianduan(): qidian(-1), zhongdian(-1), bianjie(false), fan(-1), mian(-1){}
+};
+
+class jiaodian{
+public:
+	double x;
+	double y;
+	vector<int> xianduans;
+	jiaodian(): x(-1), y(-1){}
+	jiaodian(double xx, double yy): x(xx), y(yy){}
+};
+
+class quyu{
+public:
+	vector<int> xianduans;
+	bool chu;
+	int depth;
+	quyu(): chu(false), depth(0){}
+};
+
+xianduan xds[3000];
+jiaodian jds[1500];
+quyu qys[500];
+zhixian zxs[35];
+
+void zhixian::sortJD(){
+		int gs = jiaodians.size();
+		for(int i = 1; i < gs; i++){
+			for(int j = i-1; j >= 0; j--){
+				if(abs(jds[jiaodians[j]].x-x_shi) + abs(jds[jiaodians[j]].y-y_shi) < abs(jds[jiaodians[j+1]].x-x_shi) + abs(jds[jiaodians[j+1]].y-y_shi)){
+					 break;
+				}
+				int temp = jiaodians[j+1];
+				jiaodians[j+1] = jiaodians[j];
+				jiaodians[j] = temp;
+			}
+		}
+}
+
+
+bool inRange(jiaodian jd){
+	return jd.x > -1e-8 && jd.x < 100 + 1e-8 && jd.y > -1e-8 && jd.y < 100 + 1e-8;
+}
+
+jiaodian getJD(zhixian zx1, zhixian zx2){
+	jiaodian temp(-1, -1);
+	int x1 = zx1.x_shi, y1 = zx1.y_shi;
+	int x2 = zx1.x_zhong, y2 = zx1.y_zhong;
+	int x3 = zx2.x_shi, y3 = zx2.y_shi;
+	int x4 = zx2.x_zhong, y4 = zx2.y_zhong;
+	if((y2-y1)*(x4-x3)==(x2-x1)*(y4-y3)){
+		return temp;
+	}
+	if(x1==x2){
+		temp.x = x1*1.0;
+		temp.y = y3 + (y4-y3) * (x1-x3) * 1.0 / (x4-x3);
+		if(inRange(temp)) return temp;
+		else return jiaodian(-1,-1);
+	}
+	if(x3==x4){
+		temp.x = x3*1.0;
+		temp.y = y1 + (y2-y1) * (x3-x1) * 1.0 / (x2-x1);
+		if(inRange(temp)) return temp;
+		else return jiaodian(-1,-1);
+	}
+	double k1 = (y2-y1)*1.0/(x2-x1), k2 = (y4-y3)*1.0/(x4-x3);
+	temp.x = (k1*x1-k2*x3-y1+y3)/(k1-k2);
+	temp.y = y1 + k1*(temp.x - x1);
+	if(inRange(temp)) return temp;
+	else return jiaodian(-1, -1);
+}
+
+bool you(xianduan& xd, jiaodian& jd){
+	double x1 = jds[xd.qidian].x, x2 = jds[xd.zhongdian].x;
+	double y1 = jds[xd.qidian].y, y2 = jds[xd.zhongdian].y;
+	double x = jd.x, y = jd.y;
+	return (x-x2)*(y2-y1)-(y-y2)*(x2-x1) > 1e-8;
+}
+
+
+int main() {
+	int dian;
+	cin >> dian;
+	//int x_shi[35], y_shi[35], x_zhong[35], y_zhong[35];
+	for(int i = 4; i < dian + 4; i++){
+		cin >> zxs[i].x_shi >> zxs[i].y_shi >> zxs[i].x_zhong >> zxs[i].y_zhong;
+	}
+	cin >> trea_x >> trea_y;
+	//cout << 1 << endl;
+	zxs[0].x_shi = 100; zxs[0].x_zhong = 0; zxs[0].y_shi = 0; zxs[0].y_zhong = 0;
+	zxs[1].x_shi = 0; zxs[1].x_zhong = 0; zxs[1].y_shi = 0; zxs[1].y_zhong = 100;
+	zxs[2].x_shi = 0; zxs[2].x_zhong = 100; zxs[2].y_shi = 100; zxs[2].y_zhong = 100;
+	zxs[3].x_shi = 100; zxs[3].x_zhong = 100; zxs[3].y_shi = 100; zxs[3].y_zhong = 0;
+	for(int i = 1; i < dian+4; i++){
+		for(int j = 0; j < i; j++){
+			jiaodian temp = getJD(zxs[i], zxs[j]);
+			//cout << temp.x << " " << temp.y << endl;
+			if(temp.x != -1 && temp.y != -1){
+				jds[jd_cnt] = temp;
+				zxs[i].jiaodians.push_back(jd_cnt);
+				zxs[j].jiaodians.push_back(jd_cnt);
+				jd_cnt++;
+			}
+		}
+	}
+	//for(int i = 0; i < 4; i++) cout << zxs[i].jiaodians.size() << endl;
+	for(int i = 0; i < dian+4; i++){
+		zxs[i].sortJD();
+		int num = zxs[i].jiaodians.size();
+		for(int j = 0; j < num-1; j++){
+			xds[xd_cnt].qidian = zxs[i].jiaodians[j];
+			xds[xd_cnt].zhongdian = zxs[i].jiaodians[j+1];
+			jds[zxs[i].jiaodians[j]].xianduans.push_back(xd_cnt);
+			if(i < 4) xds[xd_cnt].bianjie = true;
+			xd_cnt++;
+			if(i >= 4){
+				xds[xd_cnt].qidian = zxs[i].jiaodians[j+1];
+				xds[xd_cnt].zhongdian = zxs[i].jiaodians[j];
+				jds[zxs[i].jiaodians[j+1]].xianduans.push_back(xd_cnt);
+				xds[xd_cnt].fan = xd_cnt-1;
+				xds[xd_cnt-1].fan = xd_cnt;
+				xd_cnt++;
+			}
+		}
+	}
+	//cout << xd_cnt << endl;
+	/*
+	for(int i = 0; i < jd_cnt; i++){
+		cout << i << " " << jds[i].x << " " << jds[i].y << endl;
+		for(int j = 0; j < jds[i].xianduans.size(); j++){
+			cout << jds[i].xianduans[j] << " ";
+		}
+		cout << endl;
+	}
+	for(int i = 0; i < xd_cnt; i++){
+		cout << i << " " << xds[i].qidian << " " << xds[i].zhongdian << endl;
+	}
+	*/
+	bool state[3000] = {false};
+	for(int i = 0; i < xd_cnt; i++){
+		if(state[i]) continue;
+		quyu tempq;
+		tempq.xianduans.push_back(i);
+		if(xds[i].bianjie) tempq.chu = true;
+		xds[i].mian = qy_cnt;
+		state[i] = true;
+		int idx = i;
+		//int cnt = 0;
+		while(1){
+			//cnt++;
+			//cout << idx << endl;
+			int jdidx = xds[idx].zhongdian;
+			int len = jds[jdidx].xianduans.size();
+			for(int j = 0; j < len; j++){
+				if(you(xds[idx], jds[xds[jds[jdidx].xianduans[j]].zhongdian])){
+					idx = jds[jdidx].xianduans[j];
+					break;
+				}
+			}
+			if(idx == i) break;
+			tempq.xianduans.push_back(idx);
+			if(xds[idx].bianjie) tempq.chu = true;
+			xds[idx].mian = qy_cnt;
+			state[idx] = true;
+		}
+		qys[qy_cnt] = tempq;
+		qy_cnt++;
+	}
+	//cout << 1 << endl;
+	jiaodian bao(trea_x, trea_y);
+	int wz;
+	/*
+	cout << "qys" << endl;
+	for(int i = 0; i < qy_cnt; i++){
+		cout << i << ": " ;
+		for(int j = 0; j < qys[i].xianduans.size(); j++){
+			cout << qys[i].xianduans[j] << " ";
+		}
+		cout << endl;
+	}
+	*/
+	for(int i = 0; i < qy_cnt; i++){
+		int sz = qys[i].xianduans.size();
+		bool OK = true;
+		for(int j = 0; j < sz; j++){
+			if(!you(xds[qys[i].xianduans[j]], bao)){
+				OK = false;
+				break;
+			}
+		}
+		if(OK){
+			wz = i;
+			break;
+		}
+	}
+	//cout << "weizhi: " << wz << endl;
+	queue<int> qqy;
+	for(int i = 0; i < qy_cnt; i++){
+		if(qys[i].chu){
+			qys[i].depth = 1;
+			qqy.push(i);
+		}
+	}
+	while(!qqy.empty()){
+		int idxq = qqy.front();
+		qqy.pop();
+		int dpt = qys[idxq].depth;
+		int geshu = qys[idxq].xianduans.size();
+		for(int i = 0; i < geshu; i++){
+			if(xds[qys[idxq].xianduans[i]].bianjie) continue;
+			int fanmian = xds[xds[qys[idxq].xianduans[i]].fan].mian;
+			if(qys[fanmian].depth != 0) continue;
+			qys[fanmian].depth = dpt+1;
+			qqy.push(fanmian);
+		}
+	}
+	cout << "Number of doors = " << qys[wz].depth << endl;
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
