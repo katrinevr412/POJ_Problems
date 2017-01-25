@@ -1,0 +1,59 @@
+#include <iostream>
+using namespace std;
+
+const int offset[17] = {0, 0, 1, 0, 5, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 85};
+
+void print(int n){
+	if(n < 10) cout << "   " << n;
+	else if(n < 100) cout << "  " << n;
+	else cout << " " << n;
+}
+
+int main() {
+	int cases;
+	cin >> cases;
+	for(int ii = 0; ii < cases; ii++){
+		cout << "Case " << ii+1 << endl << endl;
+		int n, fei;
+		cin >> n;
+		int test[256];
+		cin >> fei;
+		if(fei != n*n) return 0;
+		for(int i = 0; i < n*n; i++) {
+			cin >> fei;
+			cin >> test[fei-offset[n]];
+		}
+		int data[512];
+		for(int i = 0; i < 512; i++) data[i] = -1;
+		cin >> fei;
+		for(int i = 0; i < fei; i++){
+			int temp;
+			cin >> temp;
+			cin >> data[temp];
+		}
+		while(1){
+			int cnt = 0;
+			for(int i = 0; i < offset[n]; i++){
+				if(data[i] != -1){
+					cnt++;
+					for(int j = 1; j < 5; j++){
+						data[4*i+j] = data[i];
+					}
+					data[i] = -1;
+				}
+			}
+			if(cnt == 0) break;
+		}
+		int *rdata = data + offset[n];
+		int res[256];
+		for(int i = 0; i < n*n; i++){
+			res[test[i]] = rdata[i];
+		}
+		for(int i = 0; i < n*n; i++){
+			print(res[i]);
+			if(i%n == n-1) cout << endl;
+		}
+		cout << endl;
+	}
+	return 0;
+}
