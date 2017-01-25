@@ -1,0 +1,66 @@
+#include <iostream>
+#include <string>
+#include <sstream>
+using namespace std;
+
+class node{
+public:
+	string url;
+	node* next;
+	node* prev;
+	node(string u){
+		url = u;
+		next = NULL;
+		prev = NULL;
+	}
+	~node(){
+		if(next != NULL) delete next;
+		//delete this;
+	}
+};
+
+
+
+int main() {
+	string start = "http://www.acm.org/";
+	node* head = new node(start);
+	node* cur = head;
+	string cmd;
+	while(getline(cin, cmd)){
+		stringstream ss(cmd);
+		string dz;
+		ss >> dz;
+		if(dz == "QUIT") return 0;
+		else if(dz == "VISIT"){
+			string vURL;
+			ss >> vURL;
+			node* nN = new node(vURL);
+			nN->prev = cur;
+			delete cur->next;
+			cur->next = nN;
+			cur = nN;
+			cout << vURL << endl;
+		}
+		else if(dz == "BACK"){
+			if(cur->prev == NULL){
+				cout << "Ignored" << endl;
+			}
+			else{
+				cur = cur->prev;
+				cout << cur->url << endl;
+			}
+		}
+		else if(dz == "FORWARD"){
+			if(cur->next == NULL){
+				cout << "Ignored" << endl;
+			}
+			else{
+				cur = cur->next;
+				cout << cur->url << endl;
+			}
+		}
+		else continue;
+	}
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
