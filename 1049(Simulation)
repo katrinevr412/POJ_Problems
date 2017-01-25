@@ -1,0 +1,65 @@
+#include <iostream>
+#include <string>
+using namespace std;
+int N(int c){
+	if(c>='0'&&c<='9') return c-'0';
+	return c-'A'+10;
+}
+int C(int i){
+	if(i<10) return i+'0';
+	return i-10+'A';
+}
+void p(string &s){
+	int A=0,B=0,P=0;
+	while(s[P]!='8'){
+		int c=N(s[P]);
+		int a=N(s[P+1])*16+N(s[P+2]);
+		switch(c){
+		case 0:{
+			A=N(s[a]);
+			P+=3;
+			break;}
+		case 1:{
+			s[a]=C(A);
+			P+=3;
+			break;}
+		case 2:{
+			int t=A;
+			A=B;
+			B=t;
+			P++;
+			break;}
+		case 3:{
+			int r=A+B;
+			A=r%16;
+			B=r/16;
+			P++;
+			break;}
+		case 4:{
+			A=(A+1)%16;
+			P++;
+			break;}
+		case 5:{
+			A=(A+15)%16;
+			P++;
+			break;}
+		case 6:{
+			if(!A)P=a;
+			else P+=3;
+			break;}
+		case 7:{
+			P=a;
+			break;}
+		}
+	}
+}
+int main() {
+	while(1){
+		string s;
+		cin>>s;
+		if(s[0]=='8') return 0;
+		p(s);
+		cout<<s<<endl;
+	}
+	return 0;
+}
