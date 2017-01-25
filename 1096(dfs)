@@ -1,0 +1,73 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+bool oc[70][70][70];
+int cnt = 0;
+int N, M, K;
+
+void init(){
+	for(int i = 0; i < 70; i++)
+		for(int j = 0; j < 70; j++)
+			for(int k = 0; k < 70; k++)
+				oc[i][j][k] = 0;
+	cnt = 0;
+}
+
+void dfs(int x, int y, int z, bool visited[70][70][70]){
+	visited[x][y][z] = 1;
+	if(x > 0){
+		if(oc[x-1][y][z]) cnt++;
+		else if(!visited[x-1][y][z]){
+			dfs(x-1, y, z, visited);
+		}
+	}
+	if(x <= N){
+		if(oc[x+1][y][z]) cnt++;
+		else if(!visited[x+1][y][z]){
+			dfs(x+1, y, z, visited);
+		}
+	}
+	if(y > 0){
+		if(oc[x][y-1][z]) cnt++;
+		else if(!visited[x][y-1][z]){
+			dfs(x, y-1, z, visited);
+		}
+	}
+	if(y <= M){
+		if(oc[x][y+1][z]) cnt++;
+		else if(!visited[x][y+1][z]){
+			dfs(x, y+1, z, visited);
+		}
+	}
+	if(z > 0){
+		if(oc[x][y][z-1]) cnt++;
+		else if(!visited[x][y][z-1]){
+			dfs(x, y, z-1, visited);
+		}
+	}
+	if(z <= K){
+		if(oc[x][y][z+1]) cnt++;
+		else if(!visited[x][y][z+1]){
+			dfs(x, y, z+1, visited);
+		}
+	}
+}
+
+int main() {
+	while(1){
+		init();
+		int gs;
+		scanf("%d%d%d%d", &N, &M, &K, &gs);
+		if(N == 0) break;
+		int temp;
+		for(int i = 0; i < gs; i++){
+			scanf("%d", &temp);
+			oc[temp%N+1][(temp/N)%M+1][temp/(N*M)+1] = 1;
+		}
+		bool visited[70][70][70] = {0};
+		dfs(0,0,0,visited);
+		printf("The number of faces needing shielding is %d.\n", cnt);
+	}
+	return 0;
+}
