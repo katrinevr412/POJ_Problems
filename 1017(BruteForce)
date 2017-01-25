@@ -1,0 +1,84 @@
+import java.util.Scanner;
+
+
+public class Main {
+	
+	public static int truncate(int a){
+		if(a < 0) return 0;
+		return a;
+	}
+	
+	public static int min(int a, int b){
+		if(a < b) return a;
+		return b;
+	}
+	
+	public static void main(String args[]) throws Exception
+    {
+		//System.out.println((-1)/4);
+		Scanner cin = new Scanner(System.in);
+		while(cin.hasNext()){
+			int[] boxes = new int[7];
+			boxes[0] = 0;
+			for(int i = 1; i < 7; i++) boxes[i] = cin.nextInt();
+			int sum = 0;
+			for(int i: boxes) sum += i;
+			if(sum == 0) break;
+			
+			int res = boxes[6] + boxes[5] + boxes[4];
+			
+			if(boxes[5] > 0){
+			boxes[1] -= boxes[5] * 11;
+			boxes[1] = truncate(boxes[1]);
+			}
+			
+			if(boxes[4] > 0){
+			//int boxes42 = (boxes[2]-1) / 5 + 1;
+			int boxes42 = min(boxes[4] * 5, boxes[2]);
+			boxes[2] -= boxes42;
+			int boxes41 = min(boxes[1], boxes[4] * 20 - boxes42 * 4);
+			boxes[1] -= boxes41;
+			}
+			
+			if(boxes[3] > 0){
+			res += (boxes[3]-1) / 4 + 1;
+			int mod = boxes[3] % 4;
+			switch(mod){
+				case 0:
+					break;
+				case 3:
+					if(boxes[2] > 0){
+						boxes[2]--;
+						boxes[1] -= min(boxes[1], 5);
+					}
+					else{
+						boxes[1] -= min(boxes[1], 9);
+					}
+					break;
+				case 2:
+					int boxes32 = min(3, boxes[2]);
+					boxes[2] -= boxes32;
+					boxes[1] -= min(boxes[1], 18 - 4 * boxes32);
+					break;
+				case 1:
+					int boxes321 = min(5, boxes[2]);
+					boxes[2] -= boxes321;
+					boxes[1] -= min(boxes[1], 27 - 4 * boxes321);
+					break;
+			}
+			}
+			
+			if(boxes[2] > 0){
+				res += (boxes[2] - 1) / 9 + 1;
+				int mod = (9-(boxes[2]%9))%9;//剩余可以放1的位置
+				boxes[1] -= min(boxes[1], mod * 4);
+			}
+			
+			if(boxes[1] > 0){
+				res += (boxes[1] - 1) / 36 + 1;
+			}
+			
+			System.out.println(res);
+		}
+    }
+}
