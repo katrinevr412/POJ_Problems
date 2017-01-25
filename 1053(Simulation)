@@ -1,0 +1,59 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <string>
+using namespace std;
+
+bool isOK(char c1, char c2, char c3){
+	return (c1==c2 && c2==c3) || (c1!=c2 && c2!=c3 && c3!=c1);
+}
+
+int main() {
+	vector<string> vs;
+	string s;
+	//int cnt = 0;
+	bool zuihou = false;
+	while(getline(cin, s)){
+		if(s.length() == 4){
+			vs.push_back(s);
+		}
+		else{
+			ZH:
+			int gs = vs.size();
+			cout << "CARDS: ";
+			for(int i = 0; i < gs; i++){
+				cout << " " << vs[i];
+			}
+			cout << endl;
+			cout << "SETS:   ";
+			int cnt = 0;
+			for(int i = 0; i < gs-2; i++){
+				for(int j = i+1; j < gs-1; j++){
+					for(int k = j+1; k < gs; k++){
+						bool OK = true;
+						for(int l = 0; l < 4; l++){
+							if(!isOK(vs[i][l], vs[j][l], vs[k][l])){
+								OK = false;
+								break;
+							}
+						}
+						if(OK){
+							cnt ++;
+							if(cnt > 1) cout << "        ";
+							cout << cnt << ".  " << vs[i] << " " << vs[j] << " " << vs[k] << endl;
+						}
+					}
+				}
+			}
+			if(cnt == 0){
+				cout << "*** None Found ***" << endl;
+			}
+			cout << endl;
+			if(zuihou) return 0;
+			vs.clear();
+		}
+	}
+	zuihou = true;
+	if(vs.size() > 0) goto ZH;
+	return 0;
+}
