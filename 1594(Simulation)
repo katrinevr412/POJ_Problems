@@ -1,0 +1,107 @@
+#include <iostream>
+#include <stdio.h>
+#include <string>
+#include <map>
+#include <vector>
+using namespace std;
+
+int M;
+
+struct entry{
+	string place, p1, p2, p3, p4;
+};
+
+struct message{
+	string p1, p2, p3, p4;
+};
+
+struct MTA{
+	string place;
+	int no, gs;
+	vector<entry> entries;
+};
+
+bool cmp(string &se, string &sm){
+	if(se.length() == 1 && se[0] == '*') return true;
+	return se == sm;
+}
+
+bool cmp(entry &e, message &m){
+	if(!cmp(e.p1, m.p1)) return false;
+	if(!cmp(e.p2, m.p2)) return false;
+	if(!cmp(e.p3, m.p3)) return false;
+	if(!cmp(e.p4, m.p4)) return false;
+	return true;
+}
+
+istream& operator>>(istream& is, entry& ent){
+	is >> ent.place >> ent.p1 >> ent.p2 >> ent.p3 >> ent.p4;
+	return is;
+}
+
+istream& operator>>(istream& is, MTA& mta){
+	mta.entries.clear();
+	is >> mta.place >> mta.gs;
+	for(int i = 0; i < mta.gs; i++){
+		entry tmp;
+		is >> tmp;
+		mta.entries.push_back(tmp);
+	}
+	return is;
+}
+
+MTA MTAs[20];
+map<string, int> MTAbh;
+
+int main() {
+	int caseNo = 0;
+	while(cin >> M){
+		caseNo++;
+		cout << "Scenario # " << caseNo << endl;
+		MTAbh.clear();
+		for(int i = 0; i < M; i++){
+			cin >> MTAs[i];
+			MTAbh.insert(pair<string, int>(MTAs[i].place, i));
+		}
+		int Q;
+		cin >> Q;
+		for(int i = 0; i < Q; i++){
+			cout << (i+1) << " -- ";
+			string curPlace;
+			message msg;
+			cin >> curPlace >> msg.p1 >> msg.p2 >> msg.p3 >> msg.p4;
+			bool used[20] = {0};
+			int curNo = MTAbh[curPlace];
+			used[curNo] = 1;
+			while(1){
+				int gs = MTAs[curNo].gs;
+				int fhbh = -1;
+				for(int i = 0; i < gs; i++){
+					if(cmp(MTAs[curNo].entries[i], msg)){
+						fhbh = i;
+						break;
+					}
+				}
+				if(fhbh == -1){
+					cout << "unable to route at " << curPlace << endl;
+					break;
+				}
+				string nextPlace = MTAs[curNo].entries[fhbh].place;
+				if(nextPlace == curPlace){
+					cout << "delivered to " << curPlace << endl;
+					break;
+				}
+				int nextNo = MTAbh[nextPlace];
+				if(used[nextNo]){
+					cout << "circular routing detected by " << nextPlace << endl;
+					break;
+				}
+				used[nextNo] = 1;
+				curNo = nextNo;
+				curPlace = nextPlace;
+			}
+		}
+		cout << endl;
+	}
+	return 0;
+}
