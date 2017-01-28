@@ -1,0 +1,96 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+bool qiang[110][110] = {false};
+bool dfsUsed[110][110] = {false};
+
+bool used[110][110][4] = {false};
+
+bool zdrkl = false;//找到入口了
+int rkX, rkY, rkFx;
+
+int offset[4][2] = {{1, 0}, {0, -1}, {-1, 0}, {0, 1}};
+
+int N, M;
+
+bool isCourTYard(int x, int y){
+	if(x > 0 && y > 0 && !qiang[x-1][y] && !qiang[x][y-1] && !qiang[x-1][y-1]) return true;
+	if(x > 0 && y <= M && !qiang[x-1][y] && !qiang[x][y+1] && !qiang[x-1][y+1]) return true;
+	if(x <= N && y > 0 && !qiang[x+1][y] && !qiang[x][y-1] && !qiang[x+1][y-1]) return true;
+	if(x <= N && y <= M && !qiang[x+1][y] && !qiang[x][y+1] && !qiang[x+1][y+1]) return true;
+	return false;
+}
+
+bool dfs(int x, int y){
+	if(zdrkl) return true;
+	if(x > 0 && x <= N && qiang[x-1][y] && qiang[x+1][y]){
+		zdrkl = true;
+		rkX = x;
+		rkY = y;
+		if(y > 0 && dfsUsed[x][y-1]) rkFx = 1;
+		else rkFx = 3;
+		return true;
+	}
+	if(y > 0 && y <= M && qiang[x][y-1] && qiang[x][y+1]){
+		zdrkl = true;
+		rkX = x;
+		rkY = y;
+		if(x > 0 && dfsUsed[x-1][y]) rkFx = 2;
+		else rkFx = 0;
+	}
+	dfsUsed[x][y] = 1;
+	if(x > 0 && !qiang[x-1][y] && !dfsUsed[x-1][y]){
+		if(dfs(x-1, y)) return true;
+	}
+	if(x <= N && !qiang[x+1][y] && !dfsUsed[x+1][y]){
+		if(dfs(x+1, y)) return true;
+	}
+	if(y > 0 && !qiang[x][y-1] && !dfsUsed[x][y-1]){
+		if(dfs(x, y-1)) return true;
+	}
+	if(y <= M && !qiang[x][y+1] && !dfsUsed[x][y+1]){
+		if(dfs(x, y+1)) return true;
+	}
+	return false;
+}
+
+int main() {
+	scanf("%d%d", &N, &M);
+	char s[200];
+	for(int i = 1; i <= N; i++){
+		scanf("%s", s);
+		for(int j = 1; j <= M; j++){
+			char c = s[j-1];
+			if(c == '#') qiang[i][j] = true;
+		}
+	}
+	dfs(0,0);
+	//cout << rkX << " " << rkY << " " << rkFx;
+	int fx = rkFx, x = rkX, y = rkY;
+	while(1){
+		//cout << x << " " << y << " " << fx << endl;
+		int FX;
+		for(FX = (fx+1)%4; ; FX = (FX+1)%4){
+			if(!qiang[x+offset[FX][0]][y+offset[FX][1]]) break;
+		}
+		if(used[x][y][FX]){
+			printf("NO\n");
+			return 0;
+		}
+		used[x][y][FX] = true;
+		fx = (FX+2)%4;
+		x += offset[FX][0];
+		y += offset[FX][1];
+		//cout << x << " " << y << " " << fx << endl;
+		if(x == rkX && y == rkY){
+			printf("NO\n");
+			return 0;
+		}
+		if(isCourTYard(x, y)){
+			printf("YES\n");
+			return 0;
+		}
+	}
+	return 0;
+}
