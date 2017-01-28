@@ -1,0 +1,100 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int num, cat, mouse;
+int catDoors[105][105];
+int catDoorsNum[105] = {0};
+int mouseDoors[105][105];
+int mouseDoorsNum[105] = {0};
+bool mouseDoorsMtx[105][105] = {0};
+
+void init(){
+	for(int i = 1; i <= num; i++) catDoorsNum[i]=0;
+	for(int i = 1; i <= num; i++) mouseDoorsNum[i] = 0;
+	for(int i = 1; i <= num; i++)
+		for(int j = 1; j <= num; j++)
+			mouseDoorsMtx[i][j] = 0;
+}
+
+void dfs(int cm, bool *used, bool isCat){
+	if(isCat){
+		used[cm] = 1;
+		for(int i = 0; i < catDoorsNum[cm]; i++){
+			if(!used[catDoors[cm][i]]){
+				dfs(catDoors[cm][i], used, 1);
+			}
+		}
+	}
+	else{
+		used[cm] = 1;
+		for(int i = 0; i < mouseDoorsNum[cm]; i++){
+			if(!mouseDoorsMtx[cm][mouseDoors[cm][i]]) continue;
+			if(!used[mouseDoors[cm][i]]){
+				dfs(mouseDoors[cm][i], used, 0);
+			}
+		}
+	}
+}
+
+int main() {
+	int t;
+	scanf("%d", &t);
+	for(int ii = 0; ii < t; ii++){
+
+		scanf("%d%d%d", &num, &cat, &mouse);
+		init();
+		while(1){
+			int from, to;
+			scanf("%d%d", &from, &to);
+			if(from == -1) break;
+			catDoors[from][catDoorsNum[from]] = to;
+			catDoorsNum[from]++;
+		}
+		while(1){
+			int from, to;
+			scanf("%d%d", &from, &to);
+			if(from == -1) break;
+			mouseDoors[from][mouseDoorsNum[from]] = to;
+			mouseDoorsNum[from]++;
+			mouseDoorsMtx[from][to] = 1;
+		}
+		bool catUsed[105] = {0};
+		bool mouseUsed[105] = {0};
+		dfs(cat, catUsed, 1);
+		dfs(mouse, mouseUsed, 0);
+		bool xy = 0;
+		for(int i = 1; i <= num; i++){
+			if(catUsed[i] && mouseUsed[i]){
+				xy = 1;
+				break;
+			}
+		}
+		if(xy) printf("Y ");
+		else printf("N ");
+		if(catUsed[mouse]){
+			printf("N\n");
+			continue;
+		}
+		for(int i = 1; i <= num; i++){
+			for(int j = 0; j < mouseDoorsNum[i]; j++){
+				if(catUsed[i] || catUsed[mouseDoors[i][j]]){
+					mouseDoorsMtx[i][mouseDoors[i][j]] = 0;
+				}
+			}
+		}
+		bool msUsed[105] = {0};
+		dfs(mouse, msUsed, 0);
+		bool ky = 0;
+		for(int i = 1; i <= num; i++){
+			if(i == mouse) continue;
+			if(msUsed[i] && mouseDoorsMtx[i][mouse]){
+				ky = 1;
+				break;
+			}
+		}
+		if(ky) printf("Y\n");
+		else printf("N\n");
+	}
+	return 0;
+}
