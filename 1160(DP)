@@ -1,0 +1,49 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int main() {
+	int V, P;
+	scanf("%d%d", &V, &P);
+	int villages[303] = {0};
+	for(int i = 0; i < V; i++){
+		scanf("%d", &villages[i]);
+	}
+	if(P == 1){
+		int sum = 0;
+		for(int i = 0; i < V/2; i++){
+			sum += (villages[V-1-i]-villages[i]);
+		}
+		printf("%d\n", sum);
+		return P-1;
+	}
+	int one[303][303] = {0};
+	for(int i = 0; i < V; i++){
+		for(int j = i; j < V; j++){
+			int temp = 0;
+			int left = i, right = j;
+			while(left < right){
+				temp += (villages[right]-villages[left]);
+				left ++;
+				right --;
+			}
+			one[i][j] = temp;
+		}
+	}
+	int ans[303][33] = {0};
+	for(int i = 0; i < V; i++){
+		ans[i][1] = one[0][i];
+	}
+	for(int j = 2; j <= P; j++){
+		for(int i = j-1; i < V-P+j; i++){
+			int min = 2147483647;
+			for(int k = j-1; k <= i; k++){
+				int tempMin = one[k][i] + ans[k-1][j-1];
+				if(tempMin < min) min = tempMin;
+			}
+			ans[i][j] = min;
+		}
+	}
+	printf("%d\n", ans[V-1][P]);
+	return 0;
+}
