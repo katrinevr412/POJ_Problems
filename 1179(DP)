@@ -1,0 +1,73 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+inline int mx(int a, int b){
+	return a>b ? a : b;
+}
+
+inline int mn(int a, int b){
+	return a<b ? a : b;
+}
+
+int main() {
+	int res[55];
+	int N;
+	cin >> N;
+	char opr[55];
+	int num[55];
+	for(int i = 0; i < N; i++){
+		cin >> opr[i] >> num[i];
+	}
+	for(int i = 0; i < N; i++){
+		//若删掉第i个opr，重新标號：
+		int Num[55];
+		char Opr[55];
+		for(int j = 0; j < N; j++){
+			Num[j] = num[(i+j)%N];
+		}
+		for(int j = 0; j < N-1; j++){
+			Opr[j] = opr[(i+1+j)%N];
+		}
+		int dpMin[55][55], dpMax[55][55];
+		for(int j = 0; j < N; j++){
+			dpMin[j][j] = dpMax[j][j] = Num[j];
+		}
+		for(int kd = 1; kd <= N-1; kd++){
+			for(int j = 0; j <= N-1-kd; j++){
+				int Mn = 50000, Mx = -50000;
+				for(int l = 0; l <= kd-1; l++){
+					int tempMn, tempMx;
+					if(Opr[j+l] == 't'){
+						//加法
+						tempMn = dpMin[j][j+l] + dpMin[j+l+1][j+kd];
+						tempMx = dpMax[j][j+l] + dpMax[j+l+1][j+kd];
+					}
+					else{
+						//乘法
+						int l1 = dpMin[j][j+l], l2 = dpMax[j][j+l];
+						int l3 = dpMin[j+l+1][j+kd], l4 = dpMax[j+l+1][j+kd];
+						int hx1 = l1*l3, hx2 = l1*l4, hx3 = l2*l3, hx4 = l2*l4;
+						tempMn = mn(hx1,mn(hx2,mn(hx3,hx4)));
+						tempMx = mx(hx1,mx(hx2,mx(hx3,hx4)));
+					}
+					Mn = mn(Mn, tempMn);
+					Mx = mx(Mx, tempMx);
+				}
+				dpMin[j][j+kd] = Mn, dpMax[j][j+kd] = Mx;
+			}
+		}
+		res[i] = dpMax[0][N-1];
+	}
+	int zMx = -65536;
+	for(int i = 0; i < N; i++){
+		zMx = mx(zMx, res[i]);
+	}
+	cout << zMx << endl;
+	for(int i = 0; i < N; i++){
+		if(res[i] == zMx){
+			cout << i+1 << " ";
+		}
+	}
+	return 0;
+}
