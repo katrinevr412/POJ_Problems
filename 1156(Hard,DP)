@@ -1,0 +1,70 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int alt[701][701];
+
+int maxExt[701][701][11];
+
+int main() {
+	int W, H, C;
+	scanf("%d%d%d", &W, &H, &C);
+	for(int i = 1; i <= H; i++){
+		for(int j = 1; j <= W; j++){
+			scanf("%d", &alt[i][j]);
+		}
+	}
+	int maxArea = 0;
+	for(int w = 1; w <= W; w++){
+		for(int c = 0; c <= C; c++) maxExt[1][w][c] = 1;
+		for(int c = 0; c <= C; c++){
+			//bool keyi = true;
+			for(int w_ = w; w_ <= W && w_ < w+100; w_++){
+
+					if(alt[1][w_] < alt[1][w]-C+c || alt[1][w_] > alt[1][w]+c){
+						break;
+					}
+					//else{
+						//maxExt[1][w][c][w_-w] = 1;
+						if(maxArea < w_-w+1) maxArea = w_-w+1;
+					//}
+
+			}
+		}
+	}
+
+	for(int h = 2; h <= H; h++){
+		//int to = h%2, from = (h+1)%2;
+		for(int w = 1; w <= W; w++){
+			int offset = alt[h][w] - alt[h-1][w];
+			for(int c = 0; c <= C; c++){
+				int c_ = c+offset;
+				if(c_<0 || c_>C){
+					maxExt[h][w][c] = 1;
+				}
+				else{
+					maxExt[h][w][c] = maxExt[h-1][w][c_]+1;
+				}
+			}
+		}
+		for(int w = 1; w <= W; w++){
+			for(int c = 0; c <= C; c++){
+				//bool keyi = true;
+				int h_ = maxExt[h][w][c];
+				for(int w_ = w; w_ <= W && w_ < w+100; w_++){
+
+
+						if(alt[h][w_] < alt[h][w]-C+c || alt[h][w_] > alt[h][w]+c){
+							break;
+						}
+						int newH = maxExt[h][w_][c+alt[h][w]-alt[h][w_]];
+						if(newH < h_) h_ = newH;
+						int tempArea = h_ * (w_-w+1);
+						if(tempArea > maxArea) maxArea = tempArea;
+				}
+			}
+		}
+	}
+	printf("%d\n", maxArea);
+	return 0;
+}
