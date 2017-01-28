@@ -1,0 +1,35 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int main() {
+	int gs;
+	while(1){
+		scanf("%d", &gs);
+		if(gs <= 0) return gs;
+		int min1, max1, min2, max2, min3, max3;
+		for(int i = 0; i < gs; i++){
+			int x, y, z, b;
+			scanf("%d%d%d%d", &x, &y, &z, &b);
+			if(i == 0){
+				min1 = x, max1 = x+b;
+				min2 = y, max2 = y+b;
+				min3 = z, max3 = z+b;
+			}
+			else{
+				if(min1<x) min1=x;
+				if(max1>x+b) max1=x+b;
+				if(min2<y) min2=y;
+				if(max2>y+b) max2=y+b;
+				if(min3<z) min3=z;
+				if(max3>z+b) max3=z+b;
+			}
+		}
+		long long int ge1 = max1-min1, ge2 = max2-min2, ge3 = max3-min3;
+		if(ge1<0) ge1=0;
+		if(ge2<0) ge2=0;
+		if(ge3<0) ge3=0;
+		printf("%I64d\n", ge1*ge2*ge3);
+	}
+	return 0;
+}
