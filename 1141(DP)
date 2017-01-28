@@ -1,0 +1,76 @@
+#include <iostream>
+#include <stdio.h>
+#include <cstring>
+using namespace std;
+
+int val[110][110] = {0};
+int trace[110][110];
+char brackets[110] = {'\0'};
+
+void print(int i, int j){
+	if(i > j) return;
+	if(i == j){
+		if(brackets[i] == '(' || brackets[i] == ')') printf("()");
+		else printf("[]");
+		return;
+	}
+	if(trace[i][j] == -1){
+		print(i,i);
+		print(i+1, j);
+		return;
+	}
+	int k = trace[i][j];
+	printf("%c", brackets[i]);
+	print(i+1, k-1);
+	printf("%c", brackets[k]);
+	print(k+1, j);
+}
+
+int main() {
+	scanf("%s", brackets);
+	int len = strlen(brackets);
+	for(int i = 0; i < len; i++){
+		val[i][i] = 1;
+	}
+	for(int cha = 1; cha <= len-1; cha ++){
+		for(int i = 0; i < len-cha; i++){
+			int j = i + cha;
+			if(brackets[i] == ')' || brackets[i] == ']') {
+				val[i][j] = val[i+1][j] + 1;
+				trace[i][j] = -1;
+			}
+			if(brackets[i] == '('){
+				int value = val[i+1][j] + 1;
+				int arg = -1;
+				for(int k = i+1; k <= j; k++){
+					if(brackets[k] != ')') continue;
+					int tempval = val[i+1][k-1] + val[k+1][j];
+					if(tempval < value){
+						arg = k;
+						value = tempval;
+					}
+				}
+				val[i][j] = value;
+				trace[i][j] = arg;
+			}
+			if(brackets[i] == '['){
+				int value = val[i+1][j] + 1;
+				int arg = -1;
+				for(int k = i+1; k <= j; k++){
+					if(brackets[k] != ']') continue;
+					int tempval = val[i+1][k-1] + val[k+1][j];
+					if(tempval < value){
+						arg = k;
+						value = tempval;
+					}
+				}
+				val[i][j] = value;
+				trace[i][j] = arg;
+			}
+		}
+	}
+	//cout << val[0][len-1] << endl;
+	print(0, len-1);
+	printf("\n");
+	return 0;
+}
