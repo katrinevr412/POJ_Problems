@@ -1,0 +1,121 @@
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <stdio.h>
+using namespace std;
+
+int okNum[60] = {0,1,2,4,8,9,16,17,18,32,33,34,36,64,65,66,68,72,73,128,129,130,132,136,137,144,145,146,256,257,258,260,264,265,272,273,274,288,289,290,292,512,513,514,516,520,521,528,529,530,544,545,546,548,576,577,578,580,584,585};
+
+int numOf1[60] = {0,1,1,1,1,2,1,2,2,1,2,2,2,1,2,2,2,2,3,1,2,2,2,2,3,2,3,3,1,2,2,2,2,3,2,3,3,2,3,3,3,1,2,2,2,2,3,2,3,3,2,3,3,3,2,3,3,3,3,4};
+
+int geshu[11] = {0,2,3,4,6,9,13,19,28,41,60};
+
+int main() {
+	/*
+	for(int i = 0; i < 60; i++){
+		int temp = okNum[i];
+		int cnt = 0;
+		for(int j = 0; j < 10; j++){
+			if((temp >> j)%2 == 1) cnt++;
+		}
+		cout << cnt << ",";
+	}*/
+
+	int res[102][60][60] = {0};
+	int N, M;
+	scanf("%d%d", &N, &M);
+	int hills[101] = {0};
+	for(int i = 0; i < N; i++){
+		char c[11];
+		scanf("%s", &c);
+		for(int j = 0; j < M; j++){
+			//cout << c[j] << " ";
+			if(c[j] == 'H') hills[i] |= (1 << j);
+		}
+		//cout << endl;
+	}
+	/*
+	for(int i = 0; i < N; i++){
+		cout << hills[i] << " ";
+	}
+	cout << endl;*/
+	if(N == 1){
+		int MAX = 0;
+		for(int i = 0; i < geshu[M]; i++){
+			if((hills[0] & okNum[i]) != 0) continue;
+			if(numOf1[i] > MAX) MAX = numOf1[i];
+		}
+		cout << MAX << endl;
+		return 0;
+	}
+	//初始值：前两个
+	for(int i = 0; i < geshu[M]; i++){
+		for(int j = 0; j < geshu[M]; j++){
+			if(((okNum[i] & hills[0]) != 0) || ((okNum[j] & hills[1]) != 0) || ((okNum[i] & okNum[j]) != 0)){
+				res[2][j][i] = -1;
+				continue;
+			}
+			res[2][j][i] = numOf1[i] + numOf1[j];
+		}
+	}
+	for(int m = 3; m <= N; m++){
+		int ans = 0;
+		for(int i = 0; i < geshu[M]; i++){
+			for(int j = 0; j < geshu[M]; j++){
+				if(((okNum[i] & hills[m-1]) != 0) || ((okNum[j] & hills[m-2]) != 0) || ((okNum[i] & okNum[j]) != 0)){
+					res[m][i][j] = -1;
+					continue;
+				}
+				int MAX = 0;
+				for(int k = 0; k < geshu[M]; k++){
+					if((res[m-1][j][k] == -1) || ((okNum[i] & okNum[k]) != 0)) continue;
+					int temp = numOf1[i] + res[m-1][j][k];
+					if(MAX < temp) MAX = temp;
+				}
+				res[m][i][j] = MAX;
+				if(m == N){
+					if(ans < MAX) ans = MAX;
+				}
+			}
+		}
+		if(m == N){
+			cout << ans << endl;
+		}
+	}
+	/*
+	int cnt = 0;
+	int res[60];
+	for(int i = 0; i < 1024; i++){
+		int ct[10];
+		vector<int> tmp;
+		for(int j = 0; j <= 9; j++){
+			ct[j] = (i >> j) & 1;
+			if(ct[j]) tmp.push_back(j);
+		}
+		bool can = true;
+		if(tmp.size() <= 1) goto wanle;
+		for(int j = 0; j < tmp.size() - 1; j++){
+			if(tmp[j+1] - tmp[j] <= 2){
+				can = false;
+				break;
+			}
+		}
+		wanle:
+		if(can){
+			cout << i << ",";
+			res[cnt] = i;
+			cnt++;
+		}
+	}
+	cout << endl << cnt << endl;
+	int mi = 1;
+	int jl[10];
+	for(int i = 0; i < 60; i++){
+		if(res[i] > pow(2, mi)-1){
+			jl[mi] = i;
+			mi++;
+		}
+	}
+	for(int i = 0; i <= 9; i++) cout << jl[i] << " ";*/
+	return 0;
+}
