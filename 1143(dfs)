@@ -1,0 +1,139 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+void quickSort(int s[], int l, int r)
+{
+    if (l< r)
+    {
+        int i = l, j = r, x = s[l];
+        while (i < j)
+        {
+            while(i < j && s[j]>= x)
+                j--;
+            if(i < j)
+                s[i++] = s[j];
+            while(i < j && s[i]< x)
+                i++;
+            if(i < j)
+                s[j--] = s[i];
+        }
+        s[i] = x;
+        quickSort(s, l, i - 1);
+        quickSort(s, i + 1, r);
+    }
+}
+
+
+int state[524288] = {0};
+//0: 不确定
+//1: 胜局
+//-1: 败局
+
+inline bool contain(int n, int num){
+	return (n & (1<<(num-2))) != 0;
+}
+
+void unset(int &n, int w){
+	n -= (1<<(w-2));
+}
+
+void dfs(int n){
+	if(state[n] != 0) return;
+	if(n == 0){
+		state[n] = -1;
+		return;
+	}
+	bool existBai = false;
+	int validList[22];
+	int validNum = 0;
+	//int indexes[22] = {0};
+	for(int i = 2; i <= 20; i++){
+		if(!contain(n,i)) continue;
+		validList[validNum] = i;
+		//indexes[i] = validNum + 1;
+		validNum ++;
+	}
+	for(int i = 0; i < validNum; i++){
+		//if(indexes[i] == 0) continue;
+		//考慮去掉validList[i]，得到的状態存在N中
+		int N = n;
+		unset(N, validList[i]);
+		for(int j = i+1; j < validNum; j++){
+			int tbus = validList[j];
+			while(1){
+				tbus -= validList[i];
+				if(tbus <= 1) break;
+				if(!contain(N, tbus)){
+					unset(N, validList[j]);
+					break;
+				}
+			}
+		}
+
+		dfs(N);
+		if(state[N] == -1){
+			existBai = true;
+			break;
+		}
+	}
+	if(existBai) state[n] = 1;
+	else state[n] = -1;
+}
+
+int main() {
+	int cnt = 0;
+	while(1){
+		cnt ++;
+		int rem;
+		scanf("%d", &rem);
+		if(rem == 0) return rem;
+		printf("Test Case #%d\n", cnt);
+		int st = 0;
+		int hehe[19] = {0};
+		int heheCnt = 0;
+		for(int i = 0; i < rem; i++){
+			int temp;
+			scanf("%d", &temp);
+			hehe[heheCnt] = temp;
+			heheCnt ++;
+			st |= (1 << (temp-2));
+		}
+		//dfs(st);
+		int resList[19];
+		int resNum = 0;
+		for(int i = 0; i < heheCnt; i++){
+			int N = st;
+			unset(N, hehe[i]);
+			for(int j = i+1; j < heheCnt; j++){
+				int tbus = hehe[j];
+				while(1){
+					tbus -= hehe[i];
+					if(tbus <= 1) break;
+					if(!contain(N, tbus)){
+						unset(N, hehe[j]);
+						break;
+					}
+				}
+			}
+			dfs(N);
+			if(state[N] == -1){
+				resList[resNum] = hehe[i];
+				resNum ++;
+			}
+		}
+		if(resNum == 0){
+			printf("There's no winning move.\n");
+		}
+		else{
+			quickSort(resList, 0, resNum-1);
+			printf("The winning moves are:");
+			for(int i = 0; i < resNum; i++){
+				printf(" %d", resList[i]);
+			}
+			printf("\n");
+		}
+		printf("\n");
+	}
+	return 0;
+}
