@@ -1,0 +1,167 @@
+#include <stdio.h>
+#include <string.h>
+//using namespace std;
+
+int scores[26] = {2,5,4,4,1,6,5,5,1,7,6,3,5,2,3,5,7,2,1,2,4,6,6,7,5,7};
+
+char* words[40004];
+int wordCnt[5] = {0};
+int wordIdx[5][40004];
+int score[40004];
+
+int Score(char c[]){
+	int len = strlen(c);
+	int sum = 0;
+	for(int i = 0; i < len; i++){
+		sum += scores[c[i]-'a'];
+	}
+	return sum;
+}
+
+void quickSort(int s[], int l, int r)
+{
+    if (l < r)
+    {
+        int i = l, j = r, x = s[l];
+        while (i < j)
+        {
+            while(i < j && score[s[j]] <= score[x])
+                j--;
+            if(i < j)
+                s[i++] = s[j];
+            while(i < j && score[s[i]] > score[x])
+                i++;
+            if(i < j)
+                s[j--] = s[i];
+        }
+        s[i] = x;
+        quickSort(s, l, i - 1);
+        quickSort(s, i + 1, r);
+    }
+}
+
+int main() {
+
+	char letters[8];
+	scanf("%s", letters);
+	int state[26] = {0};
+	int tL = strlen(letters);
+	int total = Score(letters);
+	for(int i = 0; i < tL; i++){
+		state[letters[i]-'a'] ++;
+	}
+	int numOfW = 0;
+
+	bool getMax = false;
+	int Max = 0;
+	while(1){
+		char *c = new char[8];
+		scanf("%s", c);
+		if(c[0] == '.') break;
+		if(getMax) {
+			delete [] c;
+			continue;
+		}
+		int l = strlen(c);
+		int tempstate[26] = {0};
+		bool ok = true;
+		for(int i = 0; i < l; i++){
+			tempstate[c[i]-'a'] ++;
+			if(tempstate[c[i]-'a'] > state[c[i]-'a']){
+				ok = false;
+				break;
+			}
+		}
+		if(!ok) {
+			delete [] c;
+			continue;
+		}
+		int sco = Score(c);
+		if(sco == total){
+			getMax = true;
+			delete [] c;
+			continue;
+		}
+		if(sco > Max) Max = sco;
+		if(l > 4) {
+			delete [] c;
+			continue;
+		}
+		score[numOfW] = sco;
+		wordIdx[l][wordCnt[l]] = numOfW;
+		wordCnt[l] ++;
+		words[numOfW] = c;
+		numOfW++;
+	}
+
+	if(getMax){
+		printf("%d\n", total);
+		return 0;
+	}
+
+	quickSort(wordIdx[3], 0, wordCnt[3]-1);
+	quickSort(wordIdx[4], 0, wordCnt[4]-1);
+
+	if(wordCnt[3] > 0 && wordCnt[4] > 0){
+		for(int i = 0; i < wordCnt[3]; i++){
+			int I = wordIdx[3][i];
+			int Sc = score[I] + score[wordIdx[4][0]];
+			if(Sc <= Max) break;
+			for(int j = 0; j < wordCnt[4]; j++){
+				int J = wordIdx[4][j];
+				int sc = (j == 0) ? Sc: (score[I] + score[J]);
+				if(sc <= Max) break;
+				//int l3 = strlen(words[I]), l4 = strlen(words[J]);
+				int st[26] = {0};
+				bool keyi = true;
+				for(int k = 0; k < 3; k++){
+					st[words[I][k]-'a'] ++;
+				}
+				for(int k = 0; k < 4; k++){
+					int idx = words[J][k]-'a';
+					st[idx] ++;
+					if(st[idx] > state[idx]){
+						keyi = false;
+						break;
+					}
+				}
+				if(!keyi) continue;
+				if(sc == total){
+					printf("%d\n", total);
+					return 0;
+				}
+				Max = sc;
+				break;
+			}
+		}
+	}
+	if(wordCnt[3] > 1){
+		for(int i = 0; i < wordCnt[3]-1; i++){
+			int I = wordIdx[3][i];
+			if(score[I] + score[wordIdx[3][i+1]] <= Max) break;
+			for(int j = i+1; j < wordCnt[3]; j++){
+				int J = wordIdx[3][j];
+				int sc = score[I] + score[J];
+				if(sc <= Max) break;
+				int st[26] = {0};
+				bool keyi = true;
+				for(int k = 0; k < 3; k++){
+					st[words[I][k]-'a'] ++;
+				}
+				for(int k = 0; k < 3; k++){
+					int idx = words[J][k]-'a';
+					st[idx] ++;
+					if(st[idx] > state[idx]){
+						keyi = false;
+						break;
+					}
+				}
+				if(!keyi) continue;
+				Max = sc;
+				break;
+			}
+		}
+	}
+	printf("%d\n", Max);
+	return 0;
+}
