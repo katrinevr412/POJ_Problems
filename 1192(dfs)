@@ -1,0 +1,46 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int bh[1010][1010] = {{0}};
+int quan[1010];
+
+int X[1010], Y[1010];
+
+int minX = 2147483647, minY = 2147483647;
+
+int ans = 0;
+
+int N;
+
+int dfs(int bianhao, int shangge){
+	//上个为-1表示是根节点，否则为上一个的编號
+	int fangxiang[4][2] = {{-1,0},{0,1},{1,0},{0,-1}};
+	int dqX = X[bianhao] - minX + 1, dqY = Y[bianhao] - minY + 1;
+	int res = quan[bianhao];
+	for(int i = 0; i < 4; i++){
+		int xinbh = bh[dqX + fangxiang[i][0]][dqY + fangxiang[i][1]];
+		if(xinbh == 0 || xinbh == shangge) continue;
+		int temp = dfs(xinbh, bianhao);
+		if(temp > 0) res += temp;
+	}
+	if(res > ans) ans = res;
+	return res;
+}
+
+int main() {
+	scanf("%d",&N);
+	for(int i = 1; i <= N; i++){
+		scanf("%d%d%d", &X[i], &Y[i], &quan[i]);
+		if(minX > X[i]) minX = X[i];
+		if(minY > Y[i]) minY = Y[i];
+	}
+	for(int i = 1; i <= N; i++){
+		bh[X[i]-minX+1][Y[i]-minY+1] = i;
+	}
+
+	dfs(1, -1);
+	printf("%d\n", ans);
+
+	return 0;
+}
