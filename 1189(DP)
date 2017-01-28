@@ -1,0 +1,100 @@
+#include <iostream>
+#include <stdio.h>
+#include <string>
+using namespace std;
+
+struct frc{
+	long long int num;
+	long long int den;
+	frc(long long int n, long long int d): num(n), den(d){}
+	frc(): num(1), den(1){}
+};
+
+frc add(frc f1, frc f2){
+	if(f1.den < f2.den){
+		long long int b = f2.den/f1.den;
+		return frc(f1.num * b + f2.num, f2.den);
+	}
+	if(f1.den > f2.den){
+		long long int b = f1.den/f2.den;
+		return frc(f1.num + f2.num * b, f1.den);
+	}
+	long long int num = f1.num + f2.num;
+	long long int den = f1.den;
+	if(num == 0) return frc(0,1);
+	while(num%2 == 0){
+		num /= 2;
+		den /= 2;
+	}
+	return frc(num, den);
+}
+
+frc div2(frc f){
+	if(f.num == 0) return frc(0,1);
+	return frc(f.num, f.den*2);
+}
+
+ostream& operator<<(ostream& out, frc f){
+	out << f.num << "/" << f.den << " ";
+	return out;
+}
+
+int main() {
+	int n, m;
+	//scanf("%d%d", &n, &m);
+	cin >> n >> m;
+	bool d[60][60];
+	for(int i = 1; i <= n; i++){
+		string s;
+		while(1){
+			getline(cin, s);
+			if(s.length() > 0) break;
+		}
+		//cout << s.length() << endl;
+		int idx = 0;
+		for(int j = 0; ; j++){
+			if(s[j] == ' ') continue;
+			if(s[j] == '*') d[i][idx] = 1;
+			else if(s[j] == '.') d[i][idx] = 0;
+			idx ++;
+			if(idx == i) break;
+		}
+	}
+	/*
+	for(int i = 1; i <= n; i++){
+		for(int j = 0; j < i; j++){
+			cout << d[i][j] << " ";
+		}
+		cout << endl;
+	}*/
+	frc p[60][120];
+	p[1][0] = frc(1,1);
+	for(int i = 2; i <= n; i++){
+		for(int k = 0; k < i-1; k++){
+			if(d[i-1][k]) p[i][2*k+1] = frc(0,1);
+			else p[i][2*k+1] = p[i-1][2*k];
+		}
+		for(int k = 0; k < i; k++){
+			frc res(0,1);
+			if(k > 0 && d[i-1][k-1]) res = add(res, div2(p[i-1][2*k-2]));
+			if(k > 0 && k < i-1) res = add(res, p[i-1][2*k-1]);
+			if(k < i-1 && d[i-1][k]) res = add(res, div2(p[i-1][2*k]));
+			p[i][2*k] = res;
+		}
+	}
+	/*
+	for(int j = 1; j <= n; j++){
+	for(int i = 0; i <= 2*j-2; i++){
+		cout << p[j][i];
+	}
+	cout << endl;
+	}
+	cout << endl;
+	*/
+	frc ans(0,1);
+	if(m != 0) ans = add(ans, div2(p[n][2*m-2]));
+	if(m != 0 && m != n) ans = add(ans, p[n][2*m-1]);
+	if(m != n) ans = add(ans, div2(p[n][2*m]));
+	printf("%I64d/%I64d\n", ans.num, ans.den);
+	return 0;
+}
