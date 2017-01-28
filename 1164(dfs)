@@ -1,0 +1,72 @@
+#include <iostream>
+using namespace std;
+
+int state[50][50];
+bool zhany[50][50] = {false};
+int zy = 0;
+int hang, lie;
+int mx = 0;
+
+int Mx(int a, int b){
+	if(a < b) return b;
+	return a;
+}
+
+bool shang(int n){
+	return (n>>1)%2 == 0;
+}
+
+bool xia(int n){
+	return (n>>3)%2 == 0;
+}
+
+bool zuo(int n){
+	return n%2==0;
+}
+
+bool you(int n){
+	return (n>>2)%2 == 0;
+}
+
+void jisuan(int ch, int cl){
+	//cout << ch << " " << cl << endl;
+	zhany[ch][cl] = true;
+	zy++;
+	if(cl>0 && zuo(state[ch][cl]) && !zhany[ch][cl-1]) jisuan(ch, cl-1);
+	if(cl<lie-1 && you(state[ch][cl]) && !zhany[ch][cl+1]) jisuan(ch, cl+1);
+	if(ch>0 && shang(state[ch][cl]) && !zhany[ch-1][cl]) jisuan(ch-1, cl);
+	if(ch<hang-1 && xia(state[ch][cl]) && !zhany[ch+1][cl]) jisuan(ch+1, cl);
+}
+
+int main() {
+	cin >> hang >> lie;
+	for(int i = 0; i < hang; i++){
+		for(int j = 0; j < lie; j++){
+			cin >> state[i][j];
+		}
+	}
+	int cnt = 0;
+	while(zy < hang * lie){
+		//cout << zy << endl;
+		int yuan = zy;
+		int ch, cl;
+		for(int i = 0; i < hang; i++){
+			for(int j = 0; j < lie; j++){
+				if(!zhany[i][j]){
+					ch = i;
+					cl = j;
+					goto zhaodaole;
+				}
+			}
+		}
+		zhaodaole:
+		//cout << ch << " " << cl << endl;
+		jisuan(ch, cl);
+		cnt++;
+		int zycgs = zy - yuan;
+		mx = Mx(mx, zycgs);
+	}
+	cout << cnt << endl << mx << endl;
+	return 0;
+}
+
