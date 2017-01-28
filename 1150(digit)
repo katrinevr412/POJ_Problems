@@ -1,0 +1,77 @@
+#include <stdio.h>
+
+int pow2[25] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216};
+int pow5[11] = {1, 5, 25, 125, 625, 3125, 15625, 78125, 390625, 1953125, 9765625};
+
+int md[4] = {6,2,4,8};
+
+int p1379(int l, int u){
+	if(l > u) return 1;
+	int prod = 1;
+	int L = l%10, U = u%10;
+	int l10 = l/10, u10 = u/10;
+	if(L <= U){
+		if(L<=3 && 3<=U) prod*=3;
+		if(L<=7 && 7<=U) prod*=7;
+		if(L<=9 && 9<=U) prod*=9;
+	}
+	else{
+		prod = p1379(L, 9) * p1379(0, U);
+	}
+	int qjgs = (L<=U) ? (u10-l10) : (u10-l10-1);
+	prod *= ((qjgs%2==0) ? 1 : 9);
+	return prod%10;
+}
+
+int main() {
+	int N, M;
+	while(scanf("%d%d", &N, &M) > 0){
+		if(N == -1 && M == -1) return N+1;
+		if(M == 0) {
+			printf("1\n");
+			continue;
+		}
+		int n2n = 0, n5n = 0, n2m = 0, n5m = 0;
+		int n = N, m = N-M;
+		while(n>=2){
+			n2n += n/2;
+			n /= 2;
+		}
+		n = N;
+		while(n>=5){
+			n5n += n/5;
+			n /= 5;
+		}
+		while(m>=2){
+			n2m += m/2;
+			m/=2;
+		}
+		m = N-M;
+		while(m>=5){
+			n5m += m/5;
+			m/=5;
+		}
+		int n2 = n2n-n2m, n5 = n5n-n5m;
+		//printf("%d %d\n", n2, n5);
+		if(n2 < n5){
+			printf("5\n");
+			continue;
+		}
+		int prod = 1;
+		for(int i = 0; i < 25; i++){
+			for(int j = 0; j < 11; j++){
+				int div = pow2[i]*pow5[j];
+				if(div>N) break;
+				int lower = (N-M)/div+1, upper = N/div;
+				prod = (prod*p1379(lower, upper))%10;
+			}
+		}
+		if(n2 == n5){
+			printf("%d\n", prod);
+		}
+		else{
+			printf("%d\n", (prod*md[(n2-n5)%4])%10);
+		}
+	}
+	return 0;
+}
