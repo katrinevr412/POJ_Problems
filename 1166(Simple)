@@ -1,0 +1,46 @@
+#include <iostream>
+using namespace std;
+
+int state[10];
+int res[10];
+int orig[10];
+
+int minNum = 100;
+
+int main() {
+	for(int i = 1; i <= 9; i++) {
+		cin >> orig[i];
+		orig[i] = (4-orig[i]) %4;
+	}
+	for(state[1] = 0; state[1] <= 3; state[1] ++){
+		for(state[2] = 0; state[2] <= 3; state[2] ++){
+			for(state[3] = 0; state[3] <= 3; state[3] ++){
+				state[4] = (orig[1] + 20 - state[1] - state[2]) % 4;
+				state[5] = (orig[2] + 20 - state[1] - state[2] - state[3]) % 4;
+				state[6] = (orig[3] + 20 - state[2] - state[3]) % 4;
+				state[7] = (orig[4] + 20 - state[1] - state[4] - state[5]) % 4;
+				state[8] = (orig[7] + 20 - state[4] - state[7]) % 4;
+				state[9] = (orig[9] + 20 - state[6] - state[8]) % 4;
+				bool b5 = (state[1] + state[3] + state[5] + state[7] + state[9] + 20 - orig[5])%4 == 0;
+				bool b6 = (state[3] + state[5] + state[6] + state[9] + 20 - orig[6])%4 == 0;
+				bool b8 = (state[5] + state[7] + state[8] + state[9] + 20 - orig[8])%4 == 0;
+				if(!b5 || !b6 || !b8) continue;
+				int sum = 0;
+				for(int i = 1; i <= 9; i++){
+					sum +=state[i];
+				}
+				if(sum < minNum){
+					for(int i = 1; i <= 9; i++){
+						res[i] = state[i];
+					}
+				}
+			}
+		}
+	}
+	for(int i = 1; i <= 9; i++){
+		for(int j = 0; j < res[i]; j++){
+			cout << i << " ";
+		}
+	}
+	return 0;
+}
