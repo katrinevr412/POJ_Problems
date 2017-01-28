@@ -1,0 +1,73 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int zeroone[3003][3003];
+
+void print(int N){
+	for(int j = 0; j < N; j++){
+		for(int i = 0; i < N; i++){
+			cout << zeroone[i][j] << " ";
+		}
+		cout << endl;
+	}
+}
+
+int main() {
+	int N;
+	scanf("%d", &N);
+	for(int i = 0; i < N; i++){
+		scanf("%d", &zeroone[N-1][i]);
+	}
+	bool intv[3004] = {false};
+	intv[0] = true; intv[N] = true;//开始就一个区间，[0,N)
+	int order[3003];
+	for(int i = 0; i < N; i++) order[i] = i;
+	for(int i = 0; i < N-1; i++){
+		int from = i==0? N-1: i-1;
+		int start = 0;
+		int end;
+
+		int temp[3004];
+		while(1){
+			//print(N);
+			//for(int ii = 0; ii < N; ii++) cout << order[ii] << " "; cout << endl;
+			//cout << endl;
+			for(int j = start+1; ; j++){
+				if(intv[j]) {
+					end = j;
+					break;
+				}
+			}
+			if(end - start == 1){
+				zeroone[i][start] = zeroone[from][order[start]];
+			}
+			else{
+				int offset = 0;
+				int temp_pl = start;
+				for(int ii = start; ii < end; ii++){
+					if(zeroone[from][order[ii]] == 0){
+						order[start+offset] = order[ii];
+						offset ++;
+					}
+					else{
+						temp[temp_pl] = order[ii];
+						temp_pl ++;
+					}
+				}
+				intv[start+offset] = true;
+				for(int ii = 0; ii < temp_pl-start; ii++){
+					order[start+offset+ii] = temp[ii+start];
+				}
+				for(int ii = start; ii < end; ii++){
+					zeroone[i][ii] = zeroone[from][order[ii]];
+				}
+			}
+			if(end == N) break;
+			start = end;
+		}
+	}
+	for(int i = 0; i < N; i++) printf("%d ", zeroone[i][0]);
+	printf("\n");
+	return 0;
+}
