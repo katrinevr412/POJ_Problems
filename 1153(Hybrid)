@@ -1,0 +1,121 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int pos[100000];
+
+int gs = 0;
+
+int mn(int a, int b){
+	return (a>b) ? b : a;
+}
+
+int cwDist(int i1, int i2){
+	if(i1 <= i2) return pos[i2]-pos[i1];
+	return pos[i2] + 10000000 - pos[i1];
+}
+
+int dist(int i1, int i2){
+	int cwd = cwDist(i1, i2);
+	if(cwd <= 5000000) return cwd;
+	return 10000000-cwd;
+}
+
+int geshu(int i1, int i2){
+	//i1到i2的前闭后开区间的数的个数
+	if(i1 <= i2) return i2-i1;
+	return i2+gs-i1;
+}
+
+void quickSort(int s[], int l, int r)
+{
+    if (l< r)
+    {
+        int i = l, j = r, x = s[l];
+        while (i < j)
+        {
+            while(i < j && s[j]>= x)
+                j--;
+            if(i < j)
+                s[i++] = s[j];
+            while(i < j && s[i]< x)
+                i++;
+            if(i < j)
+                s[j--] = s[i];
+        }
+        s[i] = x;
+        quickSort(s, l, i - 1);
+        quickSort(s, i + 1, r);
+    }
+}
+
+int main() {
+	scanf("%d", &gs);
+	for(int i = 0; i < gs; i++){
+		int temp;
+		scanf("%d", &temp);
+		temp --;
+		pos[i] = temp;
+	}
+	quickSort(pos, 0, gs-1);
+	int zg = -1, xg = -1;
+	for(int i = 0; i < gs; i++){
+		int xyg = (i+1)%gs;
+		if(cwDist(i, xyg) >= 5000000){
+			zg = i;
+			xg = xyg;
+			break;
+		}
+	}
+	if(zg != -1){
+		//存在两个点，下标分别为zg和xg，顺时针相邻，且相距大于一半。此时它们一定是端点。
+		long long int res = 0;
+		for(int i = 0; i < gs/2; i++){
+			res += cwDist((xg+i)%gs, (zg+gs-i)%gs);
+		}
+		printf("%I64d\n", res);
+		return 0;
+	}
+	int idx = 0;
+	int cwIdx = 0;
+	long long int res = 0;
+	for(int i = 0; i < gs; i++){
+		int tempDis = cwDist(0, i);
+		if(tempDis < 5000000){
+			cwIdx ++;
+			res += tempDis;
+		}
+		else{
+			res += (10000000-tempDis);
+		}
+	}
+	long long int tempRes = res;
+	while(1){
+		int newIdx = idx;
+		while(pos[newIdx] == pos[idx]){
+			newIdx ++;
+		}
+		if(newIdx >= gs) break;
+		long long int L = pos[newIdx] - pos[idx];
+		//idx和newIdx把圆周分成4段
+		//第一段：
+		tempRes += ((long long int)(newIdx - idx)) * L;
+		//第三段：
+		int newCwIdx = cwIdx;
+		while(cwDist(newIdx, newCwIdx) < 5000000){
+			tempRes -= dist(idx, newCwIdx);
+			tempRes += dist(newIdx, newCwIdx);
+			newCwIdx = (newCwIdx + 1) % gs;
+		}
+		//第二段：
+		tempRes -= L * ((long long int)(geshu(newIdx, cwIdx)));
+		//第四段：
+		tempRes += L * ((long long int)(geshu(newCwIdx, idx)));
+		if(tempRes < res) res = tempRes;
+		idx = newIdx;
+		cwIdx = newCwIdx;
+	}
+	printf("%I64d\n", res);
+	return 0;
+}
+
