@@ -1,0 +1,145 @@
+#include <iostream>
+#include <stdio.h>
+#include <string.h>
+#include <sstream>
+using namespace std;
+
+struct node{
+	node *left;
+	node *right;
+	node *prev;
+	bool visited;
+	int val;
+	int sum;
+	node(){
+		left = right = prev = NULL;
+		visited = 0;
+		sum = -2147483648;
+		val = 0;
+	}
+};
+
+bool getVal(node *root, int curSum, int sum){
+	root->sum = curSum + root->val;
+	if(root->left == NULL && root->right == NULL){
+		//cout << root->sum << endl;
+		if(root->sum == sum) return 1;
+		else return 0;
+	}
+	if(root->left != NULL){
+		if(getVal(root->left, root->sum, sum)) return 1;
+	}
+	if(root->right != NULL){
+		if(getVal(root->right, root->sum, sum)) return 1;
+	}
+	return 0;
+}
+
+int main() {
+	int sum;
+	while(scanf("%d", &sum) > 0){
+		bool start = 1;
+		char buf[100000] = {'\0'};
+		int offset = 0;
+		int zuo = 0, you = 0;
+		char c;
+		while(scanf("%c", &c)){
+			if(!start && zuo == you){
+				break;
+			}
+			if(c == '('){
+				start = 0;
+				buf[offset] = c;
+				offset++;
+				zuo ++;
+			}
+			else if(c == ')'){
+				buf[offset] = c;
+				offset++;
+				you++;
+			}
+			else if((c >= '0' && c <= '9') || c == '-'){
+				buf[offset] = c;
+				offset++;
+			}
+		}
+		//printf("%d %s\n", sum, buf);
+		int len = strlen(buf);
+		if(len == 2){
+			if(sum == 0) printf("yes\n");
+			else printf("no\n");
+			continue;
+		}
+		len--;
+		offset = 1;
+		int curVal = 0;
+		node *root = new node;
+		int fh = 1;
+		/*
+		while(buf[offset] != '('){
+			if(buf[offset] == '-') fh = -fh;
+			else{
+				val *= 10;
+				val += (buf[offset] - '0');
+			}
+			offset++;
+		}
+		root->val = val * fh;*/
+		node *cur = root;
+		while(offset < len){
+			if(buf[offset] == '('){
+				if(buf[offset+1] == ')'){
+					if(!cur->visited){
+						cur->visited = 1;
+						cur->val = curVal * fh;
+						curVal = 0;
+						fh = 1;
+					}
+					offset += 2;
+					continue;
+				}
+				if(!cur->visited){
+					cur->val = curVal * fh;
+				}
+				curVal = 0;
+				fh = 1;
+				node *temp = new node;
+				if(cur->visited) {
+					cur->right = temp;
+					temp->prev = cur;
+					cur = temp;
+				}
+				else{
+					cur->left = temp;
+					temp->prev = cur;
+					cur->visited = 1;
+					cur = temp;
+				}
+				offset ++;
+			}
+			else if(buf[offset] == ')'){
+				curVal = 0;
+				fh = 1;
+				cur = cur->prev;
+				offset++;
+			}
+			else{
+				while(buf[offset] != '('){
+					if(buf[offset] == '-') fh = -1;
+					else{
+						curVal *= 10;
+						curVal += (buf[offset] - '0');
+					}
+					offset++;
+				}
+			}
+		}
+		if(getVal(root, 0, sum)){
+			printf("yes\n");
+		}
+		else{
+			printf("no\n");
+		}
+	}
+	return 0;
+}
