@@ -1,0 +1,95 @@
+#include <iostream>
+#include <queue>
+using namespace std;
+
+int conn[1000][1000] = {0};
+int N, M;
+
+const int MAX = 2147483647/2;
+
+int value = 0;
+
+bool pushFlow(){
+	queue<int> bfs;
+	bfs.push(0);
+	bool getT = false;
+	bool state[103] = {false};
+	int trace[103] = {0};
+	while(!bfs.empty()){
+		int idx = bfs.front();
+		bfs.pop();
+		for(int i = 1; i <= N+1; i++){
+			if(conn[idx][i] <= 0 || state[i]) continue;
+			trace[i] = idx;
+			state[i] = true;
+			if(i == N+1){
+				getT = true;
+				break;
+			}
+			bfs.push(i);
+		}
+		if(getT) break;
+	}
+	//for(int i = 0; i <= N+1; i++) cout << trace[i] << " "; cout << endl;
+	if(!getT) return false;
+	int minVal = MAX;
+	int qian = trace[N+1], hou = N+1;
+	while(1){
+		if(conn[qian][hou] < minVal) minVal = conn[qian][hou];
+		hou = qian;
+		qian = trace[qian];
+		if(hou == 0) break;
+	}
+	value += minVal;
+	qian = trace[N+1], hou = N+1;
+	while(1){
+		if(conn[qian][hou] != MAX) conn[qian][hou] -= minVal;
+		if(conn[hou][qian] != MAX && hou != N+1 && qian != 0) conn[hou][qian] += minVal;
+		hou = qian;
+		qian = trace[qian];
+		if(hou == 0) break;
+	}
+	return true;
+}
+
+int main() {
+	cin >> M >> N;
+	int pigs[1003];
+	for(int i = 1; i <= M; i++) cin >> pigs[i];
+	int state[1003] = {0};
+	int slian[103] = {0};
+	for(int i = 1; i <= N; i++){
+		int num;
+		int cur = 0;
+		cin >> num;
+		for(int j = 1; j <= num; j++){
+			int zj;
+			cin >> zj;
+			if(zj == cur) continue;
+			cur = zj;
+			if(state[zj] == 0){
+				slian[i] += pigs[zj];
+			}
+			else{
+				conn[state[zj]][i] = MAX;
+			}
+			state[zj] = i;
+		}
+		cin >> num;
+		conn[i][N+1] = num;
+	}
+	for(int i = 1; i <= N; i++){
+		conn[0][i] = slian[i];
+	}
+	/*
+	for(int i = 0; i <= N+1; i++){
+		for(int j = 0; j <= N+1; j++){
+			cout << conn[i][j] << " ";
+		}
+		cout << endl;
+	}
+	*/
+	while(pushFlow()){;}
+	cout << value << endl;
+	return 0;
+}
