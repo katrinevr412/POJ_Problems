@@ -1,0 +1,107 @@
+#include <iostream>
+#include <stdio.h>
+#include <queue>
+using namespace std;
+
+struct node{
+	int val;
+	node *prev, *next;
+	node(int v): val(v), prev(NULL), next(NULL){}
+};
+
+int main() {
+	int M, N, L;
+	scanf("%d%d%d", &M, &N, &L);
+	int clubs[32];
+	for(int i = 0; i < L; i++){
+		scanf("%d", &clubs[i]);
+	}
+	int reg_[302][302] = {0};
+	int dian[302][302] = {0};
+	int dianNum[302] = {0};
+	for(int i = 1; i <= M; i++){
+		int len;
+		scanf("%d", &len);
+		int start, q, h;
+		scanf("%d", &start);
+		dian[start][dianNum[start]] = i;
+		dianNum[start] ++;
+		q = start;
+		for(int j = 0; j < len-1; j++){
+			scanf("%d", &h);
+			dian[h][dianNum[h]] = i;
+			dianNum[h] ++;
+			reg_[q][h] = i;
+			q = h;
+		}
+		reg_[q][start] = i;
+	}
+	int connNum[302] = {0};
+	int connList[302][302];
+
+	for(int i = 1; i <= N-1; i++){
+		for(int j = i+1; j <= N; j++){
+			int a = reg_[i][j], b = reg_[j][i];
+			if(a > 0 && b > 0){
+				connList[a][connNum[a]] = b;
+				connNum[a] ++;
+				connList[b][connNum[b]] = a;
+				connNum[b] ++;
+			}
+		}
+	}
+	int dist[302][302];
+	for(int i = 1; i <= N; i++){
+		node *st = new node(i);
+		dist[i][i] = 0;
+		bool state[302] = {false};
+		state[i] = true;
+		node *head = st, *tail = st;
+		while(head != NULL){
+			int cur = head->val;
+			if(head == tail){
+				head = NULL;
+				tail = NULL;
+			}
+			else{
+				head->next->prev = NULL;
+				head = head->next;
+			}
+			for(int j = 0; j < connNum[cur]; j++){
+				int idx = connList[cur][j];
+				if(state[idx]) continue;
+				state[idx] = true;
+				dist[i][idx] = dist[i][cur] + 1;
+				if(head == NULL){
+					node *temp = new node(idx);
+					head = temp;
+					tail = temp;
+				}
+				else{
+					node *temp = new node(idx);
+					tail->next = temp;
+					temp->prev = tail;
+					tail = tail->next;
+				}
+			}
+		}
+	}
+	int res = 2147483647;
+	for(int i = 1; i <= M; i++){
+		//如果选在i
+		int tempRes = 0;
+		for(int j = 0; j < L; j++){
+			int Dian = clubs[j];
+			int Min = 2147483647;
+			for(int k = 0; k < dianNum[Dian]; k++){
+				int temp = dist[i][dian[Dian][k]];
+				if(temp < Min) Min = temp;
+			}
+			tempRes += Min;
+			if(tempRes >= res) break;
+		}
+		if(tempRes < res) res = tempRes;
+	}
+	printf("%d\n", res);
+	return 0;
+}
