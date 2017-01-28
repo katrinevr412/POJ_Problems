@@ -1,0 +1,126 @@
+#include <iostream>
+#include <vector>
+#include <stdio.h>
+using namespace std;
+
+int DP[3003][3003] = {0};
+
+int get[3003];//从客户的所得
+
+int N, M;
+
+void print(){
+	for(int i = 1; i <= N; i++){
+		for(int j = 0; j <= M; j++){
+			cout << "(" <<i << "," << j << "):" << DP[i][j] << " ";
+		}
+		cout << endl;
+	}
+}
+
+struct node{
+	int num;
+	int sucGs;
+	vector<int> suc;
+	vector<int> costs;
+	node(int n): num(n), sucGs(-1){}
+	int getGS();
+	void Dp();
+};
+
+node* nodes[3003] = {NULL};
+
+int node::getGS(){
+	if(sucGs != -1) return sucGs;
+	if(num > N-M) {
+		sucGs = 1;
+		return 1;
+	}
+	int res = 0;
+	int len = suc.size();
+	for(int i = 0; i < len; i++){
+		res += nodes[suc[i]]->getGS();
+	}
+	sucGs = res;
+	return res;
+}
+
+void node::Dp(){
+	//cout << "DPing:" << num << endl;
+	//print();
+	if(num > N-M) return;
+	int len = suc.size();
+	for(int i = 0; i < len; i++) nodes[suc[i]]->Dp();
+	int row = len+1, column = sucGs + 1;
+	int *dp = new int[row*column];
+	int *gs = new int[row];
+	gs[0] = 0;
+	for(int i = 1; i < row; i++){
+		gs[i] = gs[i-1] + nodes[suc[i-1]]->sucGs;
+	}
+	dp[0] = 0;
+	for(int i = 1; i < len; i++){
+		for(int j = 0; j <= gs[i]; j++) dp[i*column+j] = -2147483648;
+		int cha = nodes[suc[i-1]]->sucGs;
+		for(int j = 0; j <= gs[i-1]; j++){
+			for(int k = 0; k <= cha; k++){
+				int temp = dp[(i-1)*column+j] + DP[suc[i-1]][k] - (k==0? 0: costs[i-1]);
+				if(temp > dp[i*column+j+k]) dp[i*column+j+k] = temp;
+			}
+		}
+	}
+	for(int j = 0; j <= sucGs; j++) DP[num][j] = -2147483648;
+	int cha = nodes[suc[len-1]]->sucGs;
+	for(int j = 0; j <= gs[len-1]; j++){
+		for(int k = 0; k <= cha; k++){
+			int temp = dp[(len-1)*column+j] + DP[suc[len-1]][k] - (k==0? 0 : costs[len-1]);
+			if(temp > DP[num][j+k]) DP[num][j+k] = temp;
+		}
+	}
+	delete [] dp;
+	delete [] gs;
+	//print();
+}
+
+int main() {
+	node *root = new node(1);
+	nodes[1] = root;
+	//int N, M;
+	scanf("%d%d", &N, &M);
+	for(int i = 1; i <= N-M; i++){
+		int gs;
+		scanf("%d", &gs);
+		node *temp;
+		if(nodes[i] == NULL){
+			temp = new node(i);
+			nodes[i] = temp;
+		}
+		else{
+			temp = nodes[i];
+		}
+		for(int j = 0; j < gs; j++){
+			int suc, cost;
+			scanf("%d%d", &suc, &cost);
+			temp->suc.push_back(suc);
+			temp->costs.push_back(cost);
+		}
+	}
+	for(int i = N-M+1; i <= N; i++) {
+		node *temp = new node(i);
+		nodes[i] = temp;
+		scanf("%d", &get[i]);
+		DP[i][1] = get[i];
+	}
+
+	root->getGS();
+	//for(int i = 1; i <= N; i++){cout << nodes[i]->sucGs << endl;}
+	//cout << 1 << endl;
+	root->Dp();
+	for(int i = M; i >= 0; i--){
+		if(DP[1][i] >= 0){
+			printf("%d\n", i);
+			break;
+		}
+	}
+	return 0;
+}
