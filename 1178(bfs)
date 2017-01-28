@@ -1,0 +1,115 @@
+#include <iostream>
+#include <stdio.h>
+#include <queue>
+#include <string.h>
+
+using namespace std;
+
+int dist[64][64];
+
+bool inRange(int x, int y){
+	return x >= 0 && x < 8 && y >= 0 && y < 8;
+}
+
+inline int Abs(int x){
+	if(x >= 0) return x;
+	return -x;
+}
+
+void preprocess(){
+	for(int i = 0; i < 64; i++){
+		bool used[64] = {0};
+		used[i] = 1;
+		queue<int> bfs;
+		bfs.push(i);
+		dist[i][i] = 0;
+		while(!bfs.empty()){
+			int top = bfs.front();
+			bfs.pop();
+			int x = top/8, y = top%8;
+			if(inRange(x-1, y-2) && !used[top-10]){
+				used[top-10] = 1;
+				dist[i][top-10] = dist[i][top]+1;
+				bfs.push(top-10);
+			}
+			if(inRange(x-1, y+2) && !used[top-6]){
+				used[top-6] = 1;
+				dist[i][top-6] = dist[i][top]+1;
+				bfs.push(top-6);
+			}
+			if(inRange(x+1, y-2) && !used[top+6]){
+				used[top+6] = 1;
+				dist[i][top+6] = dist[i][top]+1;
+				bfs.push(top+6);
+			}
+			if(inRange(x+1, y+2) && !used[top+10]){
+				used[top+10] = 1;
+				dist[i][top+10] = dist[i][top]+1;
+				bfs.push(top+10);
+			}
+			if(inRange(x-2, y-1) && !used[top-17]){
+				used[top-17] = 1;
+				dist[i][top-17] = dist[i][top]+1;
+				bfs.push(top-17);
+			}
+			if(inRange(x-2, y+1) && !used[top-15]){
+				used[top-15] = 1;
+				dist[i][top-15] = dist[i][top]+1;
+				bfs.push(top-15);
+			}
+			if(inRange(x+2, y-1) && !used[top+15]){
+				used[top+15] = 1;
+				dist[i][top+15] = dist[i][top]+1;
+				bfs.push(top+15);
+			}
+			if(inRange(x+2, y+1) && !used[top+17]){
+				used[top+17] = 1;
+				dist[i][top+17] = dist[i][top]+1;
+				bfs.push(top+17);
+			}
+		}
+	}
+}
+
+int main() {
+	preprocess();
+	char str[250];
+	scanf("%s", str);
+	int len = strlen(str);
+	int gs = len/2-1;
+	int posKgx, posKgy;
+	int posKnx[64], posKny[64];
+	posKgx = (str[0]-'A'), posKgy = (str[1]-'1');
+	for(int i = 0; i < gs; i++){
+		posKnx[i] = (str[2*i+2]-'A'), posKny[i] = (str[2*i+3]-'1');
+	}
+	int mn = 2147483647;
+	for(int rdz = 0; rdz < 64; rdz++){
+		int rdzx = rdz/8, rdzy = rdz%8;
+		int mnK = Abs(rdzx-posKgx) + Abs(rdzy-posKgy);
+		for(int i = 0; i < gs; i++){
+			mnK += dist[rdz][posKnx[i]*8+posKny[i]];
+		}
+		for(int getOn = 0; getOn < 64; getOn++){
+			if(getOn == rdz) continue;
+			int getOnx = getOn/8, getOny = getOn%8;
+			int temp = Abs(getOnx-posKgx) + Abs(getOny-posKgy);
+			int dz = 2147483647;
+			for(int i = 0; i < gs; i++){
+				int iP = posKnx[i]*8+posKny[i];
+				int duozou = dist[iP][getOn] + dist[getOn][rdz] - dist[iP][rdz];
+				if(duozou < dz){
+					dz = duozou;
+				}
+			}
+			temp += dz;
+			for(int i = 0; i < gs; i++){
+				temp += dist[posKnx[i]*8+posKny[i]][rdz];
+			}
+			if(temp < mnK) mnK = temp;
+		}
+		if(mnK < mn) mn = mnK;
+	}
+	printf("%d\n", mn);
+	return 0;
+}
