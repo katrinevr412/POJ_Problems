@@ -1,0 +1,114 @@
+#include <iostream>
+#include <stdio.h>
+#include <queue>
+using namespace std;
+
+bool adj[55][55] = {0};
+int adjList[55][55];
+int adjNum[55] = {0};
+
+int main() {
+	int cnt = 0;
+	while(1){
+		int temp;
+		scanf("%d", &temp);
+		if(temp == -1) break;
+		adj[cnt][temp] = 1;
+		adjList[cnt][adjNum[cnt]] = temp;
+		adjNum[cnt]++;
+		while(1){
+			int tmp;
+			scanf("%d", &tmp);
+			if(tmp == -2) break;
+			adj[cnt][tmp] = 1;
+			adjList[cnt][adjNum[cnt]] = tmp;
+			adjNum[cnt]++;
+		}
+		cnt++;
+	}
+	int N = cnt;
+	//cout << N << endl;
+	bool conn[2][55][55];
+	for(int i = 0; i <= N; i++){
+		for(int j = 0; j <= N; j++){
+			if(i == j) conn[0][i][j] = 1;
+			else conn[0][i][j] = adj[i][j];
+		}
+	}
+	//floyd厕连通性
+	for(int i = 1; i < N; i++){
+		int from = (i+1)%2, to = i%2;
+		for(int j = 0; j <= N; j++){
+			for(int k = 0; k <= N; k++){
+				if(conn[from][j][k]){
+					conn[to][j][k] = 1;
+					continue;
+				}
+				if(conn[from][j][i] && conn[from][i][k]){
+					conn[to][j][k] = 1;
+				}
+				else conn[to][j][k] = 0;
+			}
+		}
+	}
+	//bfs看是否必需
+	int uavNum = 0;
+	int uav[55];
+	int split[55];
+	int splitNum = 0;
+	int tar = (N+1)%2;
+	for(int i = 1; i < N; i++){
+		bool used[55] = {1,0};
+		queue<int> bfs;
+		bfs.push(0);
+		used[i] = 1;
+		bool kydd = 0;
+		while(!bfs.empty()){
+			int t = bfs.front();
+			bfs.pop();
+			for(int j = 0; j < adjNum[t]; j++){
+				if(used[adjList[t][j]]) continue;
+				used[adjList[t][j]] = 1;
+				if(adjList[t][j] == N){
+					kydd = 1;
+					goto done;
+				}
+				bfs.push(adjList[t][j]);
+			}
+		}
+		done:
+		if(!kydd){
+			uav[uavNum] = i;
+			uavNum ++;
+			used[i] = 0;
+			bool spl = 1;
+			for(int j = 0; j <= N; j++){
+				for(int k = 0; k <= N; k++){
+					if(used[j] && !used[k] && conn[tar][k][j]){
+						spl = 0;
+						goto done1;
+					}
+				}
+			}
+			done1:
+			if(spl){
+				split[splitNum] = i;
+				splitNum ++;
+			}
+		}
+	}
+	printf("%d", uavNum);
+	for(int i = 0; i < uavNum; i++){
+		printf(" %d", uav[i]);
+	}
+	printf("\n");
+
+
+	printf("%d", splitNum);
+	for(int i = 0; i < splitNum; i++){
+		printf(" %d", split[i]);
+	}
+	printf("\n");
+	return 0;
+}
+
