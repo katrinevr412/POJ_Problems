@@ -1,0 +1,155 @@
+#include <stdio.h>
+#include <iostream>
+
+using namespace std;
+
+int alr[25];//确定的存为放的位置，不确定的为-1
+
+int state[6][6][6][6][6];
+bool has[25] = {false};
+
+int MAX(int a, int b){
+	return a>b ? a : b;
+}
+
+void init(){
+	for(int i = 0; i < 25; i++) alr[i] = -1;
+}
+
+void initState(){
+	for(int i = 0; i < 6; i++)
+		for(int j = 0; j < 6; j++)
+			for(int k = 0; k < 6; k++)
+				for(int l = 0; l < 6; l++)
+					for(int m = 0; m < 6; m++)
+						state[i][j][k][l][m] = -1;
+	state[5][5][5][5][5] = 1;
+}
+
+int search(int r0, int r1, int r2, int r3, int r4){
+	//cout << "*" << endl;
+	//cout << r0 << r1 << r2 << r3 << r4 << endl;
+	if(state[r0][r1][r2][r3][r4] != -1) return state[r0][r1][r2][r3][r4];
+	int tobe = r0+r1+r2+r3+r4;
+	if(alr[tobe] != -1){
+		//cout << "#" << alr[tobe] << endl;
+		int hang = alr[tobe]/5, lie = alr[tobe]%5;
+		if(hang == 0 && r0 == lie){
+			int res = search(r0+1, r1, r2, r3, r4);
+			state[r0][r1][r2][r3][r4] = res;
+			return res;
+		}
+		if(hang == 1 && r1 == lie && r0 > r1){
+			int res = search(r0, r1+1, r2, r3, r4);
+			state[r0][r1][r2][r3][r4] = res;
+			return res;
+		}
+		if(hang == 2 && r2 == lie && r1 > r2){
+			int res = search(r0, r1, r2+1, r3, r4);
+			state[r0][r1][r2][r3][r4] = res;
+			return res;
+		}
+		if(hang == 3 && r3 == lie && r2 > r3){
+			int res = search(r0, r1, r2, r3+1, r4);
+			state[r0][r1][r2][r3][r4] = res;
+			return res;
+		}
+		if(hang == 4 && r4 == lie && r3 > r4){
+			int res = search(r0, r1, r2, r3, r4+1);
+			state[r0][r1][r2][r3][r4] = res;
+			return res;
+		}
+		state[r0][r1][r2][r3][r4] = 0;
+		return 0;
+	}
+	else{
+		//cout << "*" << endl;
+		int res = 0;
+		if(r0 < 5 && !has[r0]){
+			res += search(r0+1, r1, r2, r3, r4);
+		}
+		if(r1 < 5 && r1 < r0 && !has[5+r1]){
+			res += search(r0, r1+1, r2, r3, r4);
+		}
+		if(r2 < 5 && r2 < r1 && !has[10+r2]){
+			res += search(r0, r1, r2+1, r3, r4);
+		}
+		if(r3 < 5 && r3 < r2 && !has[15+r3]){
+			res += search(r0, r1, r2, r3+1, r4);
+		}
+		if(r4 < 5 && r4 < r3 && !has[20+r4]){
+			//cout << "*" << endl;
+			res += search(r0, r1, r2, r3, r4+1);
+		}
+		state[r0][r1][r2][r3][r4] = res;
+		return res;
+	}
+}
+
+int main() {
+	init();
+	char c;
+	scanf("%c", &c);
+	if(c == 'W'){
+		char s[30];
+		scanf("%s", s);
+		int num = 0;
+		alr[0] = 0;
+		has[0] = true;
+		for(int i = 1; i < 25; i++){
+			int shang = (i>=5) ? (s[i-5]-'A') : 0;
+			int zuo = (i%5!= 0) ? (s[i-1]-'A') : 0;
+			int ksIdx = MAX(shang, zuo) + 1;
+			//has[i] = true;
+			for(int j = ksIdx; j < s[i]-'A'; j++){
+				if(alr[j] != -1) continue;
+				alr[j] = i;
+				has[i] = true;
+				//for(int ii = 0; ii < 25; ii++) cout << alr[ii] << " "; cout << endl;
+				//开始搜索
+				initState();
+				int temp = search(1,0,0,0,0);
+				num += temp;
+				//cout << temp << endl;
+				alr[j] = -1;
+				has[i] = false;
+			}
+			alr[s[i]-'A'] = i;
+			has[i] = true;
+			//for(int ii = 0; ii < 25; ii++) cout << alr[ii] << " "; cout << endl;
+		}
+		printf("%d\n", num+1);
+	}
+	else{
+		int idx;
+		scanf("%d", &idx);
+		alr[0] = 0;
+		has[0] = true;
+		char Res[30] = {'\0'};
+		Res[0] = 'A';
+		for(int i = 1; i < 25; i++){
+			int shang = (i>=5) ? (Res[i-5]-'A') : 0;
+			int zuo = (i%5!= 0) ? (Res[i-1]-'A') : 0;
+			int ksIdx = MAX(shang, zuo) + 1;
+			for(int j = ksIdx; j < 25; j++){
+				if(alr[j] != -1) continue;
+				alr[j] = i;
+				has[i] = true;
+				initState();
+				int temp = search(1,0,0,0,0);
+				if(temp < idx){
+					idx -= temp;
+				}
+				else{
+					Res[i] = j+'A';
+					break;
+				}
+				alr[j] = -1;
+				has[i] = false;
+			}
+		}
+		printf("%s\n", Res);
+	}
+
+	return 0;
+}
