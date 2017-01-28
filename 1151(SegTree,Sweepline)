@@ -1,0 +1,88 @@
+#include <iostream>
+#include <stdio.h>
+#include <map>
+using namespace std;
+
+
+
+void quickSort(double s[], int l, int r)
+{
+    if (l < r)
+    {
+        int i = l, j = r;
+        double x = s[l];
+        while (i < j)
+        {
+            while(i < j && s[j] >= x)
+                j--;
+            if(i < j)
+                s[i++] = s[j];
+            while(i < j && s[i]< x)
+                i++;
+            if(i < j)
+                s[j--] = s[i];
+        }
+        s[i] = x;
+        quickSort(s, l, i - 1);
+        quickSort(s, i + 1, r);
+    }
+}
+
+int main() {
+	int cases = 0;
+	while(1){
+		int n;
+		scanf("%d", &n);
+		if(n == 0) return n;
+		bool state[202][202] = {false};
+		double x0[100], y0[100], x1[100], y1[100];
+		for(int i = 0; i < n; i++){
+			scanf("%lf%lf%lf%lf", &x0[i], &y0[i], &x1[i], &y1[i]);
+		}
+		double xAll[202], yAll[202];
+		for(int i = 0; i < n; i++){
+			xAll[i] = x0[i];
+			xAll[i+n] = x1[i];
+			yAll[i] = y0[i];
+			yAll[i+n] = y1[i];
+		}
+		quickSort(xAll, 0, 2*n-1);
+		quickSort(yAll, 0, 2*n-1);
+		map<double, int> xIdx, yIdx;
+		int idx_x = 0, idx_y = 0;
+		double alr_x = 100001.0, alr_y = 100001.0;
+		for(int i = 0; i < 2*n; i++){
+			if(xAll[i] != alr_x){
+				alr_x = xAll[i];
+				xAll[idx_x] = alr_x;
+				xIdx.insert(pair<double, int>(xAll[i], idx_x));
+				idx_x ++;
+			}
+			if(yAll[i] != alr_y){
+				alr_y = yAll[i];
+				yAll[idx_y] = alr_y;
+				yIdx.insert(pair<double, int>(yAll[i], idx_y));
+				idx_y ++;
+			}
+		}
+		for(int i = 0; i < n; i++){
+			int startX = xIdx[x0[i]], startY = yIdx[y0[i]];
+			int endX = xIdx[x1[i]], endY = yIdx[y1[i]];
+			for(int j = startX; j < endX; j++){
+				for(int k = startY; k < endY; k++){
+					state[j][k] = true;
+				}
+			}
+		}
+		double res = 0;
+		for(int i = 0; i < idx_x-1; i++){
+			for(int j = 0; j < idx_y-1; j++){
+				if(!state[i][j]) continue;
+				res += (xAll[i+1]-xAll[i]) * (yAll[j+1]-yAll[j]);
+			}
+		}
+		printf("Test case #%d\nTotal explored area: %.2lf\n\n", cases+1, res);
+		cases ++;
+	}
+	return 0;
+}
