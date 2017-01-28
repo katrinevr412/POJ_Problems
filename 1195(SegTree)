@@ -1,0 +1,127 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int erdemi[11] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024};
+
+int sum[2048][2048] = {0};
+
+int bh = 0;
+
+class intv{
+public:
+	intv *left;
+	intv *right;
+	int start;
+	int end;
+	int index;
+	intv(): left(NULL), right(NULL), start(0), end(0), index(0){}
+	intv(int s, int e): left(NULL), right(NULL), start(s), end(e), index(0){}
+};
+
+void collect(intv *root, int sta, int end, int *numX, int &gsX);
+
+void js(intv *root, int start, int end){
+	root->index = bh;
+	bh ++;
+	if(start == end){
+		return;
+	}
+	intv *tempL = new intv(start, (start+end)/2), *tempR = new intv((start+end)/2+1, end);
+	root->left = tempL;
+	root->right = tempR;
+	js(root->left, start, (start+end)/2);
+	js(root->right, (start+end)/2+1, end);
+}
+
+int main() {
+	int ling, S;
+	scanf("%d%d", &ling, &S);
+	//cin >> ling >> S;
+	if(ling != 0) return 0;
+	int log2S;
+	for(int i = 0; i < 11; i++){
+		if(erdemi[i] >= S) {
+			S = erdemi[i];
+			log2S = i;
+			break;
+		}
+	}
+	//建树
+	intv *root = new intv(0, S-1);
+	js(root, 0, S-1);
+
+	//cout << bh << endl;
+
+	while(1){
+		int inst;
+		scanf("%d", &inst);
+		//cin >> inst;
+		if(inst == 3) return 0;
+		if(inst == 1){
+			int X, Y, A;
+			scanf("%d%d%d", &X, &Y, &A);
+			int gsX = 0, gsY = 0;
+			int numX[12], numY[12];
+			intv *cur = root;
+			while(cur != NULL){
+				numX[gsX] = cur->index;
+				gsX ++;
+				if(X <= (cur->start + cur->end)/2) cur = cur->left;
+				else cur = cur->right;
+			}
+			cur = root;
+			while(cur != NULL){
+				numY[gsY] = cur->index;
+				gsY ++;
+				if(Y <= (cur->start + cur->end)/2) cur = cur->left;
+				else cur = cur->right;
+			}
+			for(int i = 0; i < gsX; i++){
+				for(int j = 0; j < gsY; j++){
+					sum[numX[i]][numY[j]] += A;
+				}
+			}
+		}
+		if(inst == 2){
+			int L, B, R, T;
+			scanf("%d%d%d%d", &L, &B, &R, &T);
+			if(L > R || B > T){
+				printf("0\n");
+				continue;
+			}
+			int numX[26], numY[26];
+			int gsX = 0, gsY = 0;
+			collect(root, L, R, numX, gsX);
+			collect(root, B, T, numY, gsY);
+			int res = 0;
+			for(int i = 0; i < gsX; i++){
+				for(int j = 0; j < gsY; j++){
+					res += sum[numX[i]][numY[j]];
+				}
+			}
+			printf("%d\n", res);
+		}
+	}
+	return 0;
+}
+
+void collect(intv *root, int sta, int end, int *numX, int &gsX){
+	int Start = root->start, End = root->end;
+	if(sta == Start && end == End){
+		numX[gsX] = root->index;
+		gsX ++;
+		return;
+	}
+	int Middle = (Start + End)/2;
+	if(end <= Middle){
+		collect(root->left, sta, end, numX, gsX);
+		return;
+	}
+	if(sta > Middle){
+		collect(root->right, sta, end, numX, gsX);
+		return;
+	}
+	collect(root->left, sta, Middle, numX, gsX);
+	collect(root->right, Middle+1, end, numX, gsX);
+}
