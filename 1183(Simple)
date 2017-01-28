@@ -1,0 +1,17 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int main() {
+	long long int A;
+	scanf("%I64d", &A);
+	long long int A2plus1 = A*A+1;
+	//printf("%I64d\n", A2plus1);
+	for(long long int B = A; B > 0; B--){
+		if(A2plus1%B == 0){
+			printf("%I64d\n", 2*A+B+A2plus1/B);
+			break;
+		}
+	}
+	return 0;
+}
