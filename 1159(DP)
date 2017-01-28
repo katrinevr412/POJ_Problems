@@ -1,0 +1,24 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+short res[5005][5005] = {0};
+
+int main() {
+	string s;
+	int len;
+	cin >> len >> s;
+	for(int cha = 1; cha < len; cha ++){
+		for(int i = 0; i < len - cha; i++){
+			int j = i + cha;
+			short min = 5005;
+			if(min > 1 + res[i+1][j]) min = 1 + res[i+1][j];
+			if(min > 1 + res[i][j-1]) min = 1 + res[i][j-1];
+			if(s[i] == s[j] && min > res[i+1][j-1]) min = res[i+1][j-1];
+			res[i][j] = min;
+		}
+	}
+	cout << res[0][len-1] << endl;
+	return 0;
+}
+
