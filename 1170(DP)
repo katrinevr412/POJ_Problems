@@ -1,0 +1,100 @@
+#include <iostream>
+using namespace std;
+
+int pow6[5] = {1, 6, 36, 216, 1296};
+
+int dp[100][8000] = {0};
+
+int main() {
+	int b;
+	int idx[1000];
+	int gs[5], price[5];
+	cin >> b;
+	for(int i = 0; i < b; i++){
+		int aa, bb, cc;
+		cin >> aa >> bb >> cc;
+		idx[aa] = i;
+		gs[i] = bb;
+		price[i] = cc;
+	}
+	int so[100][5] = {{0}};
+	int soprice[100];
+	int soNum;
+	cin >> soNum;
+	for(int i = 0; i < soNum; i++){
+		int zs;
+		cin >> zs;
+		for(int j = 0; j < zs; j++){
+			int bh, ggs;
+			cin >> bh >> ggs;
+			so[i][idx[bh]] = ggs;
+		}
+		int pr;
+		cin >> pr;
+		soprice[i] = pr;
+	}
+	if(b == 0){
+		cout << 0 << endl;
+		return 0;
+	}
+	int mxSt = 0;
+	for(int i = 0; i < b; i++){
+		mxSt += pow6[i] * gs[i];
+	}
+	//cout << mxSt << endl;
+	bool valid[8000] = {false};
+	int wei[8000][5];
+	for(int i = 0; i <= mxSt; i++){
+		//int stt[5];
+		for(int j = 0; j < b; j++){
+			//stt[j] = (mxSt/pow6[j])%6;
+			wei[i][j] = (i/pow6[j])%6;
+		}
+		valid[i] = true;
+		for(int j = 0; j < b; j++){
+			if(wei[i][j] > gs[j]){
+				valid[i] = false;
+				break;
+			}
+		}
+	}
+	for(int i = 0; i <= mxSt; i++){
+		if(!valid[i]) continue;
+		dp[0][i] = 0;
+		for(int j = 0; j < b; j++){
+			dp[0][i] += wei[i][j] * price[j];
+		}
+	}
+	//for(int i = 0; i <= mxSt; i++) cout << valid[i] << " "; cout << endl;
+	//for(int i = 0; i <= mxSt; i++) cout << dp[0][i] << " "; cout << endl;
+	for(int i = 1; i <= soNum; i++){//使用第i-1个so
+		int ii = i-1;
+		for(int j = 0; j <= mxSt; j++){//状态数为j
+			if(!valid[j]) continue;
+
+			int Mx = 2147483647;
+			for(int k = 0; k < b; k++){
+				if(so[ii][k] == 0) continue;
+				int temp = wei[j][k] / so[ii][k];
+				if(temp < Mx) Mx = temp;
+			}
+
+			if(Mx == 0){
+				dp[i][j] = dp[i-1][j];
+				continue;
+			}
+			int tempRes = dp[i-1][j];
+			for(int k = 1; k <= Mx; k++){
+				int stateVal = j;
+				for(int l = 0; l < b; l++){
+					stateVal -= k * pow6[l] * so[ii][l];
+				}
+				int tmp = k * soprice[ii] + dp[i-1][stateVal];
+				if(tmp < tempRes) tempRes = tmp;
+			}
+			dp[i][j] = tempRes;
+		}
+	}
+	cout << dp[soNum][mxSt] << endl;
+	return 0;
+}
