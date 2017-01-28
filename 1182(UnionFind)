@@ -1,0 +1,56 @@
+#include <iostream>
+#include <vector>
+#include <stdio.h>
+using namespace std;
+
+vector<int> idx[50001];
+
+int main() {
+	int N, K;
+	//cin >> N >> K;
+	scanf("%d%d", &N, &K);
+	int jiahua = 0;
+	int zu[50001];
+	for(int i = 1; i <= N; i++) zu[i] = i;
+	int state[50001] = {0};
+	for(int i = 1; i <= N; i++) idx[i].push_back(i);
+	for(int i = 0; i < K; i++){
+		int zl, X, Y;
+		//cin >> zl >> X >> Y;
+		scanf("%d%d%d", &zl, &X, &Y);
+		if(X <= 0 || X > N || Y <= 0 || Y > N || (zl == 2 && X == Y)){
+			jiahua++;
+			continue;
+		}
+		if(zu[X] == zu[Y]){
+			if((zl == 1 && state[X] != state[Y]) || (zl == 2 && state[Y] != (state[X] + 1)%3)){
+				jiahua++;
+			}
+			continue;
+		}
+		int Xnum = idx[zu[X]].size(), Ynum = idx[zu[Y]].size();
+		int zux = zu[X], zuy = zu[Y];
+		int offset = 0;
+		if(Xnum >= Ynum){
+			//全部弄到X这边来
+			if(zl == 1) offset = (state[X] + 3 - state[Y]) % 3;
+			else offset = (state[X] + 4 - state[Y]) % 3;
+			for(int j = 0; j < Ynum; j++){
+				zu[idx[zuy][j]] = zux;
+				state[idx[zuy][j]] = (state[idx[zuy][j]] + offset) % 3;
+				idx[zux].push_back(idx[zuy][j]);
+			}
+		}
+		else{
+			if(zl == 1) offset = (state[Y] + 3 - state[X]) % 3;
+			else offset = (state[Y] + 2 - state[X]) % 3;
+			for(int j = 0; j < Xnum; j++){
+				zu[idx[zux][j]] = zuy;
+				state[idx[zux][j]] = (state[idx[zux][j]] + offset) % 3;
+				idx[zuy].push_back(idx[zux][j]);
+			}
+		}
+	}
+	cout << jiahua << endl;
+	return 0;
+}
