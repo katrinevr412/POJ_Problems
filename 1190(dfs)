@@ -1,0 +1,110 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+int lifanghe[14] = {0, 1, 9, 36, 100, 225, 441, 784, 1296, 2025, 3025, 4356, 6084, 8281};
+int pingfanghe[14] = {0, 1, 5, 14, 30, 55, 91, 140, 204, 285, 385, 506, 650, 819};
+
+int N, M;
+int remN, alrM;
+
+int MIN = 2147483647;
+
+int mx(int a, int b){
+	if(a<b) return b;
+	return a;
+}
+
+int mn(int a, int b){
+	if(a>b) return b;
+	return a;
+}
+
+void dfs(int maxR, int maxH, int m){
+	//cout << maxR << " " << maxH << " " << m << endl;
+	if(m == 0){
+		if(remN == 0){
+			MIN = mn(MIN, alrM);
+		}
+		return;
+	}
+	if(m == 1){
+		for(int r = maxR; r >= 1; r--){
+			int h = remN / r / r;
+			if(r * r * h == remN && h > 0 && h <= maxH){
+				int res = alrM + 2 * h * r;
+				if(res < MIN) MIN = res;
+			}
+		}
+		return;
+	}
+	int maxR2H = remN - lifanghe[m-1];
+	int maxr = (int)sqrt(0.1 + maxR2H * 1.0 / m);
+	maxr = mn(maxR, maxr);
+	for(int R = maxr; R >= m; R--){
+		int maxh = mn(maxH, maxR2H / (R * R));
+		for(int H = maxh; H >= m; H--){
+			bool can = false;
+			int maxSum = 0;
+			for(int i = 0; i < m; i++){
+				maxSum += (R-i)*(R-i)*(H-i);
+				if(maxSum >= remN){
+					can = true;
+					break;
+				}
+			}
+			if(!can) break;
+			int newremN = remN - R*R*H;
+			int newalrM = alrM + 2*R*H;
+			if(newalrM + 2 * pingfanghe[m-1] >= MIN) continue;
+			if(newalrM + 2 * ((newremN + (m==2? 0: 1))/(R-1)) >= MIN) continue;
+			remN = newremN;
+			alrM = newalrM;
+			dfs(R-1, H-1, m-1);
+			remN += R*R*H;
+			alrM -= 2*R*H;
+		}
+	}
+}
+
+int main() {
+
+	cin >> N >> M;
+	if(M >= 14 || lifanghe[M] > N){
+		cout << 0 << endl;
+		return 0;
+	}
+	remN = N;
+	alrM = 0;
+	int maxR2H = N - lifanghe[M-1];
+	int maxR = (int)sqrt(0.1 + maxR2H * 1.0 / M);
+	//bool daCan = true;
+	for(int R = maxR; R >= M; R --){
+		int maxH = maxR2H / (R*R);
+		for(int H = maxH; H >= M; H--){
+			bool can = false;
+			int maxSum = 0;
+			for(int i = 0; i < M; i++){
+				maxSum += (R-i)*(R-i)*(H-i);
+				if(maxSum >= N){
+					can = true;
+					break;
+				}
+			}
+			if(!can) {
+				break;
+			}
+			remN = N - R*R*H;
+			alrM = R*R + 2*H*R;
+			if(alrM + 2 * pingfanghe[M-1] >= MIN) continue;
+			//cout << 1 << endl;
+			if(M > 1 && alrM + 2 * ((remN + (M==2 ? 0: 1)) / (R - 1)) >= MIN) continue;
+			dfs(R-1, H-1, M-1);
+			remN = N;
+			alrM = 0;
+		}
+	}
+	if(MIN == 2147483647) cout << 0 << endl;
+	else cout << MIN << endl;
+	return 0;
+}
