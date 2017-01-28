@@ -1,0 +1,66 @@
+#include <iostream>
+#include <vector>
+#include <stdio.h>
+using namespace std;
+
+
+int digitsum[1229] = {0};
+
+int digitSum(int n){
+	int sum = 0;
+	while(n>0){
+		sum += n%10;
+		n /= 10;
+	}
+	return sum;
+}
+
+bool isSmith(int M){
+	//vector<int> factors;
+	int sum = 0;
+	int cnt = 0;
+			int m = M;
+			for(int i = 0; i < 1229; i++){
+				//cout << 1 << endl;
+				if(M < primes[i] * primes[i]) break;
+				if(M%primes[i] == 0){
+					//cnt ++;
+					//factors.push_back(primes[i]);
+					int ds;
+					if(digitsum[i] > 0) ds = digitsum[i];
+				 	else{
+						ds = digitSum(primes[i]);
+						digitsum[i] = ds;
+					}
+					while(M%primes[i] == 0){
+						M /= primes[i];
+						sum += ds;
+						cnt++;
+					}
+				}
+			}
+			if(M > 1) {
+				sum += digitSum(M);
+				cnt ++;
+			}
+			M = m;
+			if(cnt > 1 && sum == digitSum(M)) return true;
+			return false;
+}
+
+int main() {
+	//cout << isSmith(95) << endl;
+
+	while(1){
+		int N;
+		scanf("%d", &N);
+		if(N==0) return N;
+		for(int M = N+1; ; M++){
+			if(isSmith(M)){
+				printf("%d\n", M);
+				break;
+			}
+		}
+	}
+	return 0;
+}
