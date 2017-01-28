@@ -1,0 +1,81 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int BC[34][34][34];
+
+int MIN(int a, int b){
+	return (a>b) ? b : a;
+}
+
+void init(){
+	for(int i = 0; i < 34; i++)
+		for(int j = 0; j < 34; j++)
+			for(int k = 0; k < 34; k++)
+				BC[i][j][k] = -1;
+}
+
+int bc(int n, int k, int m){
+	if(BC[n][k][m] != -1) return BC[n][k][m];
+	if(k>n || n>m*k){
+		BC[n][k][m] = 0;
+		return 0;
+	}
+	if(k == 1){
+		BC[n][1][m] = 1;
+		return 1;
+	}
+	int res = 0;
+	for(int l = 1; l < MIN(n, m+1); l++){
+		res += bc(n-l, k-1, m);
+	}
+	BC[n][k][m] = res;
+	return res;
+}
+
+int main() {
+	int n,k,m;
+	scanf("%d%d%d", &n, &k, &m);
+	init();
+	printf("%d\n", bc(n, k, m));
+	int c;
+	scanf("%d", &c);
+	for(int i = 0; i < c; i++){
+		char s[44];
+		scanf("%s", s);
+		int gs[44];
+		int cnt = 0;
+		int acc = 0;
+		char qs = '1';
+		for(int j = 0; j <= n; j++){
+			if(j < n && s[j] == qs){
+				acc ++;
+			}
+			else{
+				qs = s[j];
+				gs[cnt] = acc;
+				cnt ++;
+				acc = 1;
+			}
+		}
+		int order = 0;
+		int remain = n;
+		for(int j = 0; j < k-1; j++){
+			if(j%2==0){
+				//找1的个数少的
+				for(int l = 1; l < MIN(gs[j], remain); l++){
+					order += bc(remain-l, k-1-j, m);
+				}
+			}
+			else{
+				//找0的个数多的
+				for(int l = gs[j] + 1; l < MIN(m+1, remain); l++){
+					order += bc(remain-l, k-1-j, m);
+				}
+			}
+			remain -= gs[j];
+		}
+		printf("%d\n", order);
+	}
+	return 0;
+}
