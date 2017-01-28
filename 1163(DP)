@@ -1,0 +1,30 @@
+#include <iostream>
+using namespace std;
+
+int mx(int a, int b){
+	if(a < b) return b;
+	return a;
+}
+
+int main() {
+	int triangle[101][101];
+	int ceng;
+	cin >> ceng;
+	for(int i = 1; i <= ceng; i++){
+		for(int j = 0; j < i; j++){
+			cin >> triangle[i-1][j];
+		}
+	}
+	int res[101][101];
+	for(int i = 0; i < ceng; i++){
+		res[ceng-1][i] = triangle[ceng-1][i];
+	}
+	for(int i = ceng-2; i >= 0; i--){
+		for(int j = 0; j <= i; j++){
+			res[i][j] = triangle[i][j] + mx(res[i+1][j], res[i+1][j+1]);
+		}
+	}
+	cout << res[0][0] << endl;
+	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
+	return 0;
+}
