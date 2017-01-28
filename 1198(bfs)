@@ -1,0 +1,148 @@
+#include <iostream>
+#include <stdio.h>
+#include <queue>
+#include <vector>
+using namespace std;
+
+struct slt{
+	int state[4];
+	void sort();
+};
+
+bool operator==(const slt &s1, const slt &s2){
+	return s1.state[0] == s2.state[0] && s1.state[1] == s2.state[1] && s1.state[2] == s2.state[2] && s1.state[3] == s2.state[3];
+}
+
+void slt::sort(){
+	for(int i = 1; i < 4; i++){
+		for(int j = i; j > 0; j--){
+			if(state[j] > state[j-1]) break;
+			int temp = state[j];
+			state[j] = state[j-1];
+			state[j-1] = temp;
+		}
+	}
+}
+
+bool get1[64][64][64][64] = {0}, get2[64][64][64][64] = {0};
+slt s[4][5000], t[4][5000];
+int sNum[4] = {0}, tNum[4] = {0};
+
+bool getNewSlt(slt oldSlt, slt &newSlt, int idx, int fx){
+	bool has[8][8] = {0};
+	for(int i = 0; i < 4; i++){
+		has[oldSlt.state[i]/8][oldSlt.state[i]%8] = 1;
+	}
+	newSlt = oldSlt;
+	int x = oldSlt.state[idx]/8, y = oldSlt.state[idx]%8;
+	if(fx == 0){
+		if(x < 1 || (x == 1 && has[x-1][y]) || (has[x-1][y] && has[x-2][y])){
+			return false;
+		}
+		if(!has[x-1][y]){
+			newSlt.state[idx] -= 8;
+		}
+		else{
+			newSlt.state[idx] -= 16;
+		}
+		newSlt.sort();
+		return true;
+	}
+	else if(fx == 1){
+		if(y > 6 || (y == 6 && has[x][y+1]) || (has[x][y+1] && has[x][y+2])){
+			return false;
+		}
+		if(!has[x][y+1]) newSlt.state[idx] += 1;
+		else newSlt.state[idx] += 2;
+		newSlt.sort();
+		return true;
+	}
+	else if(fx == 2){
+		if(x > 6 || (x == 6 && has[x+1][y]) || (has[x+1][y] && has[x+2][y])){
+			return false;
+		}
+		if(!has[x+1][y]) newSlt.state[idx] += 8;
+		else newSlt.state[idx] += 16;
+		newSlt.sort();
+		return true;
+	}
+	else{
+		if(y < 1 || (y == 1 && has[x][y-1]) || (has[x][y-1] && has[x][y-2])){
+			return false;
+		}
+		if(!has[x][y-1]) newSlt.state[idx] -= 1;
+		else newSlt.state[idx] -= 2;
+		newSlt.sort();
+		return true;
+	}
+}
+
+int main() {
+	slt first, second;
+	for(int i = 0; i < 4; i++){
+		int x,y;
+		scanf("%d%d", &x, &y);
+		first.state[i] = 8 * (x-1) + (y-1);
+	}
+	for(int i = 0; i < 4; i++){
+		int x,y;
+		scanf("%d%d", &x, &y);
+		second.state[i] = 8 * (x-1) + (y-1);
+	}
+	first.sort();
+	second.sort();
+	if(first == second){
+		printf("YES\n");
+		return 0;
+	}
+	sNum[0] = 1, tNum[0] = 1;
+	s[0][0] = first, t[0][0] = second;
+	get1[first.state[0]][first.state[1]][first.state[2]][first.state[3]] = 1;
+	get2[second.state[0]][second.state[1]][second.state[2]][second.state[3]] = 1;
+	for(int i = 0; i < 4; i++){
+		for(int j = 0; j < sNum[i]; j++){
+			//slt temp = s[i][j];
+			slt newSlt;
+			for(int k = 0; k < 4; k++){
+				for(int l = 0; l < 4; l++){
+					if(getNewSlt(s[i][j], newSlt, k, l)){
+						if(get1[newSlt.state[0]][newSlt.state[1]][newSlt.state[2]][newSlt.state[3]]){
+							continue;
+						}
+						get1[newSlt.state[0]][newSlt.state[1]][newSlt.state[2]][newSlt.state[3]] = 1;
+						if(i < 3){
+							s[i+1][sNum[i+1]] = newSlt;
+							sNum[i+1] ++;
+						}
+					}
+				}
+			}
+		}
+	}
+	for(int i = 0; i < 4; i++){
+		for(int j = 0; j < tNum[i]; j++){
+			//slt temp = s[i][j];
+			slt newSlt;
+			for(int k = 0; k < 4; k++){
+				for(int l = 0; l < 4; l++){
+					if(getNewSlt(t[i][j], newSlt, k, l)){
+						if(get1[newSlt.state[0]][newSlt.state[1]][newSlt.state[2]][newSlt.state[3]]){
+							printf("YES\n");
+							return 0;
+						}
+						if(get2[newSlt.state[0]][newSlt.state[1]][newSlt.state[2]][newSlt.state[3]]){
+							continue;
+						}
+						get2[newSlt.state[0]][newSlt.state[1]][newSlt.state[2]][newSlt.state[3]] = 1;
+						if(i < 3){
+							t[i+1][tNum[i+1]] = newSlt;
+							tNum[i+1] ++;
+						}
+					}
+				}
+			}
+		}
+	}
+	printf("NO\n");
+	return 0;
+}
