@@ -1,0 +1,71 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int gs[13][4097] = {0};
+
+bool s[2000002] = {0};
+bool used[13][4097] = {0};
+
+inline int mn(int a, int b){
+	return a<b ? a : b;
+}
+
+int main() {
+	int N, A, B;
+	scanf("%d%d%d\n", &A, &B, &N);
+	int offset = 0;
+	while(1){
+		char c = getchar();
+		if(c == '2') break;
+		s[offset] = c - '0';
+		offset++;
+		//printf("%c", c);
+	}
+	B = mn(B, offset);
+	if(B < A) return 0;
+	for(int i = A; i <= B; i++){
+		int start = 0;
+		int N2 = (1 << (i-1));
+		for(int j = 0; j < i; j++){
+			start *= 2;
+			start += s[j];
+		}
+		gs[i][start]++;
+		for(int j = i; j < offset; j++){
+			start -= s[j-i] * N2;
+			start *= 2;
+			start += s[j];
+			gs[i][start]++;
+		}
+	}
+	for(int k = 0; k < N; k++){
+		int thGs = 0;
+		for(int i = B; i >= A; i--){
+			int NB = (1 << i) - 1;
+			for(int j = NB; j >= 0; j--){
+				if(used[i][j]) continue;
+				if(gs[i][j] > thGs){
+					thGs = gs[i][j];
+				}
+			}
+		}
+		if(thGs == 0) break;
+		printf("%d", thGs);
+		for(int i = B; i >= A; i--){
+			int NB = (1 << i) - 1;
+			for(int j = NB; j >= 0; j--){
+				if(gs[i][j] == thGs){
+					used[i][j] = 1;
+					printf(" ");
+					for(int t = i-1; t >= 0; t--){
+						if((j>>t)%2 == 0) printf("0");
+						else printf("1");
+					}
+				}
+			}
+		}
+		printf("\n");
+	}
+	return 0;
+}
