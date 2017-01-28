@@ -1,0 +1,95 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+void quickSort(int s[], int l, int r)
+{
+    if (l< r)
+    {
+        int i = l, j = r, x = s[l];
+        while (i < j)
+        {
+            while(i < j && s[j]>= x) // 从右向左找第一个小于x的数
+                j--;
+            if(i < j)
+                s[i++] = s[j];
+            while(i < j && s[i]< x) // 从左向右找第一个大于等于x的数
+                i++;
+            if(i < j)
+                s[j--] = s[i];
+        }
+        s[i] = x;
+        quickSort(s, l, i - 1); // 递归调用
+        quickSort(s, i + 1, r);
+    }
+}
+
+inline int getSigh(int n){
+	if(n > 0) return 1;
+	if(n < 0) return -1;
+	return 0;
+}
+
+bool tongHao(int n1, int n2){
+	return getSigh(n1) == getSigh(n2);
+}
+
+int main() {
+	int N;
+	scanf("%d", &N);
+	int xcha[10005], ycha[10005];
+	for(int i = 0; i < N; i++){
+		scanf("%d", xcha+i);
+	}
+	for(int i = 0; i < N; i++){
+		scanf("%d", ycha+i);
+	}
+	int xsigh[10005], ysigh[10005];
+	quickSort(xcha, 0, N-1);
+	quickSort(ycha, 0, N-1);
+	for(int i = 0; i < N; i++){
+		int temp;
+		scanf("%d", &temp);
+		if(temp == 1 || temp == 4) xsigh[i] = 1;
+		else xsigh[i] = -1;
+		if(temp == 1 || temp == 2) ysigh[i] = 1;
+		else ysigh[i] = -1;
+	}
+	xcha[N-1] *= xsigh[N-1], ycha[N-1] *= ysigh[N-1];
+	for(int i = N-2; i >= 0; i--){
+		xcha[i] *= (-getSigh(xcha[i+1]));
+		ycha[i] *= (-getSigh(ycha[i+1]));
+	}
+	int xans[10005], yans[10005];
+	int qian = 0, hou = N-1;
+	for(int i = N-2; i >= 0; i--){
+		if(tongHao(xsigh[i], xcha[hou])){
+			xans[i+1] = xcha[qian];
+			qian++;
+		}
+		else{
+			xans[i+1] = xcha[hou];
+			hou--;
+		}
+	}
+	xans[0] = xcha[qian];
+	qian = 0, hou = N-1;
+	for(int i = N-2; i >= 0; i--){
+		if(tongHao(ysigh[i], ycha[hou])){
+			yans[i+1] = ycha[qian];
+			qian++;
+		}
+		else{
+			yans[i+1] = ycha[hou];
+			hou--;
+		}
+	}
+	yans[0] = ycha[qian];
+	for(int i = 0; i < N; i++){
+		if(xans[i] > 0) printf("+");
+		printf("%d ", xans[i]);
+		if(yans[i] > 0) printf("+");
+		printf("%d\n", yans[i]);
+	}
+	return 0;
+}
