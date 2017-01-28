@@ -1,0 +1,65 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int GCD(int A, int B){
+	if(A == 0) return B;
+	if(B == 0) return A;
+	if(A <= B) return GCD(A, B%A);
+	return GCD(B, A%B);
+}
+
+int MAX(int a, int b){
+	return a>b ? a : b;
+}
+
+int main() {
+	int A, B;
+	while(1){
+		scanf("%d%d", &A, &B);
+		if(A == 0 && B == 0) return A+B;
+		int gcd = GCD(A, B);
+		A /= gcd;
+		B /= gcd;
+		int two = 0, five = 0;
+		int C = B;
+		while(C%2 == 0){
+			two++;
+			C /= 2;
+		}
+		while(C%5 == 0){
+			five++;
+			C /= 5;
+		}
+		int K = MAX(two, five);
+		if(C == 1){
+			printf(".");
+			for(int i = 0; i < K; i++){
+				printf("%d", A*10/B);
+				A = (A*10)%B;
+			}
+			printf("\nThis expansion terminates.\n");
+			continue;
+		}
+		int D = 0;
+		int prod = 1;
+		while(1){
+			prod = (prod*10)%C;
+			D ++;
+			if(prod == 1) break;
+		}
+		int cf = D+K;
+		printf(".");
+		int alr = 1;
+		for(int i = 0; i < cf; i++){
+			printf("%d", A*10/B);
+			A = (A*10)%B;
+			alr ++;
+			if(alr%50 == 0 && i != cf-1){
+				printf("\n");
+			}
+		}
+		printf("\nThe last %d digits repeat forever.\n", D);
+	}
+	return 0;
+}
