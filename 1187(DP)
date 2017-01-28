@@ -1,0 +1,60 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+const int MOD = 11380;
+
+int jg[11][11][11][31];
+
+void init(){
+	for(int i = 0; i < 11; i++)
+		for(int j = 0; j < 11; j++)
+			for(int k = 0; k < 11; k++)
+				for(int l = 0; l < 31; l++)
+					jg[i][j][k][l] = -1;
+}
+
+int js(int da, int zh, int xi, int sh){
+	if(sh < 0) return 0;
+	if(jg[da][zh][xi][sh] != -1) return jg[da][zh][xi][sh];
+	if(da == 0 && zh == 0 && xi == 0){
+		jg[da][zh][xi][sh] = 1;
+		return 1;
+	}
+	if(sh == 0 && (da > 0 || zh > 0 || xi > 0)){
+		jg[da][zh][xi][sh] = 0;
+		return 0;
+	}
+	if(sh >= da+zh+xi){
+		int jieguo = (js(da, zh, xi, da+zh+xi-1) + 1) % MOD;
+		jg[da][zh][xi][sh] = jieguo;
+		return jieguo;
+	}
+	int jieguo = 0;
+	for(int D = 0; D < da; D++){
+		for(int Z = 0; Z <= zh; Z++){
+			for(int X = 0; X <= xi; X++){
+				jieguo += (js(D, Z, X, sh-1) * js(da-D-1, zh-Z, xi-X, sh))%MOD;
+			}
+		}
+	}
+	for(int Z = 0; Z < zh; Z++){
+		for(int X = 0; X <= xi; X++){
+			jieguo += (js(0, Z, X, sh-1) * js(da, zh-Z-1, xi-X, sh))%MOD;
+		}
+	}
+	for(int X = 0; X < xi; X++){
+		jieguo += (js(0, 0, X, sh-1) * js(da, zh, xi-X-1, sh))%MOD;
+	}
+	jieguo %= MOD;
+	jg[da][zh][xi][sh] = jieguo;
+	return jieguo;
+}
+
+int main() {
+	init();
+	int Da, Zh, Xi, Sh;
+	scanf("%d%d%d%d", &Da, &Zh, &Xi, &Sh);
+	printf("%d\n", (js(Da, Zh, Xi, Sh) + MOD - js(Da, Zh, Xi, Sh-1))%MOD);
+	return 0;
+}
