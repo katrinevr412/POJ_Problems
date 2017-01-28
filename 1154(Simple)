@@ -1,0 +1,53 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+bool state[26] = {false};
+
+char board[20][20];
+
+int R, C;
+
+int ans = 0;
+int cur = 0;
+
+void dfs(int x, int y){
+	state[board[x][y]-'A'] = true;
+	cur ++;
+	int cnt = 0;
+	if(x > 0 && !state[board[x-1][y]-'A']){
+		dfs(x-1, y);
+		cnt ++;
+	}
+	if(x < R-1 && !state[board[x+1][y]-'A']){
+		dfs(x+1, y);
+		cnt ++;
+	}
+	if(y > 0 && !state[board[x][y-1]-'A']){
+		dfs(x, y-1);
+		cnt ++;
+	}
+	if(y < C-1 && !state[board[x][y+1]-'A']){
+		dfs(x, y+1);
+		cnt ++;
+	}
+	if(cnt == 0 && cur > ans){
+		ans = cur;
+	}
+	state[board[x][y]-'A'] = false;
+	cur --;
+}
+
+int main() {
+	scanf("%d%d", &R, &C);
+	for(int i = 0; i < R; i++){
+		char s[21];
+		scanf("%s", s);
+		for(int j = 0; j < C; j++){
+			board[i][j] = s[j];
+		}
+	}
+	dfs(0,0);
+	printf("%d\n", ans);
+	return 0;
+}
