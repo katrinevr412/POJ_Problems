@@ -1,0 +1,36 @@
+#include <iostream>
+using namespace std;
+
+int mx(int a, int b){
+	if(a > b) return a;
+	return b;
+}
+
+const int MININT = -2147483648;
+
+int main() {
+
+	int res[104][104] = {0};
+	int val[104][104] = {0};
+	int F, V;
+	cin >> F >> V;
+	for(int i = 1; i <= F; i++){
+		for(int j = 1; j <= V; j++){
+			cin >> val[j][i];
+		}
+	}
+	for(int i = 0; i <= V; i++){
+		for(int j = 0; j <= F; j++){
+			if(i < j) {
+				res[i][j] = MININT;
+				continue;
+			}
+			if(i == 0 || j == 0) continue;
+			int tmp = res[i-1][j];
+			int temp = res[i-1][j-1] + val[i][j];
+			res[i][j] = mx(tmp, temp);
+		}
+	}
+	cout << res[V][F] << endl;
+	return 0;
+}
