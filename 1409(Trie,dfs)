@@ -1,0 +1,135 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <stdio.h>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+char toJ(char c){
+	if(c <= 'c') return '2';
+	if(c <= 'f') return '3';
+	if(c <= 'i') return '4';
+	if(c <= 'l') return '5';
+	if(c <= 'o') return '6';
+	if(c <= 's') return '7';
+	if(c <= 'v') return '8';
+	return '9';
+}
+
+int wordNum;
+string words[120];
+
+struct node{
+	node *succ[8];
+	vector<int> leafWords;
+	node(){
+		for(int i = 0; i < 8; i++) succ[i] = NULL;
+	}
+	void clear(){
+		for(int i = 0; i < 8; i++) succ[i] = NULL;
+		leafWords.clear();
+	}
+};
+
+node nodePool[100000];
+int usedNodeNum;
+
+void buildTree(){
+	for(int i = 0; i < wordNum; i++){
+		int len = words[i].length();
+		node *cur = &nodePool[0];
+		for(int j = 0; j < len; j++){
+			char dir = toJ(words[i][j]);
+			int Dir = dir - '2';
+			if(cur->succ[Dir] == NULL){
+				nodePool[usedNodeNum].clear();
+				cur->succ[Dir] = &nodePool[usedNodeNum];
+				usedNodeNum++;
+			}
+			cur = cur->succ[Dir];
+		}
+		cur->leafWords.push_back(i);
+	}
+}
+
+struct period{
+	int start, end, no;
+	period(int s, int e, int n):start(s),end(e),no(n){}
+};
+
+bool cmp(const period& p1, const period& p2){
+	return p1.no < p2.no;
+}
+
+int seqLen;
+bool kx[500] = {false};
+vector<period> parts[500];
+void dfs(int seqPos, int wordGs, int *gj);
+
+int main() {
+	while(1){
+		cin >> wordNum;
+		if(!wordNum) break;
+		for(int i = 0; i < wordNum; i++){
+			cin >> words[i];
+		}
+		sort(words, words+wordNum);
+		usedNodeNum = 1;
+		nodePool[0].clear();
+		buildTree();
+		string seq;
+		cin >> seq;
+
+		seqLen = seq.length();
+		for(int i = 0; i < seqLen; i++){
+			parts[i].clear();
+		}
+		for(int i = 0; i < seqLen; i++){
+			int end = i;
+			node *cur = &nodePool[0];
+			while(end < seqLen && cur != NULL){
+				int dir = seq[end] - '2';
+				cur = cur->succ[dir];
+				if(!cur) break;
+				int sz = cur->leafWords.size();
+				for(int j = 0; j < sz; j++){
+					parts[i].push_back(period(i, end+1, cur->leafWords[j]));
+				}
+				end++;
+			}
+			sort(parts[i].begin(), parts[i].end(), cmp);
+		}
+
+		kx[seqLen] = true;
+		for(int i = seqLen-1; i >= 0; i--){
+			int sz = parts[i].size();
+			int j;
+			for(j = 0; j < sz; j++){
+				if(kx[parts[i][j].end]) break;
+			}
+			if(j != sz) kx[i] = true;
+		}
+		int gj[500];
+		dfs(0, 0, gj);
+		cout << "--" << endl;
+	}
+	return 0;
+}
+
+void dfs(int seqPos, int wordGs, int *gj){
+	if(seqPos == seqLen){
+		for(int i = 0; i < wordGs; i++){
+			cout << words[gj[i]];
+			if(i != wordGs-1) cout << " ";
+			else cout << "." << endl;
+		}
+		return;
+	}
+	int sz = parts[seqPos].size();
+	for(int i = 0; i < sz; i++){
+		if(!kx[parts[seqPos][i].end]) continue;
+		gj[wordGs] = parts[seqPos][i].no;
+		dfs(parts[seqPos][i].end, wordGs+1, gj);
+	}
+}
