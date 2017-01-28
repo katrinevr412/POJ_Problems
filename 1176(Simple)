@@ -1,0 +1,107 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <string>
+using namespace std;
+
+vector<string> results;
+
+void quickSort(vector<string> &s, int l, int r)
+{
+    if (l < r)
+    {
+        int i = l, j = r;
+        string x = s[l];
+        while (i < j)
+        {
+            while(i < j && s[j] >= x)
+                j--;
+            if(i < j)
+                s[i++] = s[j];
+            while(i < j && s[i] < x)
+                i++;
+            if(i < j)
+                s[j--] = s[i];
+        }
+        s[i] = x;
+        quickSort(s, l, i - 1);
+        quickSort(s, i + 1, r);
+    }
+}
+
+int main() {
+	int N, C;
+	vector<int> liang, mie;
+	scanf("%d%d", &N, &C);
+	while(1){
+		int temp;
+		scanf("%d", &temp);
+		if(temp == -1) break;
+		liang.push_back(temp);
+	}
+	while(1){
+		int temp;
+		scanf("%d", &temp);
+		if(temp == -1) break;
+		mie.push_back(temp);
+	}
+	int state;
+	for(state = 0; state < 16; state++){
+		int st[4];
+		for(int i = 0; i < 4; i++){
+			if((state >> i)%2 == 0) st[i] = 0;
+			else st[i] = 1;
+		}
+		int sum = 0;
+		for(int i = 0; i < 4; i++) sum += st[i];
+		if(sum > C || (C-sum)%2 != 0) continue;
+		int lNum = liang.size(), mNum = mie.size();
+		bool ky = 1;
+		for(int i = 0; i < lNum; i++){
+			int cs = 0;
+			if(st[0]) cs++;
+			if(st[1] && liang[i]%2 != 0) cs++;
+			if(st[2] && liang[i]%2 == 0) cs++;
+			if(st[3] && liang[i]%3 == 1) cs++;
+			if(cs%2 != 0){
+				ky = 0;
+				break;
+			}
+		}
+		if(!ky) continue;
+		for(int i = 0; i < mNum; i++){
+			int cs = 0;
+			if(st[0]) cs++;
+			if(st[1] && mie[i]%2 != 0) cs++;
+			if(st[2] && mie[i]%2 == 0) cs++;
+			if(st[3] && mie[i]%3 == 1) cs++;
+			if(cs%2 == 0){
+				ky = 0;
+				break;
+			}
+		}
+		if(!ky) continue;
+		string tmp = "";
+		for(int i = 1; i <= N; i++){
+			int cs = 0;
+			if(st[0]) cs++;
+			if(st[1] && i%2 != 0) cs++;
+			if(st[2] && i%2 == 0) cs++;
+			if(st[3] && i%3 == 1) cs++;
+			if(cs%2 == 0) tmp += '1';
+			else tmp += '0';
+		}
+		results.push_back(tmp);
+	}
+	int sz = results.size();
+	//cout << sz << endl;
+	quickSort(results, 0, sz-1);
+	string s = "";
+	for(int i = 0; i < sz; i++){
+		if(results[i] != s) {
+			cout << results[i] << endl;
+			s = results[i];
+		}
+	}
+	return 0;
+}
