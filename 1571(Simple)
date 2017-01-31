@@ -1,0 +1,43 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+	int month;
+	double perm, tot;
+	int n;
+	while(1){
+		cin >> month >> perm >> tot >> n;
+		if(month < 0) break;
+		int *startM = new int[n];
+		double *perc = new double[n];
+
+		for(int i = 0; i < n; i++){
+			cin >> startM[i] >> perc[i];
+		}
+		int pos = 0;
+		double carPrc = (tot+perm) * (1-perc[0]);
+		if(carPrc > tot){
+			cout << "0 months" << endl;
+			continue;
+		}
+		perm = tot / month;
+		for(int i = 1; i <= month; i++){
+			if(pos+1 < n && startM[pos+1] == i){
+				pos++;
+			}
+			double curOwe = tot - i * perm;
+			carPrc = carPrc * (1-perc[pos]);
+			//cout << i << " " << carPrc << " " << curOwe << endl;
+			if(carPrc > curOwe){
+				cout << i << " month";
+				if(i != 1) cout << "s";
+				cout << endl;
+				break;
+			}
+		}
+		//cout << 1 << endl;
+		delete [] startM;
+		delete [] perc;
+	}
+	return 0;
+}
