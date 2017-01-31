@@ -1,0 +1,78 @@
+#include <iostream>
+using namespace std;
+
+bool high(int note){
+	return note >= 8;
+}
+
+bool low(int note){
+	return note <= 1;
+}
+
+bool mid(int note){
+	return note == 4 || note == 5;
+}
+
+int parse(int *notes, int pos){
+	if(mid(notes[pos]) && mid(notes[pos+1])) return 0;
+	if(low(notes[pos]) && high(notes[pos+1])) return 1;
+	return 2;
+}
+
+bool isBeg(int *notes, int pos){
+	return parse(notes, pos)==0 && parse(notes, pos+2)==1;
+}
+
+void printTm(int n){
+	if(n < 10) cout << 0;
+	cout << n;
+}
+
+void printTm(int fz, int mz){
+	printTm(fz);
+	cout << ":";
+	printTm(mz);
+}
+
+int getVal(int *notes, int pos){
+	int t1 = parse(notes, pos), t2 = parse(notes, pos+2), t4 = parse(notes, pos+4);
+	/*
+	if(t1==2 || t2==2 || t4==2){
+		int a[2];
+		return a[1000000];
+	}
+	*/
+	return t1+2*t2+4*t4;
+}
+
+int main() {
+	int n;
+	cin >> n;
+	for(int i = 0; i < n; i++){
+		cout << "Program " << i+1 << endl;
+		int cnt = 0;
+		int note[11000];
+		while(1){
+			int tmp;
+			cin >> tmp;
+			if(tmp == 10) break;
+			note[cnt] = tmp;
+			cnt++;
+		}
+		int offset = 0;
+		while(offset <= cnt - 16){
+			//cout << offset << endl;
+			if(!isBeg(note, offset)){
+				offset++;
+				continue;
+			}
+			int tm = offset / 3;
+			int fz = tm/60, mz = tm%60;
+			printTm(fz, mz);
+			int spd = getVal(note, offset+4), inc = getVal(note, offset+10);
+			cout << " Speed " << spd << " Inclination " << inc << endl;
+			offset += 16;
+		}
+	}
+	return 0;
+}
