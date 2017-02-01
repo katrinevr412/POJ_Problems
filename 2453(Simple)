@@ -1,0 +1,24 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+	int n;
+	while(1){
+		cin >> n;
+		if(!n) break;
+		int cnt = 0;
+		int pos = 0;
+		for(; pos < 30; pos++){
+			if(n & (1<<pos)){
+				cnt++;
+				if(!(n & (1<<(pos+1)))) break;
+			}
+		}
+		n = n - n % (1<<(pos+1));
+		cnt--;
+		n += (1<<(pos+1));
+		n += (1<<cnt)-1;
+		cout << n << endl;
+	}
+	return 0;
+}
