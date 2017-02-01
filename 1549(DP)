@@ -1,0 +1,92 @@
+#include <iostream>
+#include <stdio.h>
+#include <string>
+using namespace std;
+
+int state[1024][8][8];
+
+int INF = 1000000;
+
+void init(int n){
+	int mx = 1 << (n-1);
+	for(int i = 0; i < mx; i++){
+		for(int j = 0; j < 8; j++){
+			for(int k = 0; k < 8; k++){
+				state[i][j][k] = INF;
+			}
+		}
+	}
+}
+
+int main() {
+	while(1){
+		int n;
+		cin >> n;
+		//cout << n << endl;
+		if(!n) {
+			//cout << "end" << endl;
+			break;
+		}
+		int score[8];
+		for(int i = 0; i < 8; i++){
+			cin >> score[i];
+		}
+		int octagon[14][8];
+		for(int i = 0; i < n; i++){
+			string strr;
+			cin >> strr;
+			for(int j = 0; j < 8; j++){
+				octagon[i][j] = strr[j]-'A';
+			}
+		}
+
+		init(n);
+		int upBd = 1 << (n-1);
+		for(int st = 1; st < upBd; st++){
+			int cnt = 0;
+			int kequ[12] = {0};
+			for(int i = 0; i < n-1; i++){
+				if(st & (1 << i)){
+					kequ[cnt] = i;
+					cnt++;
+				}
+			}
+			if(cnt == 1){
+				//cout << st << endl;
+				int kuai = kequ[0];
+				for(int i = 0; i < 4; i++){
+					state[st][octagon[kuai][i]][octagon[kuai][i+4]] = 0;
+					state[st][octagon[kuai][i+4]][octagon[kuai][i]] = 0;
+				}
+			}
+			else{
+
+				//cout << endl;
+				for(int i = 0; i < cnt; i++){
+					int kuai = kequ[i];
+					int oldState = st - (1 << kuai);
+					for(int j = 0; j < 8; j++){
+						int newCol = octagon[kuai][(j+4)%8];
+						int oldCol = octagon[kuai][j];
+						for(int k = 0; k < 8; k++){
+							int updated = state[oldState][k][oldCol] + score[oldCol];
+							if(updated < state[st][k][newCol]){
+								state[st][k][newCol] = updated;
+							}
+						}
+					}
+				}
+			}
+		}
+		int resSt = upBd - 1;
+		int res = INF;
+		for(int i = 0; i < 8; i++){
+			int updateRes = score[octagon[n-1][i]] + score[octagon[n-1][(i+4)%8]];
+			updateRes += state[resSt][octagon[n-1][i]][octagon[n-1][(i+4)%8]];
+			if(updateRes < res) res = updateRes;
+		}
+		if(res < INF) cout << res << endl;
+		else cout << "impossible" << endl;
+	}
+	return 0;
+}
