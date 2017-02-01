@@ -1,0 +1,80 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+int p,q,r,s,t;
+string wff;
+
+bool eval(int &offset){
+	bool var1, var2;
+	//evaluate the value acocording to current p~t, and set offset to be the next place
+	switch(wff[offset]){
+	 case 'p':
+		offset++;
+		return (bool)p;
+	 case 'q':
+		offset++;
+		return (bool)q;
+	 case 'r':
+		offset++;
+		return (bool)r;
+	 case 's':
+		offset++;
+		return (bool)s;
+	 case 't':
+		offset++;
+		return (bool)t;
+	 case 'K':
+		offset++;
+		var1 = eval(offset);
+		var2 = eval(offset);
+		return var1 && var2;
+	 case 'A':
+		offset++;
+		var1 = eval(offset);
+		var2 = eval(offset);
+		return var1 || var2;
+	 case 'N':
+		offset++;
+		return !eval(offset);
+	 case 'C':
+	    offset++;
+	    var1 = eval(offset);
+	    var2 = eval(offset);
+	    return !var1 || var2;
+	 case 'E':
+		offset++;
+		var1 = eval(offset);
+		var2 = eval(offset);
+		return var1==var2;
+	}
+}
+
+
+int main() {
+
+	while(1){
+		cin >> wff;
+		if(wff[0] == '0') break;
+		bool guile = false;
+		for(p = 0; p < 2; p++){
+			for(q = 0; q < 2; q++){
+				for(r = 0; r < 2; r++){
+					for(s = 0; s < 2; s++){
+						for(t = 0; t < 2; t++){
+							int offset = 0;
+							if(!eval(offset)){
+								guile = true;
+								goto done;
+							}
+						}
+					}
+				}
+			}
+		}
+		done:
+		if(!guile) cout << "tautology" << endl;
+		else cout << "not" << endl;
+	}
+	return 0;
+}
