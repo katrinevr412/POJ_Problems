@@ -1,0 +1,142 @@
+#include <iostream>
+#include <vector>
+#include <stdio.h>
+#include <cmath>
+using namespace std;
+
+struct pt{
+	double x,y;
+	pt():x(0),y(0){}
+	pt(double x,double y):x(x),y(y){}
+};
+
+int m,n,p;
+pt pts[10];
+double mn[256];
+vector<pt> cutRes[256];
+bool gotten[256] = {false};
+
+double getDist(pt &p1, pt &p2){
+	return sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y));
+}
+
+bool collinear(pt &p1, pt &p2, pt &p3){
+	double dx = p2.x-p1.x, dy = p2.y-p1.y, dxx = p3.x-p2.x, dyy = p3.y - p2.y;
+	return abs(dx*dyy-dxx*dy) < 1e-8;
+}
+
+bool isItc(pt &p1, pt &p2, pt &ref1, pt &ref2, double &ratio){
+	double fm = (p2.y-p1.y)*(ref2.x-ref1.x) - (p2.x-p1.x)*(ref2.y-ref1.y);
+	//if same k
+	if(abs(fm) < 1e-8) return false;
+	double fz = (p1.x-ref1.x)*(ref2.y-ref1.y) - (p1.y-ref1.y)*(ref2.x-ref1.x);
+	ratio = fz / fm;
+	pt itc(p1.x+ratio*(p2.x-p1.x), p1.y+ratio*(p2.y-p1.y));
+	double rratio;
+	if(abs(ref2.x-ref1.x)>1e-8){
+		rratio = (itc.x-ref1.x)/(ref2.x-ref1.x);
+	}
+	else{
+		rratio = (itc.y-ref1.y)/(ref2.y-ref1.y);
+	}
+	if(ratio < 1e-8 && rratio > 1e-8 && rratio < 1+1e-8) return true;
+	if(ratio > 1-1e-8 && rratio > -1e-8 && rratio < 1-1e-8) return true;
+	return false;
+}
+
+void updateShape(int oldState, int addEdge){
+	//get the new state vector of pt's, and return the cut length
+	int newState = oldState + (1 << addEdge);
+	/*
+	if(gotten[newState]){
+		//find the edge that contains addEdge, and cal the length
+		//if the length is smaller, update it
+		int startNo = addEdge, endNo = (addEdge+1)%p;
+		int sz = cutRes[oldState].size();
+		for(int i = 0; i < sz; i++){
+			int startN = i, endN = (i+1)%sz;
+
+			if(collinear(pts[startNo], pts[endNo], cutRes[oldState][startN]) && collinear(pts[startNo], pts[endNo], cutRes[oldState][endN])){
+				double updateDist = mn[oldState] + getDist(cutRes[oldState][startN], cutRes[oldState][endN]);
+				if(mn[newState] > updateDist) mn[newState] = updateDist;
+				return;
+			}
+		}
+		return;
+	}
+	*/
+	//gotten[newState] = 1;
+	//set the total length of newState to be oldState length plus cut length
+	//and store pt vector in cutRes[newState]
+	int sz = cutRes[oldState].size();
+	int qdIdx = -1, zdIdx = -1;
+	pt qd, zd;
+	double ratio;
+	pt &p1 = pts[addEdge], &p2 = pts[(addEdge+1)%p];
+	for(int i = 0; i < sz; i++){
+		pt &ref1 = cutRes[oldState][i], &ref2 = cutRes[oldState][(i+1)%sz];
+		if(isItc(p1,p2,ref1,ref2,ratio)){
+			if(ratio < 0.5){
+				qdIdx = i;
+				qd.x = p1.x+ratio*(p2.x-p1.x), qd.y = p1.y+ratio*(p2.y-p1.y);
+			}
+			else{
+				zdIdx = (i+1)%sz;
+				zd.x = p1.x+ratio*(p2.x-p1.x), zd.y = p1.y+ratio*(p2.y-p1.y);
+			}
+		}
+	}
+	if(!gotten[newState]){
+		cutRes[newState].clear();
+		cutRes[newState].push_back(qd);
+		cutRes[newState].push_back(zd);
+		int sent = (qdIdx+1)%sz;
+		for(int i = zdIdx; i != sent; i=(i+1)%sz){
+			cutRes[newState].push_back(cutRes[oldState][i]);
+		}
+		gotten[newState] = true;
+	}
+	double updateDist = mn[oldState] + getDist(qd, zd);
+	if(mn[newState] > updateDist) mn[newState] = updateDist;
+	/*
+	if(newState == 8){
+		cout << "qd: (" << qd.x << "," << qd.y << ")" << endl;
+		cout << "zd: (" << zd.x << "," << zd.y << ")" << endl;
+	}*/
+}
+
+int main() {
+	cin >> n >> m;
+	cin >> p;
+	for(int i = 0; i < p; i++){
+		cin >> pts[i].x >> pts[i].y;
+	}
+	mn[0] = 0;
+	cutRes[0].push_back(pt(0,0));
+	cutRes[0].push_back(pt(0,m));
+	cutRes[0].push_back(pt(n,m));
+	cutRes[0].push_back(pt(n,0));
+	int end = (1 << p) - 1;
+	for(int i = 1; i <= end; i++){
+		mn[i] = 1e18;
+	}
+	for(int i = 1; i <= end; i++){
+		int qd[10];
+		int cnt = 0;
+		for(int j = 0; j < p; j++){
+			if(i & (1<<j)){
+				qd[cnt] = j;
+				cnt++;
+			}
+		}
+
+		for(int j = 0; j < cnt; j++){
+			int addEdge = qd[j];
+			int oldState = i - (1<<addEdge);
+			updateShape(oldState, addEdge);
+		}
+	}
+	//cout << mn[8] << endl;
+	printf("Minimum total length = %.3lf\n", mn[end]);
+	return 0;
+}
