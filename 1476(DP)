@@ -1,0 +1,53 @@
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+using namespace std;
+
+int n,k;
+int period[15][15];
+int price[15][15][32];
+int mn[10000][15];
+const int infty = 10000000;
+
+
+int main() {
+	int cnt = 0;
+	while(1){
+		cin >> n >> k;
+		if(!n && !k) break;
+		for(int t = 0; t <= k; t++){
+			for(int c = 1; c <= n; c++){
+				mn[t][c] = infty;
+			}
+		}
+		mn[0][1] = 0;
+		for(int i = 1; i <= n; i++){
+			for(int j = 1; j <= n; j++){
+				if(j==i) continue;
+				cin >> period[i][j];
+				for(int l = 1; l <= period[i][j]; l++){
+					cin >> price[i][j][l%period[i][j]];
+				}
+			}
+		}
+		cnt++;
+		cout << "Scenario #" << cnt << endl;
+		for(int t = 1; t <= k; t++){
+			for(int c = 1; c <= n; c++){
+				for(int c_ = 1; c_ <= n; c_++){
+					if(c_ == c || mn[t-1][c_] >= infty) continue;
+					int tPrc = price[c_][c][t%period[c_][c]];
+					if(!tPrc) continue;
+					int tmpPrc = tPrc + mn[t-1][c_];
+					if(tmpPrc < mn[t][c]){
+						mn[t][c] = tmpPrc;
+					}
+				}
+			}
+		}
+		if(mn[k][n] >= infty) cout << "No flight possible.";
+		else cout << "The best flight costs " << mn[k][n] << ".";
+		cout << endl << endl;
+	}
+	return 0;
+}
