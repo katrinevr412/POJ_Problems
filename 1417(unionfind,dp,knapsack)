@@ -1,0 +1,160 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+int rep[1005];
+bool rel[1005];//relation related to rep
+int memCnt[1005];
+int n, pDiv, pDev, total;
+bool trc[1005][1005];
+bool ky[1005][1005];
+
+void init(){
+	total = pDiv+pDev;
+	for(int i = 1; i <= total; i++){
+		rep[i] = i;
+		rel[i] = 0;
+		memCnt[i] = 1;
+	}
+}
+
+int getRep(int ele){
+	vector<int> path;
+	while(rep[ele] != ele){
+		path.push_back(ele);
+		ele = rep[ele];
+	}
+	int sz = path.size();
+	for(int i = sz-1; i >= 0; i--){
+		int oldRep = rep[path[i]];
+		rep[path[i]] = ele;
+		if(!rel[path[i]]){
+			rel[path[i]] = rel[oldRep];
+		}
+		else{
+			rel[path[i]] = !rel[oldRep];
+		}
+	}
+	return ele;
+}
+
+int getUnion(int a, int b, bool relt){
+	int aRep = getRep(a), bRep = getRep(b);
+	if(aRep == bRep) return aRep;
+	if(memCnt[aRep] > memCnt[bRep]){
+		memCnt[aRep] += memCnt[bRep];
+		rep[bRep] = aRep;
+		rel[bRep] = relt ^ rel[a] ^ rel[b];
+		return aRep;
+	}
+	else{
+		memCnt[bRep] += memCnt[aRep];
+		rep[aRep] = bRep;
+		rel[aRep] = relt ^ rel[a] ^ rel[b];
+		return bRep;
+	}
+}
+
+int main() {
+	while(1){
+		scanf("%d%d%d", &n, &pDiv, &pDev);
+		if(!n && !pDiv && !pDev) break;
+		init();
+		for(int i = 0; i < n; i++){
+			int a, b;
+			char state[16];
+			scanf("%d%d%s", &a, &b, state);
+			getUnion(a, b, strcmp(state, "yes"));
+		}
+		int cnt = 0;
+		int repList[1005];
+		int revRepList[1005];
+		for(int i = 1; i <= total; i++){
+			revRepList[i] = -1;
+		}
+		vector<int> sameList[1005], diffList[1005];
+		for(int i = 1; i <= total; i++){
+			int repI = getRep(i);
+			if(revRepList[repI] == -1){
+				revRepList[repI] = cnt;
+				repList[cnt] = repI;
+				cnt++;
+			}
+			if(!rel[i]){
+				sameList[revRepList[repI]].push_back(i);
+			}
+			else{
+				diffList[revRepList[repI]].push_back(i);
+			}
+		}
+		int sameCnt[1005] = {0}, diffCnt[1005] = {0};
+		for(int i = 0; i < cnt; i++){
+			sameCnt[i] = sameList[i].size();
+			diffCnt[i] = diffList[i].size();
+		}
+		//begin knapsack
+		//first init
+		for(int i = 1; i <= cnt; i++){
+			for(int j = 0; j <= pDiv; j++){
+				ky[i][j] = false;
+			}
+		}
+		ky[0][0] = true;
+		for(int i = 1; i <= cnt; i++){
+			for(int j = 0; j <= pDiv; j++){
+				if(sameCnt[i-1] <= j && ky[i-1][j-sameCnt[i-1]]){
+					ky[i][j] = true;
+					trc[i][j] = false;
+				}
+				if(diffCnt[i-1] <= j && ky[i-1][j-diffCnt[i-1]]){
+					ky[i][j] = true;
+					trc[i][j] = true;
+				}
+			}
+		}
+		bool weiyi = true;
+		vector<int> collect;
+		int curSum = pDiv;
+		if(!ky[cnt][pDiv]){
+			weiyi = false;
+			goto done;
+		}
+
+		for(int i = cnt; i > 0; i--){
+			if(curSum >= sameCnt[i-1] && curSum >= diffCnt[i-1] && ky[i-1][curSum-sameCnt[i-1]] && ky[i-1][curSum-diffCnt[i-1]]){
+				weiyi = false;
+				goto done;
+			}
+			if(!trc[i][curSum]){
+				int sz = sameList[i-1].size();
+				for(int j = 0; j < sz; j++){
+					collect.push_back(sameList[i-1][j]);
+				}
+				curSum -= sameCnt[i-1];
+			}
+			else{
+				int sz = diffList[i-1].size();
+				for(int j = 0; j < sz; j++){
+					collect.push_back(diffList[i-1][j]);
+				}
+				curSum -= diffCnt[i-1];
+			}
+		}
+		done:
+		if(!weiyi){
+			printf("no\n");
+		}
+		else{
+			sort(collect.begin(), collect.end());
+			int sz = collect.size();
+			for(int i = 0; i < sz; i++){
+				printf("%d\n", collect[i]);
+			}
+			printf("end\n");
+		}
+	}
+	return 0;
+}
