@@ -1,0 +1,89 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+using namespace std;
+
+int n;
+vector<int> adj[1505];
+
+int mn(int a, int b){
+	return (a<b)?a:b;
+}
+
+struct node{
+	int parent;
+	vector<int> succ;
+};
+
+node nodes[1505];
+int dp[1505][2];
+
+void buildTree(int root){
+	int sz = adj[root].size();
+	for(int i = 0; i < sz; i++){
+		int suc = adj[root][i];
+		if(suc != nodes[root].parent){
+			nodes[root].succ.push_back(suc);
+			nodes[suc].parent = root;
+		}
+	}
+	for(int i = 0; i < sz; i++){
+		int suc = adj[root][i];
+		if(suc != nodes[root].parent){
+			buildTree(suc);
+		}
+	}
+}
+
+void getDP(int root){
+	int sz = nodes[root].succ.size();
+	dp[root][0] = 0;
+	dp[root][1] = 1;
+	for(int i = 0; i < sz; i++){
+		getDP(nodes[root].succ[i]);
+	}
+	for(int i = 0; i < sz; i++){
+		dp[root][0] += dp[nodes[root].succ[i]][1];
+		dp[root][1] += mn(dp[nodes[root].succ[i]][1], dp[nodes[root].succ[i]][0]);
+	}
+}
+
+int main() {
+	while(scanf("%d", &n) == 1){
+		for(int i = 0; i < n; i++){
+			adj[i].clear();
+		}
+		for(int i = 0; i < n; i++){
+			nodes[i].succ.clear();
+		}
+		for(int i = 0; i < n; i++){
+			int no;
+			scanf("%d", &no);
+			char c;
+			while(scanf("%c", &c)){
+				if(c >= '0' && c <= '9') break;
+			}
+			int gs = c-'0';
+			while(scanf("%c", &c)){
+				if(c < '0' || c > '9') break;
+				gs *= 10;
+				gs += (c-'0');
+			}
+			while(c != ')'){
+				scanf("%c", &c);
+			}
+			for(int j = 0; j < gs; j++){
+				int tmpNo;
+				scanf("%d", &tmpNo);
+				adj[no].push_back(tmpNo);
+				adj[tmpNo].push_back(no);
+			}
+		}
+		int root = 0;
+		nodes[root].parent = -1;
+		buildTree(root);
+		getDP(root);
+		printf("%d\n", mn(dp[0][0], dp[0][1]));
+	}
+	return 0;
+}
