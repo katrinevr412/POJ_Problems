@@ -1,0 +1,17 @@
+import java.math.BigDecimal;
+import java.util.Scanner;
+
+
+public class Main {
+	public static void main(String[] argv){
+		Scanner sc = new Scanner(System.in);
+		int n = sc.nextInt();
+		sc.close();
+		BigDecimal res = new BigDecimal(2);
+		System.out.println(res.toPlainString());
+		for(int i = 1; i < n; i++){
+			res = res.multiply(res.subtract(BigDecimal.ONE)).add(BigDecimal.ONE);
+			System.out.println(res.toPlainString());
+		}
+	}
+}
