@@ -1,0 +1,112 @@
+#include <iostream>
+#include <stdio.h>
+#include <cmath>
+#include <cstring>
+#include <queue>
+using namespace std;
+
+//bool zos[512][512];
+bool has[512][512][2][10];
+
+char res[2000000] = {"\0"};
+
+void init(int N, int k){
+	int gs =  N / (1 << k);
+	for(int i = 0; i < gs; i++){
+		for(int j = 0; j < gs; j++){
+			has[i][j][0][k] = 0;
+			has[i][j][1][k] = 0;
+		}
+	}
+	//initialized[k] = 1;
+}
+
+struct node{
+	int x, y, k;
+	node(int x, int y, int k): x(x),y(y),k(k){}
+};
+
+char toHexNum(int n){
+	if(n < 10) return n + '0';
+	return n + 'A' - 10;
+}
+
+int atVal(char *res, int plc){
+	if(plc < 0) return 0;
+	return res[plc] - '0';
+}
+
+void toHex(char *res, int len){
+	int cvtLen = (len-1)/4+1;
+	int origOffset = (len%4)-4;
+	if(origOffset == -4) origOffset = 0;
+	for(int i = 0; i < cvtLen; i++){
+		int thisOffset = origOffset + 4 * i;
+		int toCvt = 8 * atVal(res, thisOffset) + 4 * atVal(res, thisOffset+1) + 2 * atVal(res, thisOffset+2) + atVal(res, thisOffset+3);
+		res[i] = toHexNum(toCvt);
+	}
+	res[cvtLen] = '\0';
+}
+
+int main() {
+	int n;
+	scanf("%d", &n);
+	while(n--){
+		int N;
+		scanf("%d", &N);
+		int k = (int)(log(N+0.5)/log(2.0));
+		//printf("k=%d\n", k);
+		for(int i = 0; i <= k; i++){
+			init(N, i);
+		}
+
+		for(int i = 0; i < N; i++){
+			for(int j = 0; j < N; j++){
+				int tmp;
+				scanf("%d", &tmp);
+				//zos[i][j] = (bool)tmp;
+				int I = i, J = j;
+				for(int q = 0; q <= k; q++){
+					if(has[I][J][tmp][q]) break;
+					has[I][J][tmp][q] = 1;
+					I /= 2;
+					J /= 2;
+				}
+			}
+		}
+
+
+
+		int offset = 0;
+		queue<node> bfs;
+		bfs.push(node(0,0,k));
+		while(!bfs.empty()){
+			node curN = bfs.front();
+			//cout << "x=" << curN.x << ",y=" << curN.y << ",k=" << curN.k << endl;
+			bfs.pop();
+			if(!has[curN.x][curN.y][0][curN.k]){
+				res[offset] = '0';
+				res[offset+1] = '1';
+				offset += 2;
+			}
+			else if(!has[curN.x][curN.y][1][curN.k]){
+				res[offset] = '0';
+				res[offset+1] = '0';
+				offset += 2;
+			}
+			else{
+				bfs.push(node(2*curN.x, 2*curN.y, curN.k-1));
+				bfs.push(node(2*curN.x, 2*curN.y+1, curN.k-1));
+				bfs.push(node(2*curN.x+1, 2*curN.y, curN.k-1));
+				bfs.push(node(2*curN.x+1, 2*curN.y+1, curN.k-1));
+				res[offset] = '1';
+				offset++;
+			}
+		}
+		res[offset] = '\0';
+		//printf("%s\n", res);
+		toHex(res, offset);
+		printf("%s\n", res);
+	}
+	return 0;
+}
