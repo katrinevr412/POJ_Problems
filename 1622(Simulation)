@@ -1,0 +1,140 @@
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <cstring>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int m,n;
+
+int mn(int a, int b){
+	return a>b?b:a;
+}
+
+int mx(int a, int b){
+	return a>b?a:b;
+}
+
+
+int main() {
+	int cnt = 0;
+	while(1){
+		scanf("%d%d", &m,&n);
+		if(!m && !n) break;
+		cnt++;
+		bool board[32][32] = {0};
+		int gs;
+		scanf("%d",&gs);
+		for(int i = 0; i < gs; i++){
+			int tmpx, tmpy;
+			scanf("%d%d", &tmpx, &tmpy);
+			board[tmpx][tmpy] = 1;
+		}
+		while(1){
+			char cmd[8];
+			scanf("%s", cmd);
+			if(!strcmp(cmd,"done")){
+				break;
+			}
+			int offset;
+			scanf("%d", &offset);
+			vector<int> tongX[32], tongY[32];
+			for(int i = 0; i < m; i++){
+				for(int j = 0; j < n; j++){
+					if(board[i][j]){
+						tongX[i].push_back(j);
+						tongY[j].push_back(i);
+					}
+				}
+			}
+			int xMax = 0, yMax = 0;
+			for(int i = 0; i < m; i++){
+				xMax = mx(xMax, tongX[i].size());
+			}
+			for(int i = 0; i < n; i++){
+				yMax = mx(yMax, tongY[i].size());
+			}
+			int xPull = mn(offset, n-xMax), yPull = mn(offset, m-yMax);
+			switch(cmd[0]){
+				case 'd':{
+					for(int i = 0; i < n; i++){
+						int crit = yPull;
+						for(int j = 0; j < tongY[i].size(); j++){
+							if(tongY[i][j] >= crit) break;
+							tongY[i][j] = crit;
+							crit++;
+						}
+						for(int j = 0; j < m; j++){
+							board[j][i] = 0;
+						}
+						for(int j = 0; j < tongY[i].size(); j++){
+							board[tongY[i][j]][i] = 1;
+						}
+					}
+					break;
+				}
+				case 'l':{
+					for(int i = 0; i < m; i++){
+						int crit = n - 1 - xPull;
+						for(int j = tongX[i].size()-1; j >= 0; j--){
+							if(tongX[i][j] <= crit) break;
+							tongX[i][j] = crit;
+							crit--;
+						}
+						for(int j = 0; j < n; j++){
+							board[i][j] = 0;
+						}
+						for(int j = 0; j < tongX[i].size(); j++){
+							board[i][tongX[i][j]] = 1;
+						}
+					}
+					break;
+				}
+				case 'r':{
+					for(int i = 0; i < m; i++){
+						int crit = xPull;
+						for(int j = 0; j <tongX[i].size(); j++){
+							if(tongX[i][j] >= crit) break;
+							tongX[i][j] = crit;
+							crit++;
+						}
+						for(int j = 0; j < n; j++){
+							board[i][j] = 0;
+						}
+						for(int j = 0; j < tongX[i].size(); j++){
+							board[i][tongX[i][j]] = 1;
+						}
+					}
+					break;
+				}
+				case 'u':{
+					for(int i = 0; i < n; i++){
+						int crit = m - 1 - yPull;
+						for(int j = tongY[i].size()-1; j >= 0; j--){
+							if(tongY[i][j] <= crit) break;
+							tongY[i][j] = crit;
+							crit--;
+						}
+						for(int j = 0; j < m; j++){
+							board[j][i] = 0;
+						}
+						for(int j = 0; j < tongY[i].size(); j++){
+							board[tongY[i][j]][i] = 1;
+						}
+					}
+					break;
+				}
+			}
+		}
+		//vector<xy> xys;
+		cout << "Data set " << cnt << " ends with boxes at locations";
+		for(int i = 0; i < m; i++){
+			for(int j = 0; j < n; j++){
+				if(board[i][j]) cout << " (" << i << "," << j << ")";
+			}
+		}
+		cout << "." << endl;
+	}
+	return 0;
+}
