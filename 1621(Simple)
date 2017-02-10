@@ -1,0 +1,55 @@
+#include <iostream>
+#include <stdio.h>
+#include <assert.h>
+using namespace std;
+
+int ws(int n){
+	int res = 0;
+	while(n){
+		n /= 10;
+		res++;
+	}
+	return res;
+}
+
+int main() {
+	int cnt = 0;
+	while(1){
+		int n;
+		scanf("%d", &n);
+		if(!n) break;
+		cnt++;
+		printf("Polynomial %d: ", cnt);
+		int *a = new int[n+1];
+		scanf("%d", &a[n]);
+
+		assert(a[n]==1);
+
+		int even = 0, odd = 0;
+		if(n%2) odd++;
+		else even++;
+		for(int i = n-1; i >= 0; i--){
+			scanf("%d", &a[i]);
+			if(i%2) odd += a[i];
+			else even += a[i];
+		}
+		int zf;
+		scanf("%d", &zf);
+		if(zf == 1) printf("%d ", even+odd);
+		else printf("%d ", even-odd);
+		int cs = n, opr = 0;
+		while(1){
+			int next = cs-1;
+			while(next >= 0 && !a[next]) next--;
+			if(next == -1) {
+				opr += 2*cs;
+				break;
+			}
+			opr += 2*(cs-next)+1+ws(a[next]);
+			cs = next;
+		}
+		printf("%d\n", opr);
+		delete [] a;
+	}
+	return 0;
+}
