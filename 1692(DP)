@@ -1,0 +1,62 @@
+#include <iostream>
+#include <map>
+#include <stdio.h>
+#include <vector>
+
+using namespace std;
+
+int mx(int a, int b){
+	return a>b?a:b;
+}
+
+int search(vector<int> &pL, int lim){
+	int sz = pL.size();
+	if(!sz || pL[0] >= lim) return 0;
+	int low = 0, high = sz-1;
+	while(low < high){
+		int mid = (low + high + 1) / 2;
+		if(pL[mid] < lim){
+			low = mid;
+		}
+		else{
+			high = mid - 1;
+		}
+	}
+	return pL[low];
+}
+
+int main() {
+	int N;
+	scanf("%d", &N);
+	while(N--){
+		int n,m;
+		scanf("%d%d", &m, &n);
+		int dp[110][110] = {0};
+		int ms[110], ns[110];
+		for(int i = 1; i <= m; i++) scanf("%d", &ms[i]);
+		for(int i = 1; i <= n; i++) scanf("%d", &ns[i]);
+		vector<int> pairListM[110], pairListN[110];
+		for(int i = 1; i <= m; i++){
+			for(int j = 1; j <= n; j++){
+				if(ms[i] == ns[j]){
+					pairListM[i].push_back(j);
+					pairListN[j].push_back(i);
+				}
+			}
+		}
+
+		for(int i = 2; i <= m; i++){
+			for(int j = 2; j <= n; j++){
+				dp[i][j] = mx(dp[i][j-1], dp[i-1][j]);
+				if(ms[i] == ns[j]) continue;
+				int lastN = search(pairListM[i], j);
+				int lastM = search(pairListN[j], i);
+				if(lastM && lastN){
+					dp[i][j] = mx(dp[i][j], 2 + dp[lastM-1][lastN-1]);
+				}
+			}
+		}
+		printf("%d\n", dp[m][n]);
+	}
+	return 0;
+}
