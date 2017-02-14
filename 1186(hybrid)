@@ -1,0 +1,275 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+int k[7], p[7];
+int powerVal[151][31];
+bool powerCal[151][31] = {false};
+int ans = 0;
+int power(int a, int b){
+	//a^b
+	if(powerCal[a][b]) return powerVal[a][b];
+	if(a==1 || b==0) return 1;
+	if(b==1) return a;
+	int tmp = power(a, b/2);
+	powerCal[a][b] = true;
+	if(b%2){
+		int res = tmp*tmp*a;
+		powerVal[a][b] = res;
+		return res;
+	}
+	int rs = tmp*tmp;
+	powerVal[a][b] = rs;
+	return rs;
+}
+
+struct info{
+	int res;
+	int cs;
+	info *next;
+	info(): res(0), cs(0), next(NULL){}
+	info(int res, int cs): res(res), cs(cs), next(NULL){}
+};
+
+const int HASH = 2333333;
+
+info* hash[HASH] = {NULL};
+
+int mod(int n, int modVal){
+	int m = n%modVal;
+	if(m>=0) return m;
+	return m+modVal;
+}
+
+void addToHash(int n){
+	int pos = mod(n, HASH);//pos2 = mod(n, HASH2);
+	if(!hash[pos]){
+		hash[pos] = new info(n, 1);
+	}
+	else{
+		info *cur = hash[pos];
+		while(cur != NULL){
+			if(cur->res == n) break;
+			cur = cur->next;
+		}
+		if(cur){
+			cur->cs ++;
+		}
+		else{
+			info *tmp = new info(n,1);
+			info *laoHead = hash[pos];
+			tmp->next = laoHead;
+			hash[pos] = tmp;
+		}
+	}
+}
+
+int getHash(int n){
+	int pos = mod(n, HASH);//pos2 = mod(n, HASH2);
+	if(!hash[pos]) return 0;
+	info *cur = hash[pos];
+	while(cur != NULL){
+		if(cur->res == n) return cur->cs;
+		cur = cur->next;
+	}
+	return 0;
+}
+
+void addToHash(int start, int end, int M){
+	int gs = end - start;
+	switch(gs){
+	case 1:
+		for(int i = 1; i <= M; i++) addToHash(-k[start] * power(i, p[start]));
+		break;
+	case 2:
+		for(int i = 1; i <= M; i++){
+			int tmp = -k[start] * power(i, p[start]);
+			for(int j = 1; j <= M; j++){
+				addToHash(-k[start+1] * power(j, p[start+1]) + tmp);
+			}
+		}
+		break;
+	case 3:
+		for(int i = 1; i <= M; i++){
+			int tmp1 = -k[start] * power(i, p[start]);
+			for(int j = 1; j <= M; j++){
+				int tmp2 = tmp1 - k[start+1] * power(j, p[start+1]);
+				for(int q = 1; q <= M; q++){
+					addToHash(-k[start+2] * power(q, p[start+2]) + tmp2);
+				}
+			}
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void searchHash(int start, int end, int M){
+	int gs = end - start;
+		switch(gs){
+		case 1:
+			for(int i = 1; i <= M; i++) ans += getHash(k[start] * power(i, p[start]));
+			break;
+		case 2:
+			for(int i = 1; i <= M; i++){
+				int tmp = k[start] * power(i, p[start]);
+				for(int j = 1; j <= M; j++){
+					ans += getHash(k[start+1] * power(j, p[start+1]) + tmp);
+				}
+			}
+			break;
+		case 3:
+			for(int i = 1; i <= M; i++){
+				int tmp1 = k[start] * power(i, p[start]);
+				for(int j = 1; j <= M; j++){
+					int tmp2 = tmp1 + k[start+1] * power(j, p[start+1]);
+					for(int q = 1; q <= M; q++){
+						ans += getHash(k[start+2] * power(q, p[start+2]) + tmp2);
+					}
+				}
+			}
+			break;
+		default:
+			break;
+		}
+}
+
+int main() {
+	int n,M;
+	scanf("%d%d", &n, &M);
+
+	for(int i = 0; i < n; i++){
+		scanf("%d%d", &k[i], &p[i]);
+	}
+	if(n == 1){
+		if(!k[0]) cout << M << endl;
+		else cout << 0 << endl;
+	}
+	else{
+		addToHash(n/2, n, M);
+		ans = 0;
+		searchHash(0, n/2, M);
+		cout << ans << endl;
+	}
+	return 0;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+
+#include <iostream>
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+int k[7] = {1,1,1,1,1,1,1}, p[7]  = {1,1,1,1,1,1,1};
+int powerVal[151][31];
+bool powerCal[151][31] = {false};
+int ans = 0;
+int M,n;
+int num1 = 0, num2 = 0;
+int power(int a, int b){
+	//a^b
+	if(powerCal[a][b]) return powerVal[a][b];
+	if(a==1 || b==0) return 1;
+	if(b==1) return a;
+	int tmp = power(a, b/2);
+	powerCal[a][b] = true;
+	if(b%2){
+		int res = tmp*tmp*a;
+		powerVal[a][b] = res;
+		return res;
+	}
+	int rs = tmp*tmp;
+	powerVal[a][b] = rs;
+	return rs;
+}
+
+int bb[150*150*150];
+int aa[150*150*150];
+
+void addToList(int n, int &num, int *list){
+	list[num] = n;
+	num++;
+}
+
+
+void add(int start, int end, int &num, int *list, int sign){
+	int gs = end - start;
+	switch(gs){
+	case 1:
+		for(int i = 1; i <= M; i++) addToList(sign*k[start] * power(i, p[start]), num, list);
+		break;
+	case 2:
+		for(int i = 1; i <= M; i++){
+			int tmp = sign*k[start] * power(i, p[start]);
+			for(int j = 1; j <= M; j++){
+				addToList(sign*k[start+1] * power(j, p[start+1]) + tmp, num, list);
+			}
+		}
+		break;
+	case 3:
+		for(int i = 1; i <= M; i++){
+			int tmp1 = sign*k[start] * power(i, p[start]);
+			for(int j = 1; j <= M; j++){
+				int tmp2 = tmp1 + sign* k[start+1] * power(j, p[start+1]);
+				for(int q = 1; q <= M; q++){
+					addToList(sign*k[start+2] * power(q, p[start+2]) + tmp2, num, list);
+				}
+			}
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+
+
+
+
+int main() {
+	scanf("%d%d", &n, &M);
+
+	for(int i = 0; i < n; i++){
+		scanf("%d%d", &k[i], &p[i]);
+	}
+	if(n == 1){
+		if(!k[0]) cout << M << endl;
+		else cout << 0 << endl;
+	}
+	else{
+		bool hasZ = false, hasF = false;
+		for(int i = 0; i < n; i++){
+			if(k[i] > 0) hasZ = true;
+			if(k[i] < 0) hasF = true;
+		}
+		if(hasZ ^ hasF) cout << 0 << endl;
+		else{
+			add(0, n/2, num1, aa, 1);
+			add(n/2, n, num2, bb, -1);
+			sort(aa, aa+num1);
+			sort(bb, bb+num2);
+			int pa = 0, pb = 0;
+			while(pa < num1 && pb < num2){
+				if(aa[pa] < bb[pb]) pa++;
+				else if(aa[pa] > bb[pb]) pb++;
+				else{
+					int cur = aa[pa];
+					int cntA = 0, cntB = 0;
+					while(pa < num1 && aa[pa] == cur){
+						cntA++;
+						pa++;
+					}
+					while(pb < num2 && bb[pb] == cur){
+						cntB++;
+						pb++;
+					}
+					ans += cntA * cntB;
+				}
+			}
+			cout << ans << endl;
+		}
+	}
+	return 0;
+}
