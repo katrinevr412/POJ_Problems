@@ -1,0 +1,171 @@
+#include <iostream>
+#include <stdio.h>
+#include <map>
+#include <set>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+struct xd{
+	int bb, qd, zd;
+};
+
+bool operator<(const xd& x1, const xd& x2){
+	return x1.bb < x2.bb || (x1.bb==x2.bb && x1.qd < x2.qd) || (x1.bb==x2.bb && x1.qd==x2.qd && x1.zd<x2.zd);
+}
+
+int mx(int a, int b){
+	return (a>b)?a:b;
+}
+
+int mn(int a, int b){
+	return (a<b)?a:b;
+}
+
+int searchMn(vector<int> &vec, int tar){
+	int low = 1, high = vec.size() - 1;
+	if(vec[high] < tar) return -1;
+	while(low < high){
+		int mid = (low+high)/2;
+		if(vec[mid] >= tar){
+			high = mid;
+		}
+		else{
+			low = mid+1;
+		}
+	}
+	return low;
+}
+
+int searchMx(vector<int> &vec, int tar){
+	int low = 1, high = vec.size() - 1;
+	if(vec[low] > tar) return -1;
+	while(low < high){
+		int mid = (low+high+1)/2;
+		if(vec[mid] <= tar){
+			low = mid;
+		}
+		else{
+			high = mid-1;
+		}
+	}
+	return low;
+}
+
+int main() {
+	int tc;
+	scanf("%d", &tc);
+	while(tc--){
+		int gs;
+		scanf("%d", &gs);
+		vector<xd> heng, zong;
+		set<int> xzb, yzb;
+		while(gs--){
+			//cout << "eh" << endl;
+			int x1,y1,x2,y2;
+			scanf("%d%d%d%d", &x1,&y1,&x2,&y2);
+			xd tmp;
+			if(x1==x2){
+				tmp.bb = x1; tmp.qd = mn(y1,y2); tmp.zd = mx(y1,y2);
+				zong.push_back(tmp);
+				xzb.insert(x1);
+			}
+			else{
+				tmp.bb = y1; tmp.qd = mn(x1,x2); tmp.zd = mx(x1,x2);
+				heng.push_back(tmp);
+				yzb.insert(y1);
+			}
+		}
+		//cout << "eh" << endl;
+		if(heng.empty() || zong.empty()){
+			printf("0\n");
+			continue;
+		}
+		vector<int> xzb_v, yzb_v;
+		xzb_v.push_back(-1), yzb_v.push_back(-1);
+		for(set<int>::iterator it = xzb.begin(); it != xzb.end(); it++) xzb_v.push_back(*it);
+		for(set<int>::iterator it = yzb.begin(); it != yzb.end(); it++) yzb_v.push_back(*it);
+		sort(xzb_v.begin(), xzb_v.end());
+		sort(yzb_v.begin(), yzb_v.end());
+		sort(heng.begin(), heng.end());
+		sort(zong.begin(), zong.end());
+		//cout << "finish sort" << endl;
+		int revx[1010] = {0}, revy[1010] = {0};
+		int xgs = xzb_v.size()-1, ygs = yzb_v.size()-1;
+		for(int i = 1; i <= xgs; i++) revx[xzb_v[i]] = i;
+		for(int i = 1; i <= ygs; i++) revy[yzb_v[i]] = i;
+		int far[105][105][2] = {0};
+
+		int xxdgs = heng.size();
+		int curBb = -1, curQd = -1, curZd = -1;
+		for(int i = 0; i < xxdgs; i++){
+			int bb = heng[i].bb, qd = heng[i].qd, zd = heng[i].zd;
+			if(bb == curBb && qd <= curZd){
+				curZd = mx(zd, curZd);
+			}
+			else{
+				if(curBb != -1){
+					int curY = revy[curBb];
+					int zx = searchMn(xzb_v, curQd), zd = searchMx(xzb_v, curZd);
+					if(zx != -1 && zd != -1){
+						for(int j = zx; j < zd; j++){
+							far[j][curY][0] = zd;
+						}
+					}
+				}
+				curBb = bb, curQd = qd, curZd = zd;
+			}
+		}
+		int curY = revy[curBb];
+		int zx = searchMn(xzb_v, curQd), zd = searchMx(xzb_v, curZd);
+		if(zx != -1 && zd != -1){
+			for(int j = zx; j < zd; j++){
+				far[j][curY][0] = zd;
+			}
+		}
+
+		int yxdgs = zong.size();
+		curBb = -1, curQd = -1, curZd = -1;
+				for(int i = 0; i < yxdgs; i++){
+					int bb = zong[i].bb, qd = zong[i].qd, zd = zong[i].zd;
+					if(bb == curBb && qd <= curZd){
+						curZd = mx(zd, curZd);
+					}
+					else{
+						if(curBb != -1){
+							int curX = revx[curBb];
+							int zx = searchMn(yzb_v, curQd), zd = searchMx(yzb_v, curZd);
+							if(zx != -1 && zd != -1){
+								for(int j = zx; j < zd; j++){
+									far[curX][j][1] = zd;
+								}
+							}
+						}
+						curBb = bb, curQd = qd, curZd = zd;
+					}
+				}
+				int curX = revx[curBb];
+				zx = searchMn(yzb_v, curQd), zd = searchMx(yzb_v, curZd);
+				if(zx != -1 && zd != -1){
+					for(int j = zx; j < zd; j++){
+						far[curX][j][1] = zd;
+					}
+				}
+
+		int ans = 0;
+		for(int i = 1; i < xgs; i++){
+			for(int j = 1; j < ygs; j++){
+				if(!far[i][j][0] || !far[i][j][1]) continue;
+				for(int k = i+1; k <= far[i][j][0]; k++){
+					for(int l = j+1; l <= far[i][j][1]; l++){
+						if(far[k][j][1] >= l && far[i][l][0] >= k){
+							ans++;
+						}
+					}
+				}
+			}
+		}
+		printf("%d\n", ans);
+	}
+	return 0;
+}
