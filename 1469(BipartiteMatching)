@@ -1,0 +1,91 @@
+//For the same official dataset it only takes half time of one of accepted program on POJ, but still TLE
+//Use H-K's algorithm
+//Bugs of POJ? or on some dataset infinite loop?
+#include <iostream>
+#include <stdio.h>
+#include <queue>
+//#include <ctime>
+using namespace std;
+
+int main() {
+
+	int tc;
+	scanf("%d", &tc);
+	//time_t start = clock();
+	while(tc--){
+		int P,N;
+		scanf("%d%d", &P, &N);
+		int matchN[320] = {0}, matchP[120] = {0};
+		int adjNoP[120] = {0};
+		int  adjListP[120][320];
+		for(int i = 1; i <= P; i++){
+			int gs;
+			scanf("%d", &gs);
+			for(int j = 1; j <= gs; j++){
+				int tmp;
+				scanf("%d", &tmp);
+				adjListP[i][adjNoP[i]] = tmp;
+				adjNoP[i]++;
+				//adjListN[tmp][adjNoN[tmp]] = i;
+				//adjNoN[tmp]++;
+			}
+		}
+		int ans = 0;
+		while(1){
+			queue<int> bfs;
+			int rec[320];
+			bool usedP[120] = {0}, usedN[320] = {0};
+			for(int i = 1; i <= P; i++){
+				if(!matchP[i]) {
+					bfs.push(i);
+					break;
+				}
+			}
+			int tail = 0;
+			while(!bfs.empty()){
+				int top = bfs.front();
+				bfs.pop();
+				if(top > 0){
+					for(int i = 0; i < adjNoP[top]; i++){
+						int nEnd = adjListP[top][i];
+						if(usedN[nEnd] || matchP[top] == nEnd) continue;
+						bfs.push(-nEnd);
+						usedN[nEnd] = true;
+						rec[nEnd] = top;
+					}
+				}
+				else{
+					top = -top;
+					if(!matchN[top]) {
+						tail = top;
+						break;
+					}
+					int matched = matchN[top];
+					if(!usedP[matched]){
+						bfs.push(matched);
+						usedP[matched] = true;
+					}
+				}
+			}
+			if(!tail) break;
+			ans++;
+			int curP = rec[tail], curN = tail, prevN;
+			while(1){
+				prevN = matchP[curP];
+				matchP[curP] = curN;
+				matchN[curN] = curP;
+				if(!prevN) break;
+				curN = prevN;
+				curP = rec[prevN];
+			}
+
+		}
+
+		if(ans == P) printf("YES\n");
+		else printf("NO\n");
+	}
+	//time_t end = clock();
+	//printf("%.3lfs.\n", (end-start)*1.0/CLOCKS_PER_SEC);
+
+	return 0;
+}
