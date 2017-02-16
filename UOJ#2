@@ -1,0 +1,46 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int main() {
+	int n,m;
+	scanf("%d%d", &n, &m);
+	int ling = 0, yi = 0x7FFFFFFF;
+	for(int i = 0; i < n; i++){
+		char opr[5];
+		int shu;
+		scanf("%s%d", opr, &shu);
+		if(opr[0] == 'A'){
+			ling &= shu;
+			yi &= shu;
+		}
+		else if(opr[0] == 'O'){
+			ling |= shu;
+			yi |= shu;
+		}
+		else{
+			ling ^= shu;
+			yi ^= shu;
+		}
+	}
+	int res = 0;
+	int arg = 0;
+	for(int i = 30; i >= 0; i--){
+		int p2i = 1<<i;
+		int digitL = (ling & p2i) != 0;
+		int digitY = (yi & p2i) != 0;
+		if(digitL >= digitY){
+			res += digitL << i;
+		}
+		else if(arg + p2i <= m){
+			res += digitY << i;
+			arg += p2i;
+		}
+		else{
+			res += digitL << i;
+		}
+	}
+	printf("%d\n", res);
+	return 0;
+}
+
