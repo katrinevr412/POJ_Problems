@@ -1,0 +1,35 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+typedef long long int lint;
+
+int main() {
+	int n;
+	lint m;
+	cin >> n >> m;
+	lint M = m;
+
+	int rem[22] = {0};
+	bool flag = false;
+	for(int i = n; i > 1; i--){
+		rem[i+1] = (int) (m%i);
+		m = m / i;
+	}
+	if(rem[n+1]) {
+		flag = true;
+		cout << rem[n+1] << endl;
+	}
+	lint cur = 1;
+	for(int i = n; i >= 1; i--){
+		cur *= i;
+		if(rem[i]){
+			flag = true;
+			cout << cur * rem[i] << endl;
+		}
+	}
+	if(!flag){
+		cout << M << endl;
+	}
+	return 0;
+}
