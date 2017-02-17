@@ -1,0 +1,82 @@
+#include <iostream>
+#include <stdio.h>
+#include <cmath>
+using namespace std;
+
+struct pt{
+	double x,y;
+	pt():x(0),y(0){}
+	pt(double x,double y):x(x),y(y){}
+};
+
+double area(pt &p1, pt &p2, pt &p3){
+	return 0.5 * abs(p1.x*p2.y+p2.x*p3.y+p3.x*p1.y-p1.y*p2.x-p2.y*p3.x-p3.y*p1.x);
+}
+
+double area(pt &p1, pt &p2, pt &p3, pt &p4){
+	return area(p1,p2,p3) + area(p1,p3,p4);
+}
+
+pt midPoint(pt &p1, pt &p2){
+	return pt((p1.x+p2.x)/2, (p1.y+p2.y)/2);
+}
+
+bool isO(pt &p){
+	return p.x == 0 && p.y == 0;
+}
+
+double diff, smaller, larger, total;
+
+void setDiff(double a){
+	if(abs(a-total/2) < diff){
+		diff = abs(a-total/2);
+		if(a < total/2){
+			smaller = a;
+			larger = total-a;
+		}
+		else{
+			smaller = total-a;
+			larger = a;
+		}
+	}
+}
+
+int main() {
+	int cnt = 0;
+	while(1){
+		pt pts[4];
+		for(int i = 0; i < 4; i++){
+			scanf("%lf%lf", &pts[i].x, &pts[i].y);
+		}
+		if(isO(pts[0]) && isO(pts[1])) break;
+		cnt++;
+		printf("Cake %d:", cnt);
+		diff = 1e16;
+		smaller = 0.0, larger = diff;
+		total = area(pts[0], pts[1], pts[2], pts[3]);
+		pt mid[4];
+		for(int i = 0; i < 4; i++){
+			mid[i] = midPoint(pts[i], pts[(i+1)%4]);
+		}
+		for(int i = 0; i < 2; i++){
+			double a = area(pts[i], pts[(i+1)%4], pts[(i+2)%4]);
+			setDiff(a);
+		}
+		for(int i = 0; i < 4; i++){
+			double a = area(pts[i], pts[(i+1)%4], mid[(i+1)%4]);
+			double b = area(pts[i], pts[(i+3)%4], mid[(i+2)%4]);
+			setDiff(a);
+			setDiff(b);
+		}
+		for(int i = 0; i < 4; i++){
+			double a = area(pts[i], mid[i], mid[(i+3)%4]);
+			setDiff(a);
+		}
+		for(int i = 0; i < 2; i++){
+			double a = area(pts[i], pts[(i+1)%4], mid[(i+1)%4], mid[(i+3)%4]);
+			setDiff(a);
+		}
+		printf(" %.3lf %.3lf\n", smaller, larger);
+	}
+	return 0;
+}
