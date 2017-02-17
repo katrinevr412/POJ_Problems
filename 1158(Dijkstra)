@@ -1,0 +1,131 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+const int MX_INT = 100000000;
+
+int mn(int a, int b){
+	return (a<b)?a:b;
+}
+
+struct state{
+	bool color;//true for blue
+	int last;//remaining time
+	state(bool c, int l): color(c), last(l){}
+};
+
+
+struct light{
+	//bool init;//true: blue
+	int init;//time till purple ends
+	int bTime;
+	int pTime;
+	void setLight(char c, int leftTime, int bT, int pT){
+		bTime = bT, pTime = pT;
+		if(c=='B'){
+			init = leftTime + pT;
+		}
+		else{
+			init = leftTime;
+		}
+	}
+	state curState(int time){
+		time = (time + (bTime + pTime) - init) % (bTime + pTime);
+		if(time < bTime){
+			return state(true, bTime-time);
+		}
+		else{
+			return state(false, bTime+pTime-time);
+		}
+	}
+	int defTime(bool flag){
+		return flag?bTime:pTime;
+	}
+};
+
+
+int sTime(light &l1, light &l2, int mnTime){
+	//return the next moment from mnTime such that l1 and l2 are same state.
+	//it's O(1)!
+	state s1 = l1.curState(mnTime), s2 = l2.curState(mnTime);
+	if(s1.color == s2.color) return mnTime;
+	int next = mn(s1.last, s2.last);
+	if(s1.last != s2.last) return mnTime + next;
+	bool state1 = !s1.color, state2 = !s2.color;
+	int cnt = 0, curTime = mnTime + next;
+	while(1){
+		int t1 = l1.defTime(state1), t2 = l2.defTime(state2);
+		int next = mn(t1,t2);
+		if(t1 != t2){
+			return curTime + next;
+		}
+		cnt++;
+		curTime += next;
+		state1 = !state1;
+		state2 = !state2;
+		if(cnt > 2) return MX_INT;
+	}
+}
+
+int adjNo[330] = {0};
+int adjList[330][330];
+int adjDist[330][330];
+light lights[330];
+
+int main() {
+	int src, dest;
+	scanf("%d%d", &src, &dest);
+	int N, M;
+	scanf("%d%d", &N, &M);
+	for(int i = 1; i <= N; i++){
+		char cs[2];
+		int leftTime, bT, pT;
+		scanf("%s%d%d%d", cs, &leftTime, &bT, &pT);
+		char c = cs[0];
+		lights[i].setLight(c, leftTime, bT, pT);
+	}
+	for(int i = 1; i <= M; i++){
+		int j,k,d;
+		scanf("%d%d%d", &j, &k, &d);
+		adjList[j][adjNo[j]] = k;
+		adjDist[j][adjNo[j]] = d;
+		adjNo[j]++;
+		adjList[k][adjNo[k]] = j;
+		adjDist[k][adjNo[k]] = d;
+		adjNo[k]++;
+	}
+	//cout << 1 << endl;
+	int dist[330];
+	bool defined[330] = {false};
+	for(int i = 1; i <= N; i++){
+		dist[i] = MX_INT;
+	}
+	dist[src] = 0;
+	defined[src] = true;
+	for(int i = 0; i < adjNo[src]; i++){
+		//cout << 1 << endl;
+		dist[adjList[src][i]] = adjDist[src][i] + sTime(lights[src], lights[adjList[src][i]], 0);
+	}
+	//cout << 1 << endl;
+	while(1){
+		int mnDist = MX_INT, arg = -1;
+		for(int i = 1; i <= N; i++){
+			if(defined[i]) continue;
+			if(dist[i] < mnDist){
+				mnDist = dist[i];
+				arg = i;
+			}
+		}
+		if(arg == -1) break;
+		defined[arg] = true;
+		for(int i = 0; i < adjNo[arg]; i++){
+			int cosd = adjList[arg][i];
+			if(defined[cosd]) continue;
+			int thisDist = adjDist[arg][i] + sTime(lights[arg], lights[cosd], dist[arg]);
+			if(thisDist < dist[cosd]) dist[cosd] = thisDist;
+		}
+	}
+	if(dist[dest] >= MX_INT) printf("0");
+	else printf("%d\n", dist[dest]);
+	return 0;
+}
