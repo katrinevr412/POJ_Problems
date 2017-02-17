@@ -1,0 +1,32 @@
+#include <iostream>
+#include <stdio.h>
+#include <string.h>
+using namespace std;
+
+int main() {
+	int n,m,p;
+	scanf("%d%d%d", &n, &m, &p);
+	int gs[26] = {0};
+	for(int i = 0; i < n ; i++){
+		char tmp[14];
+		scanf("%s", tmp);
+		for(int j = 0; j < m; j++){
+			gs[tmp[j]-'A'] ++;
+		}
+	}
+	for(int i = 0; i < p; i++){
+		char tmp[10000];
+		scanf("%s", tmp);
+		int len = strlen(tmp);
+		for(int j = 0; j < len; j++){
+			gs[tmp[j] - 'A']--;
+		}
+	}
+	for(int i = 0; i < 26; i++){
+		for(int j = 0; j < gs[i]; j++){
+			printf("%c", i+'A');
+		}
+	}
+	printf("\n");
+	return 0;
+}
