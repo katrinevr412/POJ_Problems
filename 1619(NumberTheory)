@@ -1,0 +1,115 @@
+#include <iostream>
+#include <stdio.h>
+#include <ctime>
+using namespace std;
+
+const int THRES1 = 400000, THRES2 = 2000000;
+
+int primeList[100000];
+bool isPrime[THRES2+1] = {false};
+int primeCnt = 1;
+int largestPrime = 299993;
+
+inline int mn(int a, int b){
+	return (a<b)?a:b;
+}
+
+void getPrimeList(){
+	primeList[0] = 2;
+	isPrime[2] = 1;
+	//bool reach = false;
+	for(int i = 3; i < 1000000; i += 2){
+		bool prime = true;
+
+		for(int j = 1; j < primeCnt; j++){
+			if(primeList[j] * primeList[j] > i) break;
+			if(i%primeList[j] == 0){
+				prime = false;
+				break;
+			}
+		}
+		isPrime[i] = prime;
+		if(prime){
+			primeList[primeCnt] = i;
+			primeCnt++;
+
+		}
+	}
+}
+
+bool used[THRES2+1] = {false};
+int pos[THRES1+1];
+int nextUnused[THRES2+1];
+
+void init(){
+	getPrimeList();
+	//cout << largestPrime << endl;
+	for(int i = 0; i < primeCnt; i++){
+		nextUnused[primeList[i]] = primeList[i];
+	}
+	nextUnused[2] = 4;
+	used[1] = used[2] = true;
+	pos[1] = 1, pos[2] = 2;
+}
+
+int cur = 2;
+int cnt = 2;
+
+int getNextUnused(int prime){
+	int tmp = nextUnused[prime];
+	while(used[tmp]) tmp += prime;
+	nextUnused[prime] = tmp;
+	return tmp;
+}
+
+void fill(){
+	while(!used[largestPrime]){
+		int next;
+		if(isPrime[cur]){
+			next = getNextUnused(cur);
+			used[next] = 1;
+			cnt++;
+			if(next <= THRES1) pos[next] = cnt;
+			cur = next;
+		}
+		else{
+			next = 2147483647;
+			int Cur = cur;
+			for(int i = 0; ; i++){
+				if(Cur%primeList[i]==0){
+					int sP = primeList[i];
+					next = mn(next, getNextUnused(sP));
+					while(Cur%sP==0) Cur/=sP;
+					if(Cur == 1) break;
+					if(isPrime[Cur]){
+						next = mn(next, getNextUnused(Cur));
+						break;
+					}
+				}
+			}
+			//next = getNextUnused(sP);
+			used[next] = 1;
+			cnt++;
+			if(next <= THRES1) pos[next] = cnt;
+			cur = next;
+		}
+		//if(cnt < 30) cout << "term " << cnt << ":" << cur << endl;
+	}
+}
+
+int main() {
+	//time_t start = clock();
+	init();
+	fill();
+	//time_t end = clock();
+	//printf("%.3lfs.\n", (end-start)*1.0/CLOCKS_PER_SEC);
+	//cout << endl;
+
+	while(1){
+		int n;
+		scanf("%d", &n);
+		if(!n) break;
+		printf("The number %d appears in location %d.\n", n, pos[n]);
+	}
+	return 0;
+}
