@@ -1,0 +1,81 @@
+#include <iostream>
+#include <stdio.h>
+#include <map>
+#include <string.h>
+#include <string>
+#include <vector>
+using namespace std;
+
+int adjList[610][610];
+int dp[110][610];
+
+int main() {
+	//char ccc[5] = "hehe";
+	//string s(ccc, 3);
+	//cout << s << endl;
+	int n,m,l;
+	while(1){
+		scanf("%d%d%d", &n,&l,&m);
+		if(!n && !m && !l) break;
+		char c[610][12];
+		for(int i = 0; i < m; i++){
+			scanf("%s", c[i]);
+		}
+		int patLen = strlen(c[0]);
+		if(l < patLen){
+			printf("0\n");
+			continue;
+		}
+		//string s(c[0], patLen-1);
+		map<string, vector<int> > prefix;
+		for(int i = 0; i < m; i++){
+			string tmp(c[i], patLen-1);
+			map<string, vector<int> >::iterator it = prefix.find(tmp);
+			if(it != prefix.end()){
+				it->second.push_back(i);
+			}
+			else{
+				vector<int> temp(1);
+				temp[0] = i;
+				prefix.insert(pair<string, vector<int> >(tmp, temp));
+			}
+		}
+		int adjNo[610] = {0};
+
+		for(int i = 0; i < m; i++){
+			string tmp(c[i]+1);
+			//cout << tmp << endl;
+			map<string, vector<int> >::iterator it = prefix.find(tmp);
+			if(it != prefix.end()){
+				vector<int> &vec = it->second;
+				int sz = vec.size();
+				for(int j = 0; j < sz; j++){
+					int k = vec[j];
+					adjList[i][adjNo[i]] = k;
+					adjNo[i]++;
+				}
+			}
+		}
+
+		int len = l - patLen;
+		for(int i = 0; i < m; i++){
+			dp[0][i] = 1;
+		}
+		for(int i = 1; i <= len; i++){
+			for(int j = 0; j < m; j++){
+				int tmp = 0;
+				for(int k = 0; k < adjNo[j]; k++){
+					tmp += dp[i-1][adjList[j][k]];
+				}
+				dp[i][j] = tmp;
+			}
+		}
+		int ans = 0;
+		for(int i = 0; i < m; i++){
+			ans += dp[len][i];
+		}
+		printf("%d\n", ans);
+	}
+
+	return 0;
+}
