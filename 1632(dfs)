@@ -1,0 +1,79 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+typedef long long int lint;
+
+lint state[36];
+
+void init(){
+	for(int i = 0; i < 36; i++){
+		state[i] = 0;
+	}
+}
+
+int numOf1(lint l){
+	int cnt = 0;
+	for(int i = 0; i < 36; i++){
+		if(l & (((lint)1)<<i)){
+			cnt++;
+		}
+	}
+	//cout << "numOf1:" << cnt << endl;
+	return cnt;
+}
+
+int mx;
+lint cur;
+
+void dfs(int n, int curPos){
+	//cout << "searching: " << n << ' ' << curPos << endl;
+	if(mx < n) mx = n;
+	lint Cur = cur;
+	cur = cur & state[curPos];
+	int curNum = numOf1(cur);
+	//cout << curNum << "curnum" << endl;
+	if(curNum < n+1 || curNum <= mx) {
+		cur = Cur;
+		//cout << 1 << endl;
+		return;
+	}
+	//if(n+1 > mx) mx = n+1;
+	if(curNum == n+1){
+		if(mx < n+1) mx = n+1;
+		cur = Cur;
+		//cout << 2 << endl;
+		return;
+	}
+	for(int i = curPos+1; i < 36; i++){
+		dfs(n+1, i);
+	}
+	cur = Cur;
+}
+
+int main() {
+	//cout << numOf1(5) << endl;
+	int tc;
+	scanf("%d", &tc);
+	while(tc--){
+		init();
+		mx = 0;
+		int gs;
+		scanf("%d", &gs);
+		while(gs--){
+			int a, b;
+			scanf("%d%d", &a, &b);
+			state[a-1] |= (((lint)1)<<(b-1));
+		}
+
+		cur = 0;
+		for(int i = 0; i < 36; i++){
+			cur = state[i];
+			if(cur > 0) {
+				for(int j = i+1; j < 36; j++) dfs(1, j);
+			}
+		}
+		printf("%d\n", mx);
+	}
+	return 0;
+}
