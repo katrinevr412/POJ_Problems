@@ -1,0 +1,75 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+typedef long long int lint;
+
+lint val[100010];
+lint rec[100010];
+int recNo[100010];
+lint recPos = 0;
+int cur;
+lint sum[100010];
+int n;
+
+lint getSum(int i, int j){
+	return sum[j] - sum[i-1];
+}
+
+int main() {
+	scanf("%d", &n);
+	for(int i = 1; i <= n; i++){
+		scanf("%I64d", &val[i]);
+	}
+	sum[0] = 0;
+	for(int i = 1; i <= n; i++){
+		sum[i] = sum[i-1] + val[i];
+	}
+	lint mx = 0, cur = 0;
+	int L=1, R=1;
+	for(int i = 1; i <= n; i++){
+		if(val[i] > cur){
+			rec[recPos] = val[i];
+			recNo[recPos] = i;
+			recPos++;
+			cur = val[i];
+		}
+		else if(val[i] < cur){
+			int pos;
+			while(recPos > 0 && val[i] < cur){
+				lint tmpAns = getSum(recNo[recPos-1], i-1) * rec[recPos-1];
+				if(tmpAns > mx) {
+					mx = tmpAns;
+					L = recNo[recPos-1], R = i-1;
+				}
+				pos = recNo[recPos-1];
+				recPos--;
+				if(!recPos) break;
+
+				cur = rec[recPos-1];
+			}
+			if(!recPos){
+				rec[0] = val[i];
+				recNo[0] = 1;
+				recPos = 1;
+				cur = val[i];
+			}
+			else if(val[i] > rec[recPos-1]){
+				rec[recPos] = val[i];
+				recNo[recPos] = pos;
+				recPos++;
+				cur = val[i];
+			}
+		}
+	}
+	while(recPos > 0){
+		lint tmpAns = getSum(recNo[recPos-1], n) * rec[recPos-1];
+		if(tmpAns > mx) {
+			mx = tmpAns;
+			L = recNo[recPos-1], R = n;
+		}
+		recPos--;
+	}
+	printf("%I64d\n%d %d\n", mx, L, R);
+	return 0;
+}
