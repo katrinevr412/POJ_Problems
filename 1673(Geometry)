@@ -1,0 +1,36 @@
+#include <iostream>
+#include <stdio.h>
+#include <cmath>
+using namespace std;
+
+struct pt{
+	double x,y;
+}pts[3];
+
+const double PI = atan(1.0) * 4;
+
+double czAng(pt &p1, pt &p2){
+	double res = atan2(p2.y-p1.y, p2.x-p1.x) + PI/2;
+	while(res > PI) res -= PI;
+	return res;
+}
+
+void clear(double &d){
+	if(d <= 0.0 && d > -1e-8) d = 0;
+}
+
+int main() {
+	int tc;
+	scanf("%d", &tc);
+	while(tc--){
+		for(int i = 0; i < 3; i++){
+			scanf("%lf%lf", &pts[i].x, &pts[i].y);
+		}
+		double ag0 = czAng(pts[1], pts[2]), ag1 = czAng(pts[0], pts[2]);
+		double s = ((pts[1].x-pts[0].x)*sin(ag1) - (pts[1].y-pts[0].y)*cos(ag1))/sin(ag1-ag0);
+		double xR = pts[0].x + s * cos(ag0), yR = pts[0].y + s * sin(ag0);
+		clear(xR), clear(yR);
+		printf("%.4lf %.4lf\n", xR, yR);
+	}
+	return 0;
+}
