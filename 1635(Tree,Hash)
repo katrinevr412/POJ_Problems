@@ -1,0 +1,147 @@
+#include <iostream>
+#include <stdio.h>
+#include <cstring>
+#include <assert.h>
+#include <list>
+using namespace std;
+typedef long long int lint;
+char first[3010], second[3010];
+int len;
+int intv[2][3010];
+int intvLen[2][3010];
+int subtreeNo[2][3010];
+int hashVal[2][3010];
+int depth[2][3010];
+int n;
+
+const int HASH = 2333;
+
+void readStr(int i){
+	char tmp;
+	//if(!i) getchar();
+	//while((tmp = getchar()) == '\n');
+	//if(gs) getchar();
+	int offset = 1;
+	while((tmp = getchar()) != EOF){
+		if(tmp == '\n') break;
+		first[offset] = tmp;
+		offset++;
+	}
+	first[offset] = '\0';
+	first[offset+1] = '\0';
+	offset = 1;
+	while((tmp = getchar()) != EOF){
+		if(tmp == '\n') break;
+		second[offset] = tmp;
+		offset++;
+	}
+	second[offset] = '\0';
+	second[offset+1] = '\0';
+}
+
+bool isIso(int start0, int start1){
+	//cout << start0 <<
+	//		", " << start1 << endl;
+	if(intvLen[0][start0] != intvLen[1][start1] || subtreeNo[0][start0] != subtreeNo[1][start1] ||
+			hashVal[0][start0] != hashVal[1][start1]){
+		return false;
+	}
+	list<int> l[2];
+	for(int i = 0; i < 2; i++){
+		int start = i==0? start0: start1;
+		int end = intv[i][start];
+		//cout << end << endl;
+		int cur = start+1;
+		while(cur < end){
+			l[i].push_back(cur);
+			cur = intv[i][cur] + 1;
+		}
+	}
+	for(list<int>::iterator it0 = l[0].begin(); it0 != l[0].end(); it0++){
+		int cur = *it0;
+		bool tag = false;
+		for(list<int>::iterator it1 = l[1].begin(); it1 != l[1].end(); it1++){
+			if(isIso(cur, *it1)){
+				tag = true;
+				l[1].erase(it1);
+				break;
+			}
+		}
+		if(!tag) return false;
+	}
+	return true;
+}
+
+void getInfo(int start, int tag){
+	int end = intv[tag][start];
+	int stNo = 0;
+	lint hashV = 0;
+	int cur = start+1;
+	int mxDpth = 0;
+	while(cur < end){
+		int next = intv[tag][cur];
+		getInfo(cur, tag);
+		if(depth[tag][cur] > mxDpth){
+			mxDpth = depth[tag][cur];
+		}
+		hashV += hashVal[tag][cur];
+		stNo++;
+		cur = next+1;
+	}
+	subtreeNo[tag][start] = stNo;
+	depth[tag][start] = mxDpth + 1;
+	hashV += intvLen[tag][start] * intvLen[tag][start] + stNo * stNo + (mxDpth+1)*(mxDpth+1);
+	hashV %= HASH;
+	hashVal[tag][start] = hashV;
+}
+
+
+void getPair(char *str, int *v, int *vL){
+	int stk[3010];
+	int pos = 0;
+	for(int i = 0; i < len; i++){
+		//cout << i << "," << pos << endl;
+		if(str[i] == '0'){
+			stk[pos] = i;
+			pos++;
+		}
+		else{
+			assert(pos);
+			int j = stk[pos-1];
+			v[j] = i;
+			vL[j] = i-j;
+			pos--;
+		}
+	}
+}
+
+
+int main() {
+	first[0] = second[0] = '0';
+
+	scanf("%d\n", &n);
+	for(int i = 0; i < n; i++){
+		readStr(i);
+		//scanf("%s %s", first+1, second+1);
+		int len1 = strlen(first), len2 = strlen(second);
+		//printf("%s %s\n", first, second);
+		if(len1 != len2){
+			printf("different\n");
+			continue;
+		}
+		len = len1+1;
+		first[len1] = '1';
+		second[len1] = '1';
+		getPair(first, intv[0], intvLen[0]);
+		//cout << 1 << endl;
+		getPair(second, intv[1], intvLen[1]);
+		//cout << 1 << endl;
+		getInfo(0,0);
+		getInfo(0,1);
+		//cout << 1 << endl;
+		if(isIso(0,0)) printf("same\n");
+		else printf("different\n");
+		//if(i != n-1) printf("test\n");
+	}
+	return 0;
+}
