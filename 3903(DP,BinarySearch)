@@ -1,0 +1,44 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int a[100005];
+int mx[100005];
+
+int main() {
+	int num;
+	while(scanf("%d", &num) > 0){
+		for(int i = 1; i <= num; i++) scanf("%d", &a[i]);
+		mx[1] = a[1];
+		for(int i = 2; i <= num; i++){
+			mx[i] = 2147483647;
+		}
+		int mxN = 1;
+		for(int i = 2; i <= num; i++){
+			if(a[i] <= mx[1]){
+				mx[1] = a[i];
+			}
+			else{
+				int lower = 1, upper = mxN;
+				while(lower < upper){
+					int middle = (lower + upper + 1)/2;
+					if(mx[middle] < a[i]){
+						lower = middle;
+					}
+					else{
+						upper = middle - 1;
+					}
+				}
+				if(mx[lower+1] > a[i]) mx[lower+1] = a[i];
+				if(mxN < lower+1) mxN = lower+1;
+			}
+		}
+		for(int i = num; i >= 1; i--){
+			if(mx[i] != 2147483647){
+				printf("%d\n", i);
+				break;
+			}
+		}
+	}
+	return 0;
+}
