@@ -1,0 +1,67 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+const int mxInt = 100000000;
+
+inline int Mn(int x, int y){
+	return x<y?x:y;
+}
+
+inline int Mx(int x, int y){
+	return x>y?x:y;
+}
+
+inline int Abs(int x){
+	return x>0?x:-x;
+}
+
+int main() {
+	int tc;
+	scanf("%d", &tc);
+	while(tc--){
+		int gs[3];
+		for(int i = 0; i < 3; i++) scanf("%d", &gs[i]);
+		int height[3][110];
+		for(int i = 0; i < 3; i++){
+			for(int j = 1; j <= gs[i] ; j++){
+				scanf("%d", &height[i][j]);
+			}
+		}
+		int dp[3][110][110];
+		//idx=0: 0~1 1: 1~2 2: 2~0
+		for(int i = 0; i < 3; i++){
+			int from = i, to = (i+1)%3;
+			dp[i][gs[from]+1][0] = 0;
+			for(int j = 1; j <= gs[to]+1;j++){
+				dp[i][gs[from]+1][j] = mxInt;
+			}
+			for(int j = 0; j <= gs[from]; j++){
+				dp[i][j][0] = mxInt;
+			}
+			for(int j = gs[from]; j > 0; j--){
+				for(int k = 1; k <= gs[to]; k++){
+					int thisCost = Abs(height[from][j]-height[to][k]);
+					int mnOrigCost = Mn(Mn(dp[i][j][k-1], dp[i][j+1][k]), dp[i][j+1][k-1]);
+					dp[i][j][k] = mnOrigCost + thisCost;
+				}
+			}
+		}
+		int minCost = mxInt;
+		for(int i = 0; i <= gs[0]; i++){
+			for(int j = 0; j <= gs[1]; j++){
+				for(int k = 0; k <= gs[2]; k++){
+					for(int iNext = Mx(1,i); iNext <= i+1; iNext++){
+						for(int jNext = Mx(1,j); jNext <= j+1; jNext++){
+							for(int kNext = Mx(1,k); kNext <= k+1; kNext++){
+								minCost = Mn(minCost, dp[0][iNext][j] + dp[1][jNext][k] + dp[2][kNext][i]);
+							}
+						}
+					}
+				}
+			}
+		}
+		printf("%d\n", minCost);
+	}
+	return 0;
+}
