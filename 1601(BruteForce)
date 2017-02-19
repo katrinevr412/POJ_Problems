@@ -1,0 +1,71 @@
+#include <iostream>
+#include <stdio.h>
+#include <string>
+#include <vector>
+using namespace std;
+
+struct request{
+	int canMask, notMask;
+};
+
+request generateMask(string &s){
+	request rq;
+	rq.canMask = 0, rq.notMask = 0;
+	int len = s.length();
+	for(int i = 0; i < len/2; i++){
+		if(s[2*i] == '+'){
+			rq.canMask |= (1 << (s[2*i+1]-'A'));
+		}
+		else{
+			rq.notMask |= (1 << (s[2*i+1]-'A'));
+		}
+	}
+	return rq;
+}
+
+bool ky(int state, request r){
+	return (state & r.canMask) || ((state & r.notMask) != r.notMask);
+}
+
+string toString(int state){
+	string res = "";
+	for(int i = 0; i < 16; i++){
+		if(state & (1 << i)){
+			res += (char)('A'+i);
+		}
+	}
+	return res;
+}
+
+int main() {
+	string s, c;
+	while(cin >> s){
+		vector<request> rqs;
+		while(1){
+			cin >> c;
+			rqs.push_back(generateMask(s));
+			if(c[0] == '.') break;
+			s = c;
+		}
+		int gs = rqs.size();
+		bool kx = false;
+		for(int i = 0; i < 65536; i++){
+			bool kY = true;
+			for(int j = 0; j < gs; j++){
+				if(!ky(i, rqs[j])){
+					kY = false;
+					break;
+				}
+			}
+			if(kY){
+				cout << "Toppings: " << toString(i) << endl;
+				kx = true;
+				break;
+			}
+		}
+		if(!kx){
+			cout << "No pizza can satisfy these requests." << endl;
+		}
+	}
+	return 0;
+}
