@@ -1,0 +1,34 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int main() {
+	int tc;
+	scanf("%d", &tc);
+	while(tc--){
+		int n;
+		scanf("%d", &n);
+		int *arr = new int[n+1];
+		int quan = 0;
+		for(int i = 1; i <= n; i++) scanf("%d", &arr[i]);
+		bool *used = new bool[n+1];
+		for(int i = 1; i <= n; i++) used[i] = false;
+		for(int i = 1; i <= n; i++){
+			if(used[i]) continue;
+			used[i] = 1;
+			int cur = arr[i];
+			while(1){
+				if(cur == i) {
+					quan++;
+					break;
+				}
+				used[cur] = 1;
+				cur = arr[cur];
+			}
+		}
+		printf("%d\n", n-quan);
+		delete [] used;
+		delete [] arr;
+	}
+	return 0;
+}
