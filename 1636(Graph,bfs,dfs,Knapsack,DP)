@@ -1,0 +1,102 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <map>
+#include <queue>
+using namespace std;
+
+
+int main() {
+	int tc;
+	scanf("%d", &tc);
+	while(tc--){
+		int m,r;
+		scanf("%d%d",&m,&r);
+		if(!r){
+			printf("%d\n",m/2);
+			continue;
+		}
+		int adjANo[202] = {0}, adjBNo[202] = {0};
+		int adjAList[202][202], adjBList[202][202];
+		for(int i = 0; i < r; i++){
+			int a, b;
+			scanf("%d%d", &a, &b);
+			adjAList[a][adjANo[a]] = b;
+			adjANo[a]++;
+			adjBList[b][adjBNo[b]] = a;
+			adjBNo[b]++;
+		}
+		vector<pair<int, int> > vp;
+		bool usedA[202] = {0}, usedB[202] = {0};
+		for(int i = 1; i <= m; i++){
+			if(usedA[i]) continue;
+			queue<int> bfs;
+			usedA[i] = 1;
+			bfs.push(i);
+			pair<int, int> tmp(1,0);
+			while(!bfs.empty()){
+				int cur = bfs.front();
+				bfs.pop();
+				if(cur > 0){
+					for(int j = 0; j < adjANo[cur]; j++){
+						if(usedB[adjAList[cur][j]]) continue;
+						usedB[adjAList[cur][j]] = 1;
+						bfs.push(-adjAList[cur][j]);
+						tmp.second++;
+					}
+				}
+				else{
+					cur = -cur;
+					for(int j = 0; j < adjBNo[cur]; j++){
+						if(usedA[adjBList[cur][j]]) continue;
+						usedA[adjBList[cur][j]] = 1;
+						bfs.push(adjBList[cur][j]);
+						tmp.first++;
+					}
+				}
+			}
+			vp.push_back(tmp);
+		}
+		for(int i = 1; i <= m; i++){
+			if(!usedB[i]){
+				vp.push_back(pair<int,int>(0,1));
+			}
+		}
+		int sz = vp.size();
+		bool state[2][102][102] = {0};
+		state[0][0][0] = 1;
+		//int res = sz%2;
+		int ans = 0;
+		for(int i = 0; i < sz; i++){
+			int from, to;
+			if(i%2==0){
+				from = 0; to = 1;
+			}
+			else{
+				from = 1; to = 0;
+			}
+			for(int j = 0; j <= m/2; j++){
+				for(int k = 0; k <= m/2; k++){
+					if(j < vp[i].first || k < vp[i].second){
+						state[to][j][k] = state[from][j][k];
+					}
+					else{
+						state[to][j][k] = state[from][j][k] || state[from][j-vp[i].first][k-vp[i].second];
+					}
+					if(j == k && state[to][j][k]){
+						if(j == m/2){
+							ans = m/2;
+							goto done;
+						}
+						else{
+							if(j > ans) ans = j;
+						}
+					}
+				}
+			}
+		}
+		done:
+		printf("%d\n", ans);
+	}
+	return 0;
+}
