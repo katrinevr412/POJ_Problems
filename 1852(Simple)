@@ -1,0 +1,27 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int main() {
+	int tc;
+	scanf("%d", &tc);
+	while(tc--){
+		int l,n;
+		scanf("%d%d", &l,&n);
+		int mn = 0, mx = 0;
+		while(n--){
+			int tmp;
+			scanf("%d", &tmp);
+			if(tmp >= l-tmp){
+				if(mx < tmp) mx = tmp;
+				if(mn < l-tmp) mn = l-tmp;
+			}
+			else{
+				if(mx < l-tmp) mx = l-tmp;
+				if(mn < tmp) mn = tmp;
+			}
+		}
+		printf("%d %d\n", mn, mx);
+	}
+	return 0;
+}
