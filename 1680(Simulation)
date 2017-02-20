@@ -1,0 +1,45 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int getVal(int n, int xh){
+	int thres = 1 << (n-1), mod = thres - 1;
+	for(int i = 0; i < n-1; i++){
+		if(xh > thres){
+			xh -= mod;
+		}
+		mod /= 2;
+		thres -= mod;
+	}
+	return xh;
+}
+
+int getPid(int dq, int prg, int zong, int wz){
+	if(wz == 0) return dq;
+	if(wz < (1 << (zong-1))){
+		return getPid(prg, prg+1, zong-1, wz-1);
+	}
+	return getPid(dq, prg + (1 << (zong-1)), zong-1 , wz - (1 << (zong-1)));
+}
+
+int main() {
+	int t;
+	scanf("%d", &t);
+	while(t--){
+		int n, h;
+		scanf("%d%d", &n, &h);
+		if(h%2==0){
+			int xh = h/2;
+			int pid = 1000 + xh;
+			int val = 7 * getVal(n, xh);
+			printf("Process ID=%d, A=%d\n", pid, val);
+		}
+		else{
+			int xh = (h+1)/2;
+			int loop = getVal(n, xh)-1;
+			int pid = getPid(0, 1, n, xh-1) + 1000;
+			printf("Loop %d: Process ID=%d\n", loop, pid);
+		}
+	}
+	return 0;
+}
