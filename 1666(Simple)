@@ -1,0 +1,39 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+const int maxN = 233;
+
+int main() {
+	while(1){
+		int rs;
+		scanf("%d",&rs);
+		if(rs <= 0) break;
+		int ts[maxN];
+		int mn = 2147483647, mx = 0;
+		for(int i = 0; i < rs; i++){
+			scanf("%d", &ts[i]);
+			if(ts[i] < mn) mn = ts[i];
+			if(ts[i] > mx) mx = ts[i];
+		}
+		int kss = 0;
+		while(mn < mx){
+			kss++;
+			//cout << kss << endl;
+			int dyg = ts[0];
+			mn = 2147483647, mx = 0;
+			for(int i = 0; i < rs; i++){
+				if(i != rs-1){
+					ts[i] = ((ts[i] + ts[i+1])/2+1)/2*2;
+				}
+				else{
+					ts[i] = ((ts[i] + dyg)/2+1)/2*2;
+				}
+				if(ts[i] < mn) mn = ts[i];
+				if(ts[i] > mx) mx = ts[i];
+			}
+		}
+		printf("%d %d\n", kss, mn);
+	}
+	return 0;
+}
