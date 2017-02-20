@@ -1,0 +1,73 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+void print(string &s, bool *lx){
+	int len = s.length();
+	for(int i = 0; i < len; i++){
+		if(lx[i]) cout << s[i];
+	}
+	cout << endl;
+}
+
+void getPair(string &s, int *pair){
+	int stk[257];
+	int stkPos = 0;
+	int len = s.length();
+	for(int i = 0; i < len; i++){
+		if(s[i] == '('){
+			stk[stkPos] = i;
+			stkPos++;
+		}
+		else if(s[i] == ')'){
+			pair[stk[stkPos-1]] = i;
+			pair[i] = stk[stkPos-1];
+			stkPos--;
+		}
+	}
+}
+
+string clear(string s){
+	string res = "";
+	int len = s.length();
+	for(int i = 0; i < len; i++){
+		if(s[i] != ' ') res += s[i];
+	}
+	return res;
+}
+
+int main() {
+	int tc;
+	cin >> tc;
+	while(tc--){
+		string s;
+		while(!s.length()) getline(cin, s);
+		s = clear(s);
+		int len = s.length();
+		bool lx[257];
+		int pair[257];
+		getPair(s, pair);
+		for(int i = 0; i < len; i++){
+			if(s[i] != '(' && s[i] != ')') lx[i] = 1;
+			else if(s[i] == '('){
+				if(i == 0 || s[i-1] == '(' || s[i-1] == '+'){
+					lx[i] = 0;
+					lx[pair[i]] = 0;
+				}
+				else{
+					int pr = pair[i];
+					bool dx = true;
+					for(int j = i+1; j < pr; j++){
+						if(s[j] == '+' || s[j] == '-'){
+							dx = false;
+							break;
+						}
+					}
+					lx[i] = lx[pr] = !dx;
+				}
+			}
+		}
+		print(s, lx);
+	}
+	return 0;
+}
