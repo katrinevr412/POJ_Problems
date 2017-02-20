@@ -1,0 +1,92 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int dp[32768][15];
+bool jsed[32768][15];
+int x1[15], x2[15], y1[15], y2[15];
+int color[15];
+bool prc[15][15];
+int dep[15];
+
+const int INF = 100000000;
+
+void dfs(int tar, int beg, bool *used, int gs){
+	if(beg != tar) dep[tar] += (1 << beg);
+	used[beg] = 1;
+	for(int i = 0; i < gs; i++){
+		if(used[i] || !prc[beg][i]) continue;
+		dfs(tar, i, used, gs);
+	}
+}
+
+void buildDep(int gs){
+	for(int i = 0; i < gs; i++){
+		for(int j = 0; j < gs; j++){
+			if(i==j) continue;
+			if(x2[i] == x1[j] && y1[j] < y2[i] && y1[i] < y2[j]){
+				prc[i][j] = 1;
+			}
+		}
+	}
+	for(int i = 0; i < gs; i++){
+		bool used[15] = {0};
+		dfs(i, i, used, gs);
+	}
+}
+
+int getRes(int state, int last, int gs){
+	if(!state) return 0;
+	if(!(state & (1 << last)) || (state & dep[last])){
+		//if state does not contain last, or there is dependency, cannot paint last
+		return INF;
+	}
+	if(jsed[state][last]) return dp[state][last];
+	jsed[state][last] = 1;
+	int sc = state - (1 << last);
+	if(!sc){
+		dp[state][last] = 1;
+		return 1;
+	}
+	int mn = INF;
+	for(int i = 0; i < gs; i++){
+		int thisRes = getRes(sc, i, gs) + (color[i] != color[last]);
+		if(thisRes < mn) mn = thisRes;
+	}
+	dp[state][last] = mn;
+	return mn;
+}
+
+int main() {
+	int tc;
+	scanf("%d", &tc);
+	while(tc--){
+		int gs;
+		scanf("%d", &gs);
+		int stateS = 1 << gs;
+		for(int i = 0; i < stateS; i++){
+			for(int j = 0; j < gs; j++){
+				jsed[i][j] = 0;
+			}
+		}
+		for(int i = 0; i < gs; i++){
+			for(int j = 0; j < gs; j++){
+				prc[i][j] = 0;
+			}
+		}
+		for(int i = 0; i < gs; i++){
+			scanf("%d%d%d%d%d", &x1[i], &y1[i], &x2[i], &y2[i], &color[i]);
+		}
+		for(int i = 0; i < gs; i++){
+			dep[i] = 0;
+		}
+		buildDep(gs);
+		int mn = INF;
+		for(int i = 0; i < gs; i++){
+			int tp = getRes((1<<gs)-1, i, gs);
+			if(tp < mn) mn = tp;
+		}
+		printf("%d\n", mn);
+	}
+	return 0;
+}
