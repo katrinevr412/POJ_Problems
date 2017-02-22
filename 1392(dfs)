@@ -1,0 +1,92 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+
+using namespace std;
+
+vector<bool> res[17];
+
+bool used[17][32768] = {false};
+int newstate[17];
+
+bool dfs(int n, int plc, int curNum=0){
+	//cout << "dfs-ing:" << n << "," << plc << "," <<  curNum << endl;
+	//cout << "used[n][0]=" << used[n][0] << endl;
+	if(plc == (1<<n)){
+		//cout << "plc=" << plc << endl;
+		int cur = curNum * 2 + res[n][0];
+		//cout << "curNum=" << curNum << endl;
+		//int newstate[17];
+
+		for(int i = 0; i < n-1; i++){
+			if(used[n][cur]) {
+				//cout << "guile" << endl;
+				for(int j = 0; j < i; j++){
+					used[n][newstate[j]] = false;
+				}
+				return false;
+			}
+			if(i == n-2) return true;
+			newstate[i] = cur;
+			used[n][cur] = true;
+			cur = cur % (1 << (n-1));
+			cur *= 2;
+			cur += (int)res[n][i+1];
+			//used[n][cur] = true;
+			//newstate[i] = cur;
+		}
+	}
+	else if(!plc){
+		for(int i = 0; i < n; i++){
+			res[n][i] = false;
+		}
+		used[n][0] = true;
+		return dfs(n, n);
+	}
+	else{
+		if(!used[n][2*curNum]){
+			res[n][plc] = 0;
+			used[n][2*curNum] = true;
+			if(dfs(n, plc+1, (2*curNum)%((1<<(n-1))))) return true;
+			used[n][2*curNum] = false;
+		}
+		if(!used[n][2*curNum+1]){
+			res[n][plc] = 1;
+			used[n][2*curNum+1] = true;
+			if(dfs(n, plc+1, (2*curNum+1)%((1<<(n-1))))) return true;
+			used[n][2*curNum+1] = false;
+		}
+	}
+	return false;
+}
+
+
+int main() {
+	int cnt[17] = {0};
+	vector<pair<int,int> > query;
+	while(1){
+		int n,k;
+		scanf("%d%d", &n, &k);
+		if(!n) break;
+		cnt[n]++;
+		query.push_back(pair<int,int>(n,k));
+	}
+	for(int i = 1; i <= 15; i++){
+		if(!cnt[i]) continue;
+		res[i].resize((1<<i));
+		dfs(i, 0);
+	}
+	int qz = query.size();
+	for(int i = 0; i < qz; i++){
+		int n = query[i].first, k = query[i].second;
+		int resn = 0;
+		int pos = k;
+		for(int i = 0; i < n; i++){
+			resn *= 2;
+			resn += (int)(res[n][pos%(1<<n)]);
+			pos = (pos+1)%(1<<n);
+		}
+		printf("%d\n", resn);
+	}
+	return 0;
+}
