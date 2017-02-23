@@ -1,0 +1,85 @@
+#include <iostream>
+#include <stdio.h>
+#include <cmath>
+using namespace std;
+
+struct pt{
+	double x,y;
+};
+
+double dist(pt &p1, pt &p2){
+	return sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y));
+}
+
+double mn(double a1, double a2){
+	return a1>a2?a2:a1;
+}
+
+struct tunnel{
+	pt start, end;
+	int colour;
+};
+
+int main() {
+	int t;
+	scanf("%d", &t);
+	for(int i = 0; i < t; i++){
+		pt start, end;
+		scanf("%lf%lf%lf%lf", &start.x, &start.y, &end.x, &end.y);
+		int colour[1000];
+		int colourNo;
+		scanf("%d", &colourNo);
+		for(int i = 0; i < colourNo; i++) scanf("%d", &colour[i]);
+		int tunnelNo;
+		scanf("%d", &tunnelNo);
+		tunnel tunnels[1000];
+		for(int i = 0; i < tunnelNo; i++){
+			scanf("%lf%lf%lf%lf%d", &tunnels[i].start.x, &tunnels[i].start.y, &tunnels[i].end.x, &tunnels[i].end.y, &tunnels[i].colour);
+
+		}
+
+		double inf = 1e14;
+		double Dist[200][400];
+		for(int i = colourNo-1; i >= 0; i--){
+			for(int j = 0; j < tunnelNo; j++){
+				if(i == colourNo-1){
+					if(tunnels[j].colour != colour[i]){
+						Dist[i][2*j] = Dist[i][2*j+1] = inf;
+					}
+					else{
+						Dist[i][2*j] = dist(tunnels[j].start, tunnels[j].end) + dist(tunnels[j].end, end);
+						Dist[i][2*j+1] = dist(tunnels[j].start, tunnels[j].end) + dist(tunnels[j].start, end);
+					}
+				}
+				else{
+					if(tunnels[j].colour != colour[i]){
+						Dist[i][2*j] = Dist[i][2*j+1] = inf;
+					}
+					else{
+						double minDist0 = inf, minDist1 = inf;
+						for(int k = 0; k < tunnelNo; k++){
+							double curDist0 = dist(tunnels[j].start, tunnels[j].end) +
+									mn(Dist[i+1][2*k]+dist(tunnels[j].end, tunnels[k].start), Dist[i+1][2*k+1]+dist(tunnels[j].end, tunnels[k].end));
+							double curDist1 = dist(tunnels[j].end, tunnels[j].start) +
+									mn(Dist[i+1][2*k]+dist(tunnels[j].start, tunnels[k].start), Dist[i+1][2*k+1]+dist(tunnels[j].start, tunnels[k].end));
+							if(curDist0 < minDist0) minDist0 = curDist0;
+							if(curDist1 < minDist1) minDist1 = curDist1;
+						}
+						Dist[i][2*j] = minDist0;
+						Dist[i][2*j+1] = minDist1;
+					}
+				}
+			}
+		}
+		double minD = inf;
+		for(int i = 0; i < tunnelNo; i++){
+			double curD0 = dist(start, tunnels[i].start) + Dist[0][2*i];
+			if(curD0 < minD) minD = curD0;
+			double curD1 = dist(start, tunnels[i].end) + Dist[0][2*i+1];
+			if(curD1 < minD) minD = curD1;
+		}
+		printf("%.16lf\n", minD);
+		//cout << dist(start, end) << endl;
+	}
+	return 0;
+}
