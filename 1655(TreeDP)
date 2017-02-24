@@ -1,0 +1,70 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+
+using namespace std;
+
+vector<int> adj[20020];
+
+void getParent(int node, int *parent){
+	int sz = adj[node].size();
+	for(int i = 0; i < sz; i++){
+		int child = adj[node][i];
+		if(child != parent[node]) {
+			parent[child] = node;
+			getParent(child, parent);
+		}
+	}
+}
+
+void getSize(int node, int *size, int *parent){
+	int sz = adj[node].size();
+	int res = 1;
+	for(int i = 0; i < sz; i++){
+		if(adj[node][i] != parent[node]){
+			getSize(adj[node][i], size, parent);
+			res += size[adj[node][i]];
+		}
+	}
+	size[node] = res;
+}
+
+int main() {
+	int tc;
+	scanf("%d", &tc);
+	for(int i = 0; i < tc; i++){
+		int gs;
+		scanf("%d", &gs);
+		for(int i = 1; i <= gs; i++){
+			adj[i].clear();
+		}
+		for(int i = 1; i < gs; i++){
+			int a, b;
+			scanf("%d%d", &a, &b);
+			adj[a].push_back(b);
+			adj[b].push_back(a);
+		}
+		int parent[20020];
+		parent[1] = 0;//1 is the root
+		getParent(1, parent);
+		int size[20020];
+		getSize(1, size, parent);
+		int mnmx = 2147483647, arg = -1;
+		for(int i = 1; i <= gs; i++){
+			int upSize = gs - size[i];
+			if(upSize >= mnmx) continue;
+			int sz = adj[i].size();
+			for(int j = 0; j < sz; j++){
+				if(adj[i][j] != parent[i]){
+					if(size[adj[i][j]] > upSize) upSize = size[adj[i][j]];
+				}
+			}
+			if(upSize < mnmx) {
+				mnmx = upSize;
+				arg = i;
+			}
+		}
+		printf("%d %d\n", arg, mnmx);
+	}
+	return 0;
+}
