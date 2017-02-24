@@ -1,0 +1,37 @@
+#include <iostream>
+#include <stdio.h>
+#include <string.h>
+using namespace std;
+
+typedef long long int lint;
+const lint ZERO = 0;
+
+int dir[10][2] = {{}, {-1,-1}, {0,-1}, {1,-1}, {-1,0}, {0,0}, {1,0}, {-1,1}, {0,1}, {1,1}};
+
+lint get2Area(lint x, lint y, lint X, lint Y){
+	return x*Y - y*X;
+}
+char cmd[1000010];
+int main() {
+	int tc;
+	scanf("%d", &tc);
+	for(int i = 0; i < tc; i++){
+	lint x = ZERO, y = ZERO, newX, newY;
+
+	scanf("%s", cmd);
+	int len = strlen(cmd);
+	lint res = ZERO;
+	for(int i = ZERO; i < len; i++){
+		if(cmd[i] == '5') break;
+		int dirIdx = cmd[i] - '0';
+		newX = x + dir[dirIdx][0], newY = y + dir[dirIdx][1];
+		res += get2Area(x, y, newX, newY);
+		x = newX, y = newY;
+	}
+	if(res < ZERO) res = -res;
+	printf("%I64d", res/2);
+	if(res%2) printf(".5");
+	printf("\n");
+	}
+	return 0;
+}
