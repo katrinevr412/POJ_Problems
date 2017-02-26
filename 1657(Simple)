@@ -1,0 +1,89 @@
+#include <iostream>
+#include <stdio.h>
+#include <queue>
+using namespace std;
+
+const int WANG = 0, HOU = 1, CHE = 2, XIANG = 3;
+
+inline int mn(int a, int b){return a>b?b:a;}
+inline int ab(int a){return a>0?a:-a;}
+
+void print(int xs, int ys, int xe, int ye, int qz){
+	if(xs==xe && ys==ye){
+		printf(qz==XIANG? "0" : "0 ");
+		return;
+	}
+	switch(qz){
+		case WANG:{
+			int xc = ab(xs-xe), yc = ab(ys-ye);
+			int mnc = mn(xc, yc);
+			printf("%d ",  xc-mnc + yc);
+			break;
+		}
+		case HOU:{
+			int res;
+			if(xs==xe || ys==ye || ab(xs-xe)==ab(ys-ye)){
+				res = 1;
+			}
+			else res = 2;
+			printf("%d ", res);
+			break;
+		}
+		case CHE:{
+			int res;
+			if(xs==xe || ys==ye) res = 1;
+			else res = 2;
+			printf("%d ", res);
+			break;
+		}
+		case XIANG:{
+			bool used[9][9] = {0};
+			int dist[9][9];
+			int mx = (int) 1e9;
+			for(int i = 1; i <= 8; i++){
+				for(int j = 1; j <=8; j++){
+					dist[i][j] = mx;
+				}
+			}
+			dist[xs][ys] = 0;
+			used[xs][ys] = 1;
+			queue<pair<int, int> > bfs;
+			bfs.push(pair<int, int>(xs, ys));
+			while(!bfs.empty()){
+				int curx = bfs.front().first, cury = bfs.front().second;
+				bfs.pop();
+				int dir[4][2] = {{-1,-1},{-1,1},{1,-1},{1,1}};
+				for(int i = 0; i < 4; i++){
+					for(int j = 1; j <= 8; j++){
+						int newx = curx + j * dir[i][0], newy = cury + j * dir[i][1];
+						if(newx <= 0 || newx > 8 || newy <= 0 || newy > 8) break;
+						if(used[newx][newy]) continue;
+						used[newx][newy] = 1;
+						dist[newx][newy] = dist[curx][cury] + 1;
+						bfs.push(pair<int, int>(newx, newy));
+					}
+				}
+			}
+			int res = dist[xe][ye];
+			if(res == mx) printf("Inf");
+			else printf("%d", res);
+		}
+	}
+}
+
+int main() {
+	int t;
+	scanf("%d", &t);
+	for(int i = 0; i < t; i++){
+		int xs, ys, xe, ye;
+		char tmp1[4], tmp2[4];
+		scanf("%s%s", tmp1, tmp2);
+		xs = tmp1[0] - 'a' + 1, ys = tmp1[1] - '0';
+		xe = tmp2[0] - 'a' + 1, ye = tmp2[1] - '0';
+		for(int qz = WANG; qz <= XIANG; qz++){
+			print(xs, ys, xe, ye, qz);
+		}
+		printf("\n");
+	}
+	return 0;
+}
