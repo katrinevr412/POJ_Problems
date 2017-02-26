@@ -1,0 +1,99 @@
+#include <iostream>
+#include <stdio.h>
+#include <cstring>
+using namespace std;
+
+char puz[110][110];
+char word[110];
+bool found;
+int xs, xe, ys, ye;
+int wordlen;
+
+bool match(int x, int y, int xdir, int ydir){
+	for(int i = 0; i < wordlen; i++){
+		if(puz[x+i*xdir][y+i*ydir] != word[i]) return false;
+	}
+	found = true;
+	xs = x, ys = y;
+	xe = x+(wordlen-1)*xdir, ye = y+(wordlen-1)*ydir;
+	return true;
+}
+
+int main() {
+	int len;
+	while(scanf("%d", &len) > 0){
+		if(!len) break;
+
+		for(int i = 0; i < len; i++){
+			scanf("%s", puz[i]);
+		}
+
+		while(1){
+			scanf("%s", word);
+			wordlen = strlen(word);
+			if(wordlen == 1 && word[0] == '0'){
+				break;
+			}
+			found = false;
+
+			for(int i = 0; i < len; i++){
+				for(int j = 0; j <= len-wordlen; j++){
+					if(match(i, j, 0, 1)) goto done;
+				}
+			}
+
+			for(int i = 0; i < len; i++){
+				for(int j = wordlen-1; j <= len-1; j++){
+					if(match(i,j,0,-1)) goto done;
+				}
+			}
+
+			for(int j = 0; j < len; j++){
+				for(int i = 0; i <= len-wordlen; i++){
+					if(match(i,j,1,0)) goto done;
+				}
+			}
+
+			for(int j = 0; j < len; j++){
+				for(int i = wordlen-1; i <= len-1; i++){
+					if(match(i,j,-1,0)) goto done;
+				}
+			}
+
+			for(int i = 0; i <= len-wordlen; i++){
+				for(int j = 0; j <= len-wordlen; j++){
+					if(match(i,j,1,1)) goto done;
+				}
+			}
+
+			for(int i = 0; i <= len-wordlen; i++){
+				for(int j = wordlen-1; j <= len-1; j++){
+					if(match(i,j,1,-1)) goto done;
+				}
+			}
+
+			for(int i = wordlen-1; i <= len-1; i++){
+				for(int j = 0; j <= len-wordlen; j++){
+					if(match(i,j,-1,1)) goto done;
+				}
+			}
+
+			for(int i = wordlen-1; i <= len-1; i++){
+				for(int j = wordlen-1; j <= len-1; j++){
+					if(match(i,j,-1,-1)) goto done;
+				}
+			}
+
+			done:
+
+			if(found){
+				printf("%d,%d %d,%d\n", xs+1, ys+1, xe+1, ye+1);
+			}
+			else{
+				printf("Not found\n");
+			}
+
+		}
+	}
+	return 0;
+}
