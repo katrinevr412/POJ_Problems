@@ -1,0 +1,89 @@
+#include <iostream>
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+
+char pic[55][55];
+bool used[55][55];
+bool bused[55][55];
+int port[55][55];
+int gs[10000];
+int cnt;
+int m,n;
+int dir[4][2] = {{-1,0},{1,0},{0,-1},{0,1}};
+void init(){
+	for(int i = 0; i < 55; i++){
+		for(int j = 0; j < 55; j++){
+			used[i][j] = 0;
+			port[i][j] = -1;
+			bused[i][j] = 0;
+		}
+	}
+	for(int i = 0; i < 10000; i++){
+		gs[i] = 0;
+	}
+	cnt = 0;
+}
+
+bool inBound(int x, int y){
+	return x >= 0 && x < m && y >= 0 && y < n;
+}
+
+void dfs1(int x, int y, int cnt){
+	used[x][y] = 1;
+	port[x][y] = cnt;
+
+	for(int i = 0; i < 4; i++){
+		int xx = x + dir[i][0], yy = y + dir[i][1];
+		if(inBound(xx, yy) && !used[xx][yy] && pic[xx][yy] != '.'){
+			dfs1(xx, yy, cnt);
+		}
+	}
+}
+
+void dfs2(int x, int y){
+	bused[x][y] = 1;
+	for(int i = 0; i < 4; i++){
+		int xx = x + dir[i][0], yy = y + dir[i][1];
+		if(inBound(xx, yy) && !bused[xx][yy] && pic[xx][yy] == 'X'){
+			dfs2(xx, yy);
+		}
+	}
+
+}
+
+int main() {
+	int tc = 0;
+	while(scanf("%d%d", &n, &m) > 0){
+		if(!m && !n) break;
+		tc++;
+		printf("Throw %d\n", tc);
+		for(int i = 0; i < m; i++){
+			scanf("%s", pic[i]);
+		}
+		init();
+		for(int i = 0; i < m; i++){
+			for(int j = 0; j < n; j++){
+				if(!used[i][j] && pic[i][j] != '.'){
+					dfs1(i,j,cnt);
+					cnt++;
+				}
+			}
+		}
+		for(int i = 0; i < m; i++){
+			for(int j = 0; j < n; j++){
+				if(!bused[i][j] && pic[i][j] == 'X'){
+					dfs2(i,j);
+					gs[port[i][j]]++;
+				}
+			}
+		}
+		sort(gs, gs+cnt);
+		for(int i = 0; i < cnt; i++){
+			if(!gs[i]) continue;
+			printf("%d", gs[i]);
+			printf(i==cnt-1?"\n\n":" ");
+		}
+	}
+	return 0;
+}
