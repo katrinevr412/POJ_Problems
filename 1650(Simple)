@@ -1,0 +1,30 @@
+#include <iostream>
+#include <stdio.h>
+#include <cmath>
+using namespace std;
+
+int main() {
+	double a;
+	int l;
+	scanf("%lf%d", &a, &l);
+	int fz, fm;
+	int jfz, jfm;
+	double wc = 1e10;
+	for(fm = 1; fm <= l; fm++){
+		double fz_ = a * fm;
+		fz = (int) fz_;
+		if(fz_ - fz > 0.5) fz ++;
+		if(!fz) fz = 1;
+		if(fz > l+1) break;
+		if(fz > l) fz = l;
+		double zwc = abs(a - fz * 1.0 / fm);
+		if(zwc < wc) {
+			wc = zwc;
+			jfz = fz;
+			jfm = fm;
+		}
+		if(zwc == 0) break;
+	}
+	printf("%d %d\n", jfz, jfm);
+	return 0;
+}
