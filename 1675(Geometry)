@@ -1,0 +1,64 @@
+#include <iostream>
+#include <stdio.h>
+#include <cmath>
+using namespace std;
+
+typedef long long int lint;
+
+double PAI = 2*asin(1.0);
+
+double cha(double a, double b){
+	if(b - a >= 0) return b-a;
+	return b-a+2*PAI;
+}
+
+double mx(double a, double b){
+	return a>b?a:b;
+}
+
+
+bool tonghao(lint a, lint b){
+	return (a>=0&&b>=0) || (a<=0&&b<=0);
+}
+
+int main() {
+	//cout << atan2(3,5) << endl << atan2(3,-5) << endl << atan2(-3,5) << endl << atan2(-3,-5) << endl;
+	int tc;
+	scanf("%d", &tc);
+	while(tc--){
+		int r;
+		lint x[3], y[3];
+		scanf("%d", &r);
+		for(int i = 0; i < 3; i++){
+			scanf("%I64d%I64d", &x[i], &y[i]);
+		}
+		bool gx = false;
+		for(int i = 0; i < 3; i++){
+			int j = (i+1)%3;
+			if(x[i]*y[j] == x[j]*y[i] && tonghao(x[i],x[j]) && tonghao(y[i],y[j])){
+				gx = true;
+				break;
+			}
+		}
+		if(gx){
+			printf("No\n");
+			continue;
+		}
+		double jiao[3];
+		for(int i = 0; i < 3; i++){
+			jiao[i] = atan2(y[i] + 0.0, x[i] + 0.0);
+		}
+		bool ky = true;
+		for(int i = 0; i < 3; i++){
+			int j = (i+1)%3, k = (i+2)%3;
+			double mj = mx(cha(jiao[i], jiao[j]), cha(jiao[i], jiao[k]));
+			if(mj <= 2.0 / 3 * PAI) {
+				ky = false;
+				break;
+			}
+		}
+		if(ky) printf("Yes\n");
+		else printf("No\n");
+	}
+	return 0;
+}
