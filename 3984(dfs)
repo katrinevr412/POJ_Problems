@@ -1,0 +1,56 @@
+#include <iostream>
+#include <stdio.h>
+#include <queue>
+#include <stack>
+using namespace std;
+
+bool mg[5][5];
+
+struct zb{
+	int x,y;
+	zb(int x,int y):x(x),y(y){}
+	zb(){}
+};
+
+int main() {
+	for(int i = 0; i < 5; i++){
+		for(int j = 0; j < 5; j++){
+			int tmp;
+			scanf("%d", &tmp);
+			mg[i][j] = (bool) tmp;
+		}
+	}
+	queue<zb> bfs;
+	zb trc[5][5];
+	bool used[5][5] = {0};
+	bfs.push(zb(0,0));
+	used[0][0] = 1;
+	while(!bfs.empty()){
+		zb tmp = bfs.front();
+		bfs.pop();
+		int dir[4][2] = {{-1,0},{0,-1},{1,0},{0,1}};
+		for(int i = 0; i < 4; i++){
+			int x = tmp.x + dir[i][0], y = tmp.y + dir[i][1];
+			if(x>=0 && x<5 && y>=0 && y<5 && !used[x][y] && !mg[x][y]){
+				bfs.push(zb(x,y));
+				used[x][y] = 1;
+				trc[x][y] = zb(tmp.x, tmp.y);
+				if(x==4 && y==4) goto done;
+			}
+		}
+	}
+	done:
+	stack<zb> stk;
+	stk.push(zb(4,4));
+	zb tmp(4,4);
+	while(1){
+		tmp = trc[tmp.x][tmp.y];
+		stk.push(tmp);
+		if(!tmp.x && !tmp.y) break;
+	}
+	while(!stk.empty()){
+		printf("(%d, %d)\n", stk.top().x, stk.top().y);
+		stk.pop();
+	}
+	return 0;
+}
