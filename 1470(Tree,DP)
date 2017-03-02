@@ -1,0 +1,165 @@
+//============================================================================
+// Name        : main1470.cpp
+// Author      : 
+// Version     :
+// Copyright   : Your copyright notice
+// Description : Hello World in C++, Ansi-style
+//============================================================================
+
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+using namespace std;
+
+int n;
+int par[1000];
+vector<int> suc[1000];
+vector<int> subs[1000];
+bool jsedSubs[1000];
+bool jsed[1000][1000];
+short result[1000][1000];
+int depth[1000];
+int root;
+
+void getDepth(int i){
+	if(depth[i] != -1) return;
+	if(par[i] == -1) {
+		depth[i] = 0;
+		return;
+	}
+	getDepth(par[i]);
+	depth[i] = depth[par[i]] + 1;
+}
+
+void getSub(int a){
+	if(jsedSubs[a]) return;
+	int sz = suc[a].size();
+	for(int i = 0; i < sz; i++){
+		getSub(suc[a][i]);
+		int szsub = subs[suc[a][i]].size();
+		for(int j = 0; j < szsub; j++){
+			subs[a].push_back(subs[suc[a][i]][j]);
+		}
+	}
+	subs[a].push_back(a);
+	jsedSubs[a] = 1;
+}
+
+void setRes(int a, int b, int res){
+	if(a > b){int tmp = a; a = b; b = tmp;}
+	result[a][b] = res;
+	jsed[a][b] = true;
+}
+
+int getRes(int a, int b){
+	if(a == b) return a;
+	if(a > b){
+		int tmp = a; a = b; b = tmp;
+	}
+	if(jsed[a][b]) return result[a][b];
+	int depA = depth[a], depB = depth[b];
+	if(depA < depB){
+		for(int i = 0; i < depB-depA; i++){b = par[b];}
+	}
+	else{
+		for(int i = 0; i < depA-depB; i++){a = par[a];}
+	}
+	int cnt = 0;
+	int lastA, lastB;
+	while(a != b){
+		cnt++;
+		lastA = a, lastB = b;
+		a = par[a], b = par[b];
+	}
+	//do store work
+	if(cnt){
+		if(!jsedSubs[lastA]) getSub(lastA);
+		if(!jsedSubs[lastB]) getSub(lastB);
+		int szA = subs[lastA].size(), szB = subs[lastB].size();
+		for(int i = 0; i < szA; i++){
+			for(int j = 0; j < szB; j++){
+				setRes(subs[lastA][i], subs[lastB][j], a);
+			}
+		}
+	}
+	else if(depA < depB){
+		//a is b's ancestor
+		if(!jsedSubs[a]) getSub(a);
+		int szA = subs[a].size();
+		for(int i = 0; i < szA; i++){
+			setRes(subs[a][i], a, a);
+		}
+	}
+	else{
+		//b is a's ancestor
+		if(!jsedSubs[b]) getSub(b);
+		int szB = subs[b].size();
+		for(int i = 0; i < szB; i++){
+			setRes(subs[b][i], b, b);
+		}
+	}
+
+	return a;
+}
+
+int main() {
+	while(scanf("%d", &n) > 0){
+		char c;
+		for(int i = 1; i <= n; i++) par[i] = -1;
+		for(int i = 1; i <= n; i++) suc[i].clear();
+		for(int i = 1; i <= n; i++) subs[i].clear();
+		for(int i = 1; i <= n; i++) jsedSubs[i] = false;
+		for(int i = 1; i <= n; i++){
+			int no;
+			scanf("%d", &no);
+			while(scanf("%c", &c)){
+				if(c == '(') break;
+			}
+			int gs;
+			scanf("%d", &gs);
+			while(scanf("%c", &c)){
+				if(c == ')') break;
+			}
+			for(int j = 0; j < gs; j++){
+				int tmp;
+				scanf("%d", &tmp);
+				suc[no].push_back(tmp);
+				par[tmp] = no;
+			}
+		}
+		root = -1;
+		for(int i = 1; i <= n; i++){
+			if(par[i] == -1){
+				root = i;
+				break;
+			}
+		}
+		for(int i = 1; i <= n; i++){
+			for(int j = i; j <= n; j++){
+				jsed[i][j] = 0;
+			}
+		}
+		for(int i = 1; i <= n; i++) depth[i] = -1;
+		for(int i = 1; i <= n; i++) getDepth(i);
+		int qgs;
+		scanf("%d", &qgs);
+		int res[1000] = {0};
+		for(int i = 0; i < qgs; i++){
+			while(scanf("%c", &c)){
+				if(c == '(') break;
+			}
+			int a,b;
+			scanf("%d%d", &a, &b);
+			while(scanf("%c", &c)){
+				if(c == ')') break;
+			}
+			res[getRes(a,b)]++;
+		}
+		for(int i = 1; i <= n; i++){
+			if(res[i]){
+				printf("%d:%d\n", i, res[i]);
+			}
+		}
+	}
+	return 0;
+}
