@@ -1,0 +1,49 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+using namespace std;
+
+int main() {
+	int n;
+	while(scanf("%d", &n) > 0){
+		if(!n) break;
+		if(n%4==1 || n%4==2){
+			printf("0\n\n");
+		}
+		else{
+			printf("%d\n", n);
+			vector<int> *sets = new vector<int>[n+1];
+
+			for(int k = n; k >= 1; k--){
+				int j = n;
+				while(j > k && sets[j].size()%2==0){
+					j--;
+				}
+				for(int i = j; i > j-k; i--){
+					sets[i].push_back(k);
+				}
+			}
+
+			int *order = new int[n+1];
+			for(int i = 1; i <= n; i++){
+				order[i] = i;
+			}
+			if(n%4==0){
+				order[2] = 1; order[1] = 2;
+			}
+			for(int i = 1; i <= n; i++){
+				int I = order[i];
+				int sz = sets[I].size();
+				for(int j = sz-1; j >= 0; j--){
+					printf("%d", sets[I][j]);
+					if(j) printf(" ");
+				}
+				printf("\n");
+			}
+
+			printf("\n");
+			delete [] sets;
+		}
+	}
+	return 0;
+}
