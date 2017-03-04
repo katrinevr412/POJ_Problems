@@ -1,0 +1,113 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+using namespace std;
+
+int n,m;
+vector<int> adj[2002];
+bool isDouble[2002][2002] = {{false}};
+int adjNum[2002];
+int par[2002];
+int kd[2002];
+int nb[2002];
+
+int cnt = 1;
+
+void init(int n){
+	for(int i = 1; i <= n; i++){
+		adjNum[i] = 0;
+		par[i] = -1;
+		kd[i] = -1;
+		nb[i] = -1;
+	}
+	cnt = 1;
+}
+
+inline int mn(int a, int b){
+	return a<b?a:b;
+}
+
+void dfs(int cur, int prt){
+	nb[cur] = cnt;
+	cnt++;
+	par[cur] = prt;
+
+	for(int i = 0; i < adjNum[cur]; i++){
+		int next = adj[cur][i];
+		if(nb[next] == -1){
+			dfs(next, cur);
+		}
+	}
+}
+
+void getKD(int cur){
+	if(kd[cur] != -1) return;
+	if(cur == 1) {
+		kd[1] = 1;
+		return;
+	}
+	kd[cur] = nb[cur];
+	for(int i = 0; i < adjNum[cur]; i++){
+		int next = adj[cur][i];
+		if(nb[next] < nb[cur] && next != par[cur]){
+			//getKD(next);
+			kd[cur] = mn(kd[cur], nb[next]);
+		}
+		else if(cur == par[next]){
+			getKD(next);
+			kd[cur] = mn(kd[cur], kd[next]);
+
+		}
+	}
+
+}
+
+
+int main() {
+	//int tc = 0;
+	scanf("%d%d",&n,&m);
+		//if(!n && !m) break;
+		//tc++;
+		//printf("%d\n\n", tc);
+		init(n);
+		for(int i = 0; i < m; i++){
+			int a,b,c;
+			scanf("%d%d%d", &a, &b, &c);
+			adj[a].push_back(b);
+			adjNum[a]++;
+			if(c == 2){
+				adj[b].push_back(a);
+				adjNum[b]++;
+				isDouble[a][b] = isDouble[b][a] = 1;
+			}
+			//adjNum[b]++;
+		}
+		dfs(1, -1);
+		for(int i = 1; i <= n; i++){
+			getKD(i);
+			//cout << "NB[" << i << "]:" << nb[i] << endl;
+			//cout << "KD[" << i << "]:" << kd[i] << endl;
+		}
+		for(int i = 1; i <= n; i++){
+			for(int j = 0; j < adjNum[i]; j++){
+				int cur = i, next = adj[i][j];
+				if(!isDouble[cur][next]) continue;
+				if(nb[cur] < nb[next]){
+					continue;
+					//int tmp = cur; cur = next; next = tmp;
+				}
+				if(next == par[cur]){
+					if(kd[cur] > nb[next]){
+						printf("%d %d 2\n", cur, next);
+					}
+					else printf("%d %d 1\n", next, cur);
+				}
+				else{
+					printf("%d %d 1\n", cur, next);
+				}
+			}
+		}
+		//printf("#\n");
+
+	return 0;
+}
