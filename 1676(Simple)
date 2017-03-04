@@ -1,0 +1,82 @@
+#include <string>
+#include <iostream>
+#include <cstdlib>
+using namespace std;
+
+string s1, s2, s3;
+int state1[4] = {0}, state2[4] = {0};
+int digit[10] = {119,18,93,91,58,107,111,82,127,123};
+
+bool canRep(int state, int dig){
+	return (state & digit[dig]) == state;
+}
+
+void getRep(int i, int *I){
+	I[0] = (i/60)/10, I[1] = (i/60)%10, I[2] = (i%60)/10, I[3] = (i%60)%10;
+}
+
+void getState(int *state, int offset){
+	for(int i = 0; i < 4; i++){
+		if(s1[3*i+1+offset] != ' ') state[i] += (1<<6);
+		if(s2[3*i+0+offset] != ' ') state[i] += (1<<5);
+		if(s2[3*i+1+offset] != ' ') state[i] += (1<<3);
+		if(s2[3*i+2+offset] != ' ') state[i] += (1<<4);
+		if(s3[3*i+0+offset] != ' ') state[i] += (1<<2);
+		if(s3[3*i+1+offset] != ' ') state[i] += (1<<0);
+		if(s3[3*i+2+offset] != ' ') state[i] += (1<<1);
+	}
+}
+
+int main() {
+	int tc;
+	string s;
+	getline(cin, s);
+	tc = atoi(s.c_str());
+	for(int i = 0; i < tc; i++){
+
+		getline(cin,s1);
+		getline(cin,s2);
+		getline(cin,s3);
+
+		for(int j = 0; j < 4; j++){
+			state1[j] = state2[j] = 0;
+		}
+		getState(state1, 0);
+		getState(state2, 13);
+
+		int cnt = 0, arg;
+		for(int i = 0; i < 1440; i++){
+			int j = (i+1425)%1440;
+			int I[4], J[4];
+			getRep(i,I);
+			getRep(j,J);
+			bool ky = true;
+			for(int k = 0; k < 4; k++){
+				if(!canRep(state1[k], I[k])){
+					ky = false;
+					break;
+				}
+				if(!canRep(state2[k], J[k])){
+					ky = false;
+					break;
+				}
+			}
+			if(ky){
+				cnt++;
+				arg = i;
+			}
+			if(cnt >= 2) break;
+		}
+
+		if(!cnt || cnt>=2) cout << "Not Sure" << endl;
+		else{
+			int res[4];
+			getRep(arg, res);
+			for(int i = 0; i < 4; i++){
+				cout << res[i];
+			}
+			cout << endl;
+		}
+	}
+	return 0;
+}
