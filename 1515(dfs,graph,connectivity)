@@ -1,0 +1,106 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int n,m;
+int adj[1005][8];
+int adjNum[1005];
+int par[1005];
+int kd[1005];
+int nb[1005];
+
+int cnt = 1;
+
+void init(int n){
+	for(int i = 1; i <= n; i++){
+		adjNum[i] = 0;
+		par[i] = -1;
+		kd[i] = -1;
+		nb[i] = -1;
+	}
+	cnt = 1;
+}
+
+inline int mn(int a, int b){
+	return a<b?a:b;
+}
+
+void dfs(int cur, int prt){
+	nb[cur] = cnt;
+	cnt++;
+	par[cur] = prt;
+
+	for(int i = 0; i < adjNum[cur]; i++){
+		int next = adj[cur][i];
+		if(nb[next] == -1){
+			dfs(next, cur);
+		}
+	}
+}
+
+void getKD(int cur){
+	if(kd[cur] != -1) return;
+	if(cur == 1) {
+		kd[1] = 1;
+		return;
+	}
+	kd[cur] = nb[cur];
+	for(int i = 0; i < adjNum[cur]; i++){
+		int next = adj[cur][i];
+		if(nb[next] < nb[cur] && next != par[cur]){
+			//getKD(next);
+			kd[cur] = mn(kd[cur], nb[next]);
+		}
+		else if(cur == par[next]){
+			getKD(next);
+			kd[cur] = mn(kd[cur], kd[next]);
+
+		}
+	}
+
+}
+
+
+int main() {
+	int tc = 0;
+	while(scanf("%d%d",&n,&m)>0){
+		if(!n && !m) break;
+		tc++;
+		printf("%d\n\n", tc);
+		init(n);
+		for(int i = 0; i < m; i++){
+			int a,b;
+			scanf("%d%d", &a, &b);
+			adj[a][adjNum[a]] = b;
+			adj[b][adjNum[b]] = a;
+			adjNum[a]++;
+			adjNum[b]++;
+		}
+		dfs(1, -1);
+		for(int i = 1; i <= n; i++){
+			getKD(i);
+			//cout << "NB[" << i << "]:" << nb[i] << endl;
+			//cout << "KD[" << i << "]:" << kd[i] << endl;
+		}
+		for(int i = 1; i <= n; i++){
+			for(int j = 0; j < adjNum[i]; j++){
+				int cur = i, next = adj[i][j];
+				if(nb[cur] < nb[next]){
+					continue;
+					//int tmp = cur; cur = next; next = tmp;
+				}
+				if(next == par[cur]){
+					if(kd[cur] > nb[next]){
+						printf("%d %d\n%d %d\n", cur, next, next, cur);
+					}
+					else printf("%d %d\n", next, cur);
+				}
+				else{
+					printf("%d %d\n", cur, next);
+				}
+			}
+		}
+		printf("#\n");
+	}
+	return 0;
+}
