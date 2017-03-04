@@ -1,0 +1,60 @@
+#include <iostream>
+#include <stdio.h>
+#include <queue>
+using namespace std;
+
+int dist[1<<20];
+int MX = 1e9;
+
+int main() {
+	int n,m, cnt = 0;
+	while(scanf("%d%d", &n, &m) > 0){
+		if(!n && !m) break;
+		cnt++;
+		printf("Product %d\n", cnt);
+		int GS = 1 << n;
+		for(int i = 0; i < GS-1; i++){
+			dist[i] = MX;
+		}
+		dist[GS-1] = 0;
+		int bjia[110]={0}, bjian[110]={0}, fjia[110]={0}, fjian[110]={0}, cost[110];
+		for(int i = 0; i < m; i++){
+			char btmp[25], ftmp[25];
+			scanf("%d%s%s", &cost[i], btmp, ftmp);
+			for(int j = 0; j < n; j++){
+				if(btmp[j] == '+') bjia[i] += (1 << j);
+				else if(btmp[j] == '-') bjian[i] += (1 << j);
+			}
+			for(int j = 0; j < n; j++){
+				if(ftmp[j] == '+') fjia[i] += (1 << j);
+				else if(ftmp[j] == '-') fjian[i] += (1 << j);
+			}
+		}
+		queue<pair<int, int> > bfs;
+		bfs.push(pair<int, int>(GS-1, 0));
+		while(!bfs.empty()){
+			int curState = bfs.front().first, curDist = bfs.front().second;
+			bfs.pop();
+			if(dist[curState] < curDist) continue;
+			for(int i = 0; i < m; i++){
+
+				if((curState & bjia[i]) == bjia[i] && (curState & bjian[i]) == 0){
+					int newState = curState | fjia[i];
+					newState = newState & (~fjian[i]);
+					int newCost = curDist + cost[i];
+					if(newCost < dist[newState]){
+						dist[newState] = newCost;
+						bfs.push(pair<int, int>(newState, newCost));
+					}
+				}
+			}
+		}
+		if(dist[0] >= MX){
+			printf("Bugs cannot be fixed.\n\n");
+		}
+		else{
+			printf("Fastest sequence takes %d seconds.\n\n", dist[0]);
+		}
+	}
+	return 0;
+}
