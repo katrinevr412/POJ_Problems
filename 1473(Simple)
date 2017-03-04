@@ -1,0 +1,90 @@
+#include <iostream>
+#include <stdio.h>
+#include <string.h>
+#include <cmath>
+using namespace std;
+
+//N (north), NE (northeast), E (east), SE (southeast), S (south), SW (southwest), W (west) or NW (northwest)
+
+pair<double, double> getOffset(char *xtmp, int len){
+	double num = 0.0;
+	int part;
+	for(int i = 0; i < len; i++){
+		if(xtmp[i] < '0' || xtmp[i] > '9') {
+			part = i;
+			break;
+		}
+		num *= 10;
+		num += (xtmp[i] - '0');
+	}
+	//cout << num << endl;
+	double dir[2] = {0.0};
+	double sqrt2 = sqrt(2.0);
+	//printf("%.17lf\n", sqrt2/2);
+	if(len - part == 1){
+		char c = xtmp[part];
+		if(c == 'N'){
+			dir[1] = 1;
+		}
+		else if(c == 'E'){
+			dir[0] = 1;
+		}
+		else if(c == 'S'){
+			dir[1] = -1;
+		}
+		else{
+			dir[0] = -1;
+		}
+	}
+	else{
+		char c = xtmp[part], d = xtmp[part+1];
+		if(c=='N' && d=='E'){
+			dir[0] = sqrt2/2, dir[1] = sqrt2/2;
+		}
+		else if(c=='N' && d=='W'){
+			dir[0] = -sqrt2/2, dir[1] = sqrt2/2;
+		}
+		else if(c=='S' && d=='E'){
+			dir[0] = sqrt2/2, dir[1] = -sqrt2/2;
+		}
+		else{
+			dir[0] = -sqrt2/2, dir[1] = -sqrt2/2;
+		}
+	}
+	return pair<double, double>(num * dir[0], num * dir[1]);
+}
+//N (north), NE (northeast), E (east), SE (southeast), S (south), SW (southwest), W (west) or NW (northwest)
+
+int main() {
+	int cnt = 0;
+	while(1){
+		char tmp[2333];
+		scanf("%s", tmp);
+		int len = strlen(tmp);
+		if(tmp[0] == 'E') break;
+		cnt++;
+		int offset = 0;
+		double qx = 0.0, qy = 0.0;
+		while(offset < len){
+			//cout << "offset:" << offset <<endl;
+			int o = 0;
+			char xtmp[8] = {'\0'};
+			while(offset < len && tmp[offset] != ',' && tmp[offset] != '.'){
+				xtmp[o++] = tmp[offset];
+				offset++;
+				//cout << offset << endl;
+
+				//cout << offset << endl;
+				//qx += res.first, qy += res.second;
+			}
+			offset++;
+			pair<double, double> res = getOffset(xtmp, o);
+			qx += res.first, qy += res.second;
+		}
+		double dist = sqrt(qx*qx+qy*qy);
+		if(qx < 0 && qx > -1e-8) qx = 0;
+		if(qy < 0 && qy > -1e-8) qy = 0;
+		printf("Map #%d\nThe treasure is located at (%.3lf,%.3lf).\nThe distance to the treasure is %.3lf.\n\n", cnt, qx, qy, dist);
+	}
+	return 0;
+}
