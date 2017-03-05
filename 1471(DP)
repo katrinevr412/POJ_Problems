@@ -1,0 +1,89 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+char hb[101][300];
+int dpx[101][101];
+int dps[101][101];
+
+inline int MX(int a, int b){
+	return a>b?a:b;
+}
+
+inline int MN(int a, int b){
+	return a<b?a:b;
+}
+
+int main() {
+	int cnt = 0;
+	while(1){
+		int n;
+		scanf("%d", &n);
+		if(!n) break;
+		cnt++;
+		printf("Triangle #%d\n", cnt);
+		for(int i = n; i > 0; i--){
+			scanf("%s", hb[i]);
+		}
+		int mx = 0;
+		if(hb[1][0] == '-') {
+			dpx[1][0] = 1;
+			mx = 1;
+		}
+		else{
+			dpx[1][0] = 0;
+		}
+		for(int c = 2; c <= n; c++){
+			int bai = -1;
+			for(int k = 0; k < c; k++){
+				if(k == c-1){
+					dpx[c][k] = hb[c][2*c-2]=='-'?1:0;
+					mx = MX(mx, dpx[c][k]);
+					break;
+				}
+				if(hb[c][2*k] != '-'){
+					dpx[c][k] = 0;
+				}
+				else{
+					if(bai < 2*k){
+						bai = 2*k;
+						while(bai <= 2*c-2 && hb[c][bai] == '-'){
+							bai++;
+						}
+						bai--;
+					}
+					dpx[c][k] = MN(dpx[c-1][k]+1, (bai-2*k)/2+1);
+					mx = MX(mx, dpx[c][k]);
+				}
+
+			}
+		}
+
+		for(int i = 0; i < n-1; i++){
+			dps[1][i] = hb[n][2*i+1]=='-'? 1 : 0;
+			mx = MX(mx, dps[1][i]);
+		}
+		for(int c = 2; c < n; c++){
+			int bai = -1;
+			for(int k = 0; k < n-c; k++){
+				if(hb[n+1-c][2*k+1] != '-'){
+					dps[c][k] = 0;
+				}
+				else{
+					if(bai < 2*k+1){
+						bai = 2*k+1;
+						while(bai <= 2*(n-c) && hb[n+1-c][bai] == '-'){
+							bai++;
+						}
+						bai--;
+					}
+					dps[c][k] = MN(dps[c-1][k+1]+1, (bai-(2*k+1))/2+1);
+					mx = MX(mx, dps[c][k]);
+				}
+			}
+		}
+
+		printf("The largest triangle area is %d.\n\n", mx*mx);
+	}
+	return 0;
+}
