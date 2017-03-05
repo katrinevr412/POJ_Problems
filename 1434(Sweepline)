@@ -1,0 +1,71 @@
+#include <iostream>
+#include <stdio.h>
+
+#include <algorithm>
+using namespace std;
+
+int ord[1000000+40000+1];
+
+int start[50005], end[50005], area[50005];
+int pt[100010];
+int coor[100010];
+int areaDiff[100010];
+
+int main() {
+	int tc;
+	scanf("%d", &tc);
+	while(tc--){
+		int n;
+		scanf("%d", &n);
+		for(int i = 0; i < n; i++){
+			int b,h,w,d;
+			scanf("%d%d%d%d", &b, &h, &w, &d);
+			area[i] = w*d;
+			start[i] = b;
+			end[i] = b+h;
+			pt[2*i] = b, pt[2*i+1] = b+h;
+		}
+		sort(pt, pt+2*n);
+		int cnt = 0;
+		for(int i = 0; i < 2*n; i++){
+			if(i==0 || pt[i] != pt[i-1]){
+				coor[cnt] = pt[i];
+				ord[pt[i]] = cnt;
+				cnt++;
+			}
+		}
+		for(int i = 0; i < cnt; i++){
+			areaDiff[i] = 0;
+		}
+		for(int i = 0; i < n; i++){
+			areaDiff[ord[start[i]]] += area[i];
+			areaDiff[ord[end[i]]] -= area[i];
+		}
+		int v;
+		scanf("%d", &v);
+		int curArea = 0;
+		double curHeight = coor[0];
+		int curVol = 0;
+		bool notOverflow = false;
+		double height = 0.0;
+		for(int i = 0; i < cnt-1; i++){
+			curArea += areaDiff[i];
+			int newVol = curVol + (coor[i+1] - coor[i]) * curArea;
+			if(newVol >= v){
+				//do sth
+				height = curHeight + (v - curVol + 0.0) / curArea;
+				notOverflow = true;
+				break;
+			}
+			curVol = newVol;
+			curHeight = coor[i+1];
+		}
+		if(notOverflow){
+			printf("%.2lf\n", height);
+		}
+		else{
+			printf("OVERFLOW\n");
+		}
+	}
+	return 0;
+}
