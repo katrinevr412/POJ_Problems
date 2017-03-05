@@ -1,0 +1,45 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int main() {
+	int n;
+	while(1){
+		scanf("%d", &n);
+		if(!n) break;
+		int gui[32][32] = {0};
+		for(int i = 0; i < n; i++){
+			for(int j = 0; ; j++){
+				scanf("%d", &gui[i][j]);
+				if(!gui[i][j]) break;
+			}
+		}
+		for(int i = 1; i <= gui[0][0]; i++){
+			for(int j = 0; ; j++){
+				if(gui[j][0] < i) break;
+				int tmp = 0;
+				for(int k = 0; ; k++){
+					if(gui[j][k] < i) break;
+					tmp++;
+				}
+				printf("%d ", tmp);
+			}
+			printf("\n");
+		}
+		printf("\n");
+		for(int i = 0; ; i++){
+			if(!gui[0][i]) break;
+			for(int j = 1; j <= gui[0][i]; j++){
+				int tmp = 0;
+				for(int k = 0; ; k++){
+					if(gui[k][i] < j) break;
+					tmp++;
+				}
+				printf("%d ", tmp);
+			}
+			printf("\n");
+		}
+		printf("\n\n");
+	}
+	return 0;
+}
