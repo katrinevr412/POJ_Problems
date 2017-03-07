@@ -1,0 +1,296 @@
+#include <iostream>
+#include <stdio.h>
+#include <string.h>
+#include <queue>
+#include <stack>
+using namespace std;
+
+char mg[25][25];
+int r, c;
+char path[25][25][4][4][500];
+int dist[25][25][4][4];
+
+char startPath[4][500];
+int startDist[4];
+
+struct pt{
+	int x,y;
+};
+
+int dir[4][2] = {{0,-1},{1,0},{0,1},{-1,0}};
+const int MX = 1000000;
+pt start, box, target;
+bool inBound(int x, int y){
+	return x>=0 && x<r && y>=0 && y<c;
+}
+
+bool isValid(int x, int y){
+	return inBound(x,y) && mg[x][y] != '#';
+}
+
+bool keTui(int x, int y, int d){
+	return isValid(x,y) && isValid(x-dir[d][0],y-dir[d][1]) && isValid(x-2*dir[d][0],y-2*dir[d][1]);
+}
+
+char walkChar[5] = {'w', 's', 'e', 'n'};
+char pushChar[5] = {'E', 'N', 'W', 'S'};
+
+char getWalkChar(int d){
+	return walkChar[d];
+}
+
+char getPushChar(int d){
+	return pushChar[d];
+}
+
+void getStartPath(){
+	queue<pt> bfs;
+	bfs.push(start);
+	int dists[25][25];
+	for(int i = 0; i < r; i ++){
+		for(int j = 0; j < c; j++){
+			dists[i][j] = MX;
+		}
+	}
+	dists[start.x][start.y] = 0;
+	bool used[25][25] = {false};
+	pt trc[25][25];
+	int trcDir[25][25];
+	used[start.x][start.y] = 1;
+	while(!bfs.empty()){
+		pt cur = bfs.front();
+		int curDist = dists[cur.x][cur.y];
+		bfs.pop();
+		for(int i = 0; i < 4; i++){
+			int x = cur.x + dir[i][0], y = cur.y + dir[i][1];
+			if(!isValid(x,y) || mg[x][y] == 'B' || used[x][y]) continue;
+			used[x][y] = 1;
+			dists[x][y] = curDist+1;
+			trc[x][y] = cur;
+			trcDir[x][y] = i;
+			pt tmp;
+			tmp.x = x, tmp.y = y;
+			bfs.push(tmp);
+		}
+	}
+	//cout << 1 << endl;
+	for(int d = 0; d < 4; d++){
+		//cout << d << endl;
+		int x = box.x + dir[d][0], y = box.y + dir[d][1];
+		//cout << x << " " << y << endl;
+		if(!keTui(x,y,d) || dists[x][y] == MX) {
+			//cout << "boom" << endl;
+			startDist[d] = MX;
+		}
+		else{
+			startDist[d] = dists[x][y];
+			startPath[d][startDist[d]] = '\0';
+			for(int i = startDist[d]-1; i >= 0; i--){
+				startPath[d][i] = getWalkChar(trcDir[x][y]);
+				pt tmp = trc[x][y];
+				x = tmp.x, y = tmp.y;
+			}
+		}
+	}
+}
+
+void getPath(int i, int j, int d){
+	int X = i + dir[d][0], Y = j + dir[d][1];
+	if(!isValid(X,Y)) {
+		for(int k = 0; k < 4; k++) {
+			dist[i][j][d][k] = MX;
+			dist[i][j][k][d] = MX;
+		}
+		return;
+	}
+	queue<pt> bfs;
+	pt tmp;
+
+	tmp.x = X, tmp.y = Y;
+	bfs.push(tmp);
+	bool used[25][25] = {0};
+	int dists[25][25];
+	for(int I = 0; I < r; I ++){
+		for(int J = 0; J < c; J++){
+			dists[I][J] = MX;
+		}
+	}
+	dists[X][Y] = 0;
+	pt trc[25][25];
+	int trcDir[25][25];
+	used[X][Y] = 1;
+		while(!bfs.empty()){
+			pt cur = bfs.front();
+			int curDist = dists[cur.x][cur.y];
+			bfs.pop();
+			for(int I = 0; I < 4; I++){
+				int x = cur.x + dir[I][0], y = cur.y + dir[I][1];
+				if(!isValid(x,y) || (x==i && y==j) ||  used[x][y]) continue;
+				used[x][y] = 1;
+				dists[x][y] = curDist+1;
+				trc[x][y] = cur;
+				trcDir[x][y] = I;
+				pt tmp;
+				tmp.x = x, tmp.y = y;
+				bfs.push(tmp);
+			}
+		}
+		for(int D = 0; D < 4; D++){
+			//cout << "D" << endl;
+			int x = i + dir[D][0], y = j + dir[D][1];
+			if(!keTui(x,y,D) || dists[x][y] >= MX) dist[i][j][d][D] = MX;
+			else{
+				dist[i][j][d][D] = dists[x][y];
+				//cout << dists[x][y] << endl;
+				path[i][j][d][D][dists[x][y]] = '\0';
+				for(int I = dists[x][y]-1; I >= 0; I--){
+					path[i][j][d][D][I] = getWalkChar(trcDir[x][y]);
+					pt tmp = trc[x][y];
+					x = tmp.x, y = tmp.y;
+				}
+			}
+		}
+}
+
+void getPath(int i, int j){
+	if(!isValid(i,j)) return;
+	for(int d = 0; d < 4; d++){
+		//cout << d << endl;
+		getPath(i,j,d);
+	}
+}
+
+struct dst{
+	int nop;
+	int now;
+};
+
+dst MXD;
+
+bool operator<(const dst &d1, const dst &d2){
+	return d1.nop < d2.nop || (d1.nop == d2.nop && d1.now < d2.now);
+}
+
+struct state{
+	int row, col;
+	int dir;
+	state(int r, int c, int d): row(r), col(c), dir(d){}
+};
+
+int main() {
+	int cnt = 0;
+	while(1){
+		scanf("%d%d", &r, &c);
+		if(!r && !c) break;
+		cnt++;
+		printf("Maze #%d\n", cnt);
+		for(int i = 0; i < r; i++){
+			scanf("%s", mg[i]);
+		}
+
+		for(int i = 0; i < r; i++){
+			for(int j = 0; j < c; j++){
+				if(mg[i][j] == 'S'){
+					start.x = i, start.y = j;
+				}
+				else if(mg[i][j] == 'B'){
+					box.x = i, box.y = j;
+				}
+				else if(mg[i][j] == 'T'){
+					target.x = i, target.y = j;
+				}
+			}
+		}
+		getStartPath();
+		//for(int d = 0; d < 4; d++) cout << startDist[d] << endl;
+		for(int i = 0; i < r; i++){
+			for(int j = 0; j < c; j++){
+				//cout << i << " " <<j << endl;
+				getPath(i,j);
+			}
+		}
+		//cout << "path get" << endl;
+		queue<pair<state, dst> > bfs;
+		dst dists[25][25][4];
+		int lastWalk[25][25][4];
+
+		MXD.nop = MX, MXD.now = MX;
+		for(int i = 0; i < r; i++){
+			for(int j = 0; j < c; j++){
+				for(int d = 0; d < 4; d++){
+					dists[i][j][d] = MXD;
+				}
+			}
+		}
+		//cout << "test" << endl;
+		for(int d = 0; d < 4; d++){
+			if(startDist[d] == MX) continue;
+			dst tmp;
+			tmp.nop = 1;
+			tmp.now = startDist[d];
+			int newX = box.x-dir[d][0], newY = box.y-dir[d][1];
+			dists[newX][newY][d] = tmp;
+			lastWalk[newX][newY][d] = -1;
+			bfs.push(pair<state, dst>(state(newX, newY, d), tmp));
+		}
+		//cout << "test" << endl;
+		while(!bfs.empty()){
+			state tmp = bfs.front().first;
+			dst tmpd = bfs.front().second;
+			//cout << tmpd.nop << " " << tmpd.now << endl;
+			//cout << tmp.row << " " << tmp.col << " " << tmp.dir << endl;
+			bfs.pop();
+			if(dists[tmp.row][tmp.col][tmp.dir] < tmpd) continue;
+			for(int d = 0; d < 4; d++){
+				//cout << d << endl;
+				int thisDist = dist[tmp.row][tmp.col][tmp.dir][d];
+				if(thisDist >= MX) continue;
+				int newX = tmp.row - dir[d][0], newY = tmp.col - dir[d][1];
+				dst newDst;
+				newDst.nop = tmpd.nop+1;
+				newDst.now = tmpd.now+thisDist;
+				if(!(newDst < dists[newX][newY][d])) continue;
+				dists[newX][newY][d] = newDst;
+				lastWalk[newX][newY][d] = tmp.dir;
+				bfs.push(pair<state,dst>(state(newX,newY,d), newDst));
+			}
+		}
+		dst mn = MXD;
+		int D;
+		for(int d = 0; d < 4; d++){
+			if(dists[target.x][target.y][d] < mn){
+				D = d;
+				mn = dists[target.x][target.y][d];
+			}
+		}
+		if(mn.nop >= MX){
+			printf("Impossible.\n\n");
+		}
+		else{
+			stack<char> stk;
+			int curX = target.x, curY = target.y, curD = D;
+			for(int i = 0; i < mn.nop; i++){
+				int lastD = lastWalk[curX][curY][curD];
+				int lastX = curX + dir[curD][0], lastY = curY + dir[curD][1]; //lastD = lw;
+				stk.push(getPushChar(curD));
+				if(lastD == -1){
+					if(startDist[curD]) printf("%s", startPath[curD]);
+					while(!stk.empty()){
+						printf("%c", stk.top());
+						stk.pop();
+					}
+					printf("\n\n");
+					break;
+				}
+				else{
+					int len = dist[lastX][lastY][lastD][curD];
+					for(int j = len-1; j >= 0; j--){
+						stk.push(path[lastX][lastY][lastD][curD][j]);
+					}
+				}
+				curX = lastX, curY = lastY, curD = lastD;
+			}
+		}
+	}
+	return 0;
+}
