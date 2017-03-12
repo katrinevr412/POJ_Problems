@@ -1,0 +1,45 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int dp[104][104][104];
+bool jsed[104][104][104];
+
+int n,m;
+
+void init(){
+	for(int i = 0; i <= n; i++){
+		for(int j = 0; j <= n; j++){
+			for(int k = 0; k <= n; k++){
+				jsed[i][j][k] = 0;
+			}
+		}
+	}
+}
+
+int getDP(int g, int a=0, int b=0){
+	if(jsed[g][a][b]) return dp[g][a][b];
+	if(g==a+b){
+		if(!a) return 0;
+		int res = getDP(a,0,0);
+		dp[g][a][b] = res;
+		jsed[g][a][b] = 1;
+		return res;
+	}
+	int mx = 1000000;
+	for(int t = 1; t <= m && t <= g-a-b; t++){
+		int tmp = getDP(g,b,a+t);
+		if(tmp < mx) mx = tmp;
+	}
+	jsed[g][a][b] = 1;
+	dp[g][a][b] = g-mx;
+	return g-mx;
+}
+
+int main() {
+	while(scanf("%d%d", &n,&m) > 1){
+		init();
+		printf("%d\n", getDP(n));
+	}
+	return 0;
+}
