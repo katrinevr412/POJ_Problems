@@ -1,0 +1,175 @@
+#include <iostream>
+#include <stdio.h>
+#include <string.h>
+#include <vector>
+#include <string>
+using namespace std;
+
+const int NIGHT = 0, DAY = 1, DIVINE = 0, HUMAN = 1, EVIL = 2, LYING = -1;
+
+struct stmt{
+	int spk, thing, state;
+	bool sf;
+	stmt(string &s);
+};
+
+stmt::stmt(string &s){
+	spk = s[0] - 'A';
+	if(s[3] != 'I') thing = s[3] - 'A';
+	else if(s[4] != 't') thing = spk;
+	else thing = 5;
+	if(thing==5){
+		sf = (s[9] == 'd') ? DAY : NIGHT;
+		state = 0;
+	}
+	else{
+		char tag;
+		if(s[8] == 'n'){
+			sf = 0;
+			tag = s[12];
+		}
+		else{
+			sf = 1;
+			tag = s[8];
+		}
+		if(tag == 'd') state = DIVINE;
+		else if(tag == 'h') state = HUMAN;
+		else if(tag == 'e') state = EVIL;
+		else state = LYING;
+	}
+	//cout << "speaker: " << spk << " thing: " << thing << " sf: " << sf << " state: " << state << endl;
+}
+
+struct arr{
+	int state;
+	arr(int st):state(st){}
+	int getA(){return state%3;}
+	int getB(){return (state/3)%3;}
+	int getC(){return (state/9)%3;}
+	int getD(){return (state/27)%3;}
+	int getE(){return (state/81)%3;}
+	int getDay(){return (state/243);}
+	int get(int d){
+		switch(d){
+			case 0: return getA();
+			case 1: return getB();
+			case 2: return getC();
+			case 3: return getD();
+			case 4: return getE();
+			default: return getDay();
+		}
+	}
+};
+
+bool isTrue(stmt &st, arr ar){
+	if(st.thing == 5){
+		//a DAY statement
+		return (st.sf && ar.getDay() == DAY) || (!st.sf && ar.getDay() == NIGHT);
+	}
+	else if(st.state == LYING){
+		//a LYING statement
+		int thing = st.thing;
+		if(!st.sf){
+			//thing is not lying
+			return ar.get(thing) == DIVINE || (ar.getDay() == DAY && ar.get(thing) == HUMAN);
+		}
+		else{
+			//thing is lying
+			return ar.get(thing) == EVIL || (ar.getDay() == NIGHT && ar.get(thing) == HUMAN);
+		}
+	}
+	else{
+		//status statements
+		if(st.sf){
+			//thing is ar
+			return st.state == ar.get(st.thing);
+		}
+		else{
+			//thing is not ar
+			return st.state != ar.get(st.thing);
+		}
+	}
+}
+
+bool isOK(stmt &st, arr ar){
+	//return false;
+	int spkSt = ar.get(st.spk), day = ar.getDay();
+	if(spkSt == DIVINE || (spkSt == HUMAN && day == DAY)){
+		return isTrue(st, ar);
+	}
+	else return !isTrue(st, ar);
+}
+
+char str[5][16] = {"divine", "human", "evil"};
+char daystr[3][16] = {"night", "day"};
+
+void print(int t, int st){
+	if(t != 5){
+		printf("%c is %s.\n", t+'A', str[st]);
+	}
+	else{
+		printf("It is %s.\n", daystr[st]);
+	}
+}
+
+int main() {
+	int gs;
+	int cnt = 0;
+	while(1){
+		cin >> gs;
+		if(!gs) break;
+		cnt++;
+		printf("Conversation #%d\n", cnt);
+		vector<stmt> sts;
+		while(gs--){
+			string s;
+			while(!s.length()) getline(cin, s);
+			//cout << s << endl;
+			sts.push_back(stmt(s));
+		}
+		int sz = sts.size();
+		bool has[6] = {0};
+		bool can = false;
+		int tag[6] = {0};
+		for(int i = 0; i < 486; i++){
+			bool ok = true;
+			for(int j = 0; j < sz; j++){
+				if(!isOK(sts[j], arr(i))){
+					ok = false;
+					break;
+				}
+			}
+			if(ok){
+				//cout << i << " ";
+				can = true;
+				for(int j = 0; j < 6; j++){
+					int tihs = arr(i).get(j);
+					if(!has[j]){
+						has[j] = 1;
+						tag[j] = tihs;
+					}
+					else if(tag[j] != tihs){
+						tag[j] = -1;
+					}
+				}
+			}
+		}
+		if(!can){
+			printf("This is impossible.\n\n");
+		}
+		else{
+			bool printed = false;
+			for(int j = 0; j < 6; j++){
+				if(tag[j] != -1){
+					printed = true;
+					print(j, tag[j]);
+				}
+			}
+			if(!printed){
+				printf("No facts are deducible.\n\n");
+			}
+			else printf("\n");
+		}
+	}
+	return 0;
+}
