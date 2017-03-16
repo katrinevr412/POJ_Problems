@@ -1,0 +1,117 @@
+#include <iostream>
+#include <string>
+#include <stdio.h>
+#include <stdlib.h>
+using namespace std;
+
+struct cplx{
+	int data[100];
+	cplx(){
+
+		for(int i = 0; i < 11; i++) data[i] = 0;
+	}
+	cplx(const cplx& c){
+		for(int i = 0; i < 11; i++) data[i] = c.data[i];
+	}
+	void print(){
+		cout << "Runtime = ";
+		bool printed = false;
+		for(int i = 10; i > 0; i--){
+			if(data[i] == 0) continue;
+			if(printed) cout << "+";
+			if(data[i] != 1){
+				cout << data[i] << "*";
+			}
+			cout << "n";
+			if(i > 1){
+				cout << "^" << i;
+			}
+			printed = true;
+		}
+		if(printed){
+			if(data[0]){
+				cout << "+" << data[0];
+			}
+		}
+		else{
+			cout << data[0];
+		}
+	}
+	void add(cplx c){
+		for(int i = 0; i <= 10; i++) data[i] += c.data[i];
+	}
+	void mult(int a){
+		for(int i = 0; i <= 10; i++) data[i] *= a;
+	}
+};
+
+cplx parseLoop(){
+	cplx res;
+	//res.print();
+	string op, s;
+	cin >> op;
+	while(1){
+		cin >> s;
+		if(s[0] == 'E') break;
+		string opr;
+		//cin >> opr;
+		if(s[0] == 'O'){
+			cin >> opr;
+			res.data[0] += atoi(opr.c_str());
+		}
+		else{
+			res.add(parseLoop());
+		}
+	}
+	if(op[0] == 'n'){
+		for(int i = 10; i > 0; i--){
+			res.data[i] = res.data[i-1];
+		}
+		res.data[0] = 0;
+	}
+	else{
+		res.mult(atoi(op.c_str()));
+	}
+	return res;
+}
+
+cplx parseProgram(){
+	string s;
+	cin >> s;
+	cplx res;
+	//res.print();
+	while(1){
+		cin >> s;
+		if(s[0] == 'E') break;
+		string opr;
+
+		if(s[0] == 'O'){
+			cin >> opr;
+			res.data[0] += atoi(opr.c_str());
+		}
+		else{
+			res.add(parseLoop());
+		}
+	}
+	//res.print();
+	return res;
+}
+
+int i,t;
+
+int main() {
+
+	cin >> t;
+	//cout << "t=" << t << endl;
+	while(t--){
+		//cout << "i=" << i+1 << endl;
+		cout << "Program #" << i+1 << endl;
+		cplx c = parseProgram();
+		c.print();
+		cout << endl << endl;
+		//cout << "t=" << t << endl;
+		//cout << i << endl;
+		i++;
+	}
+	return 0;
+}
