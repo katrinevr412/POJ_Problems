@@ -1,0 +1,89 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int dim[5][2];
+char cont[5][25][25];
+
+int n;
+bool kx;
+
+void dfs(int gs, int used[4][4]){
+	if(kx) return;
+	if(gs == n){
+		for(int i = 0; i < 4; i++){
+			for(int j = 0; j < 4; j++){
+				printf("%d", used[i][j]+1);
+			}
+			printf("\n");
+		}
+		printf("\n");
+		kx = true;
+		return;
+	}
+	//begin to place the gs-th block
+	for(int i = 0; i < 5-dim[gs][0]; i++){
+		for(int j = 0; j < 5-dim[gs][1]; j++){
+			bool ky = true;
+			for(int k = 0; k < dim[gs][0]; k++){
+				for(int l = 0; l < dim[gs][1]; l++){
+					if(cont[gs][k][l] == '1' && used[i+k][j+l] != -1){
+						ky = false;
+						break;
+					}
+				}
+			}
+			if(!ky) continue;
+			for(int k = 0; k < dim[gs][0]; k++){
+				for(int l = 0; l < dim[gs][1]; l++){
+					if(cont[gs][k][l] == '1'){
+						used[i+k][j+l] = gs;
+					}
+				}
+			}
+			dfs(gs+1, used);
+			for(int k = 0; k < dim[gs][0]; k++){
+				for(int l = 0; l < dim[gs][1]; l++){
+					if(cont[gs][k][l] == '1'){
+						used[i+k][j+l] = -1;
+					}
+				}
+			}
+		}
+	}
+}
+
+int main() {
+
+	while(1){
+		scanf("%d",&n);
+		if(!n) break;
+		int area = 0;
+		for(int i = 0; i < n; i++){
+			scanf("%d%d", &dim[i][0], &dim[i][1]);
+			//area += dim[i][0] * dim[i][1];
+			for(int j = 0; j < dim[i][0]; j++){
+				scanf("%s", cont[i][j]);
+			}
+			for(int j = 0; j < dim[i][0]; j++){
+				for(int k = 0; k < dim[i][1]; k++){
+					if(cont[i][j][k] == '1') area++;
+				}
+			}
+		}
+		if(area != 16){
+			printf("No solution possible\n\n");
+			continue;
+		}
+		int used[4][4];
+		for(int i = 0; i < 4; i++){
+			for(int j = 0; j < 4; j++){
+				used[i][j] = -1;
+			}
+		}
+		kx = false;
+		dfs(0, used);
+		if(!kx) printf("No solution possible\n\n");
+	}
+	return 0;
+}
