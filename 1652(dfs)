@@ -1,0 +1,89 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int W, H;
+char map[102][102];
+int bh[102][102] = {0};
+int mxX[10100], mxY[10100], mnX[10100], mnY[10100];
+int cnt = 0;
+bool used1[102][102] = {0};
+int area[10100] = {0};
+int dir[4][2] = {{-1,0},{0,-1},{1,0},{0,1}};
+
+void dfs1(int i, int j){
+	used1[i][j] = 1;
+	bh[i][j] = cnt;
+	area[cnt]++;
+	if(i < mnX[cnt]) mnX[cnt] = i;
+	if(i > mxX[cnt]) mxX[cnt] = i;
+	if(j < mnY[cnt]) mnY[cnt] = j;
+	if(j > mxY[cnt]) mxY[cnt] = j;
+	for(int k = 0; k < 4; k++){
+		int x = i+dir[k][0], y = j + dir[k][1];
+		if(x>=0 && x<H && y>=0 && y<W && !used1[x][y] && map[x][y] == '*'){
+			dfs1(x,y);
+		}
+	}
+}
+
+void dfs2(int i, int j, int k, bool &flag, bool used[102][102]){
+	used[i][j] = 1;
+	for(int t = 0; t < 4; t++){
+		int x = i+dir[t][0], y = j+dir[t][1];
+		if(x<mnX[k] || x>mxX[k] || y<mnY[k] || y>mxY[k]){
+			flag = false;
+		}
+		else if(!used[x][y] && bh[x][y] != k){
+			dfs2(x,y,k,flag,used);
+		}
+	}
+}
+
+int getHoleNum(int k){
+	int res = 0;
+	bool used2[102][102] = {0};
+	for(int i = mnX[k]; i <= mxX[k]; i++){
+		for(int j = mnY[k]; j <= mxY[k]; j++){
+			bool flag = true;
+			if(!used2[i][j] && bh[i][j] != k){
+				dfs2(i,j,k,flag, used2);
+				if(flag){
+					res++;
+				}
+			}
+		}
+	}
+	return res;
+}
+
+int main() {
+	scanf("%d%d", &W, &H);
+	for(int i = 0; i < H; i++){
+		scanf("%s", map[i]);
+	}
+	for(int i = 0; i < H; i++){
+		for(int j = 0; j < W; j++){
+			if(used1[i][j] || map[i][j] == '.') continue;
+			cnt++;
+			mxX[cnt] = i, mxY[cnt] = j, mnX[cnt] = i, mnY[cnt] = j;
+			dfs1(i,j);
+		}
+	}
+	int maxHole = 0, minArea = 10086;
+	for(int k = 1; k <= cnt; k++){
+		int thisHole = getHoleNum(k);
+		//cout << k << " " << thisHole << endl;
+		if(thisHole > maxHole || (thisHole==maxHole && area[k] < minArea)){
+			maxHole = thisHole;
+			minArea = area[k];
+		}
+	}
+	if(!maxHole){
+		printf("0\n");
+	}
+	else{
+		printf("%d\n", minArea);
+	}
+	return 0;
+}
