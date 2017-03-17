@@ -1,0 +1,215 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+const int GS = 729*729;
+bool state[GS];
+bool visited[GS];
+int board[4][4];
+char cboard[4][5];
+int O = -1, X = -2;
+int pw3[13] = {1,0};
+int cnt;
+
+void initpw3(){
+	for(int i = 1; i <= 12; i++){
+		pw3[i] = pw3[i-1]*3;
+	}
+}
+
+int extractSt(int st, int bit){
+	return (st/pw3[bit])%3;
+}
+
+void init(){
+	for(int i = 0; i < pw3[cnt]; i++){
+		visited[i] = 0;
+	}
+}
+
+bool js(int st, int x, int y, int who){
+	//last step is x & y by who(=1:x, 2:o)
+	if(visited[st]) return state[st];
+	if(who == 1){
+		bool ky = true;
+		for(int i = 0; i < 4; i++){
+			if(board[x][i] == O || (board[x][i] >= 0 && extractSt(st, board[x][i]) != 1)){
+				ky = false;
+				break;
+			}
+		}
+		if(ky){
+			state[st] = 1;
+			visited[st] = 1;
+			return true;
+		}
+		ky = true;
+		for(int i = 0; i < 4; i++){
+			if(board[i][y] == O || (board[i][y] >= 0 && extractSt(st, board[i][y]) != 1)){
+				ky = false;
+				break;
+			}
+		}
+		if(ky){
+			state[st] = 1;
+			visited[st] = 1;
+			return true;
+		}
+		if(x==y){
+			ky = true;
+			for(int i = 0; i < 4; i++){
+				if(board[i][i] == O || (board[i][i] >= 0 && extractSt(st, board[i][i]) != 1)){
+					ky = false;
+					break;
+				}
+			}
+			if(ky){
+				state[st] = 1;
+				visited[st] = 1;
+				return true;
+			}
+		}
+		if(x+y==3){
+			ky = true;
+			for(int i = 0; i < 4; i++){
+				if(board[i][3-i] == O || (board[i][3-i] >= 0 && extractSt(st, board[i][3-i]) != 1)){
+					ky = false;
+					break;
+				}
+			}
+			if(ky){
+				state[st] = 1;
+				visited[st] = 1;
+				return true;
+			}
+		}
+	}
+	else if(who == 2){
+		bool ky = true;
+		for(int i = 0; i < 4; i++){
+			if(board[x][i] == X || (board[x][i] >= 0 && extractSt(st, board[x][i]) != 2)){
+				ky = false;
+				break;
+			}
+		}
+		if(ky){
+			state[st] = 0;
+			visited[st] = 1;
+			return false;
+		}
+		ky = true;
+		for(int i = 0; i < 4; i++){
+			if(board[i][y] == X || (board[i][y] >= 0 && extractSt(st, board[i][y]) != 2)){
+				ky = false;
+				break;
+			}
+		}
+		if(ky){
+			state[st] = 0;
+			visited[st] = 1;
+			return false;
+		}
+		if(x==y){
+			ky = true;
+			for(int i = 0; i < 4; i++){
+				if(board[i][i] == X || (board[i][i] >= 0 && extractSt(st, board[i][i]) != 2)){
+					ky = false;
+					break;
+				}
+			}
+			if(ky){
+				state[st] = 0;
+				visited[st] = 1;
+				return false;
+			}
+		}
+		if(x+y==3){
+			ky = true;
+			for(int i = 0; i < 4; i++){
+				if(board[i][3-i] == X || (board[i][3-i] >= 0 && extractSt(st, board[i][3-i]) != 2)){
+					ky = false;
+					break;
+				}
+			}
+			if(ky){
+				state[st] = 0;
+				visited[st] = 1;
+				return false;
+			}
+		}
+	}
+	if(who == 2){
+		//next step by X
+		bool sheng = false;
+		for(int i = 0; i < 4; i++){
+			for(int j = 0; j < 4; j++){
+				if(board[i][j] < 0 || extractSt(st, board[i][j]) != 0) continue;
+				if(js(st+pw3[board[i][j]], i, j, 1)){
+					sheng = true;
+					break;
+				}
+			}
+		}
+		state[st] = sheng;
+		visited[st] = 1;
+		return sheng;
+	}
+	else{
+		//next step by O
+		bool sheng = true;
+		for(int i = 0; i < 4; i++){
+			for(int j = 0; j < 4; j++){
+				if(board[i][j] < 0 || extractSt(st, board[i][j]) != 0) continue;
+				if(!js(st+2*pw3[board[i][j]], i, j, 2)){
+					sheng = false;
+					break;
+				}
+			}
+		}
+		state[st] = sheng;
+		visited[st] = 1;
+		return sheng;
+	}
+}
+
+int main() {
+	initpw3();
+	char c[2];
+	while(1){
+		scanf("%s",c);
+		if(c[0] == '$') break;
+		for(int i = 0; i < 4; i++){
+			scanf("%s", cboard[i]);
+		}
+		cnt = 0;
+		for(int i = 0; i < 4; i++){
+			for(int j = 0; j < 4; j++){
+				char tmp = cboard[i][j];
+				if(tmp == '.'){
+					board[i][j] = cnt++;
+				}
+				else if(tmp == 'o'){
+					board[i][j] = O;
+				}
+				else board[i][j] = X;
+			}
+		}
+		init();
+		bool sheng = false;
+		for(int i = 0; i < 4; i++){
+			for(int j = 0; j < 4; j++){
+				if(board[i][j] < 0) continue;
+				if(js(pw3[board[i][j]], i,j,1)){
+					printf("(%d,%d)\n", i, j);
+					sheng = true;
+					goto done;
+				}
+			}
+		}
+		done:
+		if(!sheng){
+			printf("#####\n");
+		}
+	}
+	return 0;
+}
