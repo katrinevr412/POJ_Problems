@@ -1,0 +1,112 @@
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+using namespace std;
+
+int len[5500] = {0};
+int prefix[5500] = {0};
+int cnt = 0;
+int dp[2][5500];
+int cand[5500];
+
+bool isZM(char c){
+	return (c>='a' && c<='z') || (c>='A' && c<='Z');
+}
+
+bool isBD(char c){
+	return c==',' || c=='.' || c=='?' || c=='!';
+}
+
+inline int mx(int a, int b){
+	return a>b?a:b;
+}
+
+inline int mn(int a, int b){
+	return a<b?a:b;
+}
+
+int main() {
+	char c;
+	int last = 0, cur = 0;
+	bool inword = false;
+	while(scanf("%c", &c) == 1){
+		if(!inword){
+			if(isZM(c)){
+				inword = true;
+				if(last) len[++cnt] = last+1;
+				cur = 1;
+			}
+			else if(isBD(c)){
+				last++;
+				//len[++cnt] = last;
+			}
+		}
+		else{
+			if(isZM(c)){
+				cur++;
+			}
+			else if(isBD(c)){
+				inword = false;
+				last = cur+1;
+			}
+			else{
+				inword = false;
+				last = cur;
+			}
+		}
+	}
+	if(inword) len[++cnt] = cur+1;
+	else if(last) len[++cnt] = last+1;
+	//cout << cnt << endl;
+	//for(int i = 1; i <= cnt; i++){
+		//cout << len[i] << " ";
+	//}
+	for(int i = 1; i <= cnt; i++){
+		prefix[i] = len[i] + prefix[i-1];
+	}
+	for(int i = 1; i <= cnt; i++){
+		dp[1][i] = prefix[i];
+	}
+	cand[1] = dp[1][cnt];
+	for(int l = 2; l <= cnt; l++){
+		int from = (l+1)%2, to = l%2;
+		for(int k = l; k <= cnt; k++){
+			int start = l-1, end = k-1;
+			if(dp[from][start] >= prefix[k] - prefix[start]){
+				dp[to][k] = dp[from][start];
+			}
+			else if(dp[from][end] <= prefix[k] - prefix[end]){
+				dp[to][k] = prefix[k] - prefix[end];
+			}
+			else{
+				bool found = false;
+				while(start < end){
+					int mid = (start+end+1)/2;
+					int cha = dp[from][mid] - prefix[k] + prefix[mid];
+					if(!cha){
+						found = true;
+						dp[to][k] = dp[from][mid];
+						break;
+					}
+					else if(cha < 0){
+						start = mid;
+					}
+					else{
+						end = mid-1;
+					}
+				}
+				if(!found){
+					dp[to][k] = mn(prefix[k]-prefix[start], dp[from][start+1]);
+				}
+			}
+		}
+		cand[l] = dp[to][cnt];
+	}
+	int minRes = 2147483647;
+	for(int i = 1; i <= cnt; i++){
+		int thisRes = (i+2) * (cand[i]+1);
+		if(thisRes < minRes) minRes = thisRes;
+	}
+	printf("%d\n", minRes);
+	return 0;
+}
