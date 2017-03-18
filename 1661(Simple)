@@ -1,0 +1,101 @@
+#include <iostream>
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+
+struct pt{
+	int left, right, h;
+	int leftVal, rightVal;
+}pts[1010];
+int N, X, Y, MX;
+
+bool operator<(const pt& p1, const pt& p2){
+	return (p1.h < p2.h) || (p1.h==p2.h && p1.left < p2.left);
+}
+
+int INFTY = 1000000000;
+
+inline int mn(int a, int b){return a>b?b:a;}
+
+int main() {
+	int n;
+	scanf("%d", &n);
+	while(n--){
+		int N, X, Y, MX;
+		scanf("%d%d%d%d",&N,&X,&Y,&MX);
+		for(int i =0; i < N; i++){
+			scanf("%d%d%d",&pts[i].left, &pts[i].right, &pts[i].h);
+			if(pts[i].left > pts[i].right){
+				int tmp = pts[i].left;
+				pts[i].left = pts[i].right;
+				pts[i].right = tmp;
+			}
+		}
+		sort(pts, pts+N);
+		int tar = -1;
+		for(int i = N-1; i >= 0; i--){
+			if(X>=pts[i].left && X<=pts[i].right){
+				tar = i;
+				break;
+			}
+		}
+		if(tar == -1){
+			if(Y > MX) printf("Impossible!\n");
+			else printf("%d\n", Y);
+			continue;
+		}
+		if(Y-pts[tar].h > MX){
+			//for correct data, this never happens
+			printf("Impossible!\n");
+			continue;
+		}
+		for(int i = 0; i <= tar; i++){
+			int to = -1;
+			for(int j = i-1; j >= 0; j--){
+				if(pts[i].h - pts[j].h > MX) break;
+				if(pts[i].left >= pts[j].left && pts[i].left <= pts[j].right){
+					to = j;
+					break;
+				}
+			}
+			if(to == -1 && pts[i].h <= MX){
+				pts[i].leftVal = 0;
+			}
+			else if(to == -1){
+				pts[i].leftVal = INFTY;
+			}
+			else if(pts[i].h - pts[to].h <= MX){
+				pts[i].leftVal = mn(pts[to].leftVal + pts[i].left-pts[to].left,
+						pts[to].rightVal + pts[to].right - pts[i].left);
+			}
+			else{
+				pts[i].leftVal = INFTY;
+			}
+			to = -1;
+			for(int j = i-1; j >= 0; j--){
+				if(pts[i].h - pts[j].h > MX) break;
+				if(pts[i].right >= pts[j].left && pts[i].right <= pts[j].right){
+					to = j;
+					break;
+				}
+			}
+			if(to == -1 && pts[i].h <= MX){
+				pts[i].rightVal = 0;
+			}
+			else if(to == -1){
+				pts[i].rightVal = INFTY;
+			}
+			else if(pts[i].h - pts[to].h <= MX){
+				pts[i].rightVal = mn(pts[to].leftVal + pts[i].right-pts[to].left,
+						pts[to].rightVal + pts[to].right - pts[i].right);
+			}
+			else{
+				pts[i].leftVal = INFTY;
+			}
+		}
+		int res = mn(pts[tar].leftVal + X - pts[tar].left,
+				pts[tar].rightVal + pts[tar].right - X);
+		printf("%d\n", res + Y);
+	}
+	return 0;
+}
