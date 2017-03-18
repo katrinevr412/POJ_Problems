@@ -1,0 +1,224 @@
+#include <iostream>
+#include <string>
+#include <map>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <queue>
+using namespace std;
+
+map<string, int> names;//存人名
+const int INFTY = (int) 1e9;
+int rs = 0;//总人数
+int adjNum[25] = {0};//用邻接表存的图
+int adjList[25][25] = {0};
+int adjDist[25][25] ;
+int parkDist[25] = {0};//到park的距离，没有连记为0
+
+int gs[25] = {0};//每个连通分支的顶点个数
+
+int ltfzgs = 0;//连通分支个数
+int ltfzbh[25];//每个點所在的连通分支编號
+bool used[25] = {0};//是否被使用的标志，通过init()清零
+
+bool cPark[25] = {0};//是否与park直接相连
+bool cHx[25][25] = {0};//邻接矩阵存的树图
+int dHx[25][25];//邻接矩阵形式的距离
+
+void dfs(int bh){
+	//dfs得到连通分支
+	ltfzbh[bh] = ltfzgs;
+	used[bh] = 1;
+	for(int i = 0; i < adjNum[bh]; i++){
+		int next = adjList[bh][i];
+		if(!used[next]){
+			dfs(next);
+		}
+	}
+}
+
+void init(){
+	//used数组清零
+	for(int i = 1; i <= rs; i++){
+		used[i] = 0;
+	}
+}
+
+bool isPark(string &s){
+	//判断一个地方是不是Park
+	return !strcmp(s.c_str(), "Park");
+}
+
+int getNum(string &s){
+	//得到一个name对应的人的编號。如果是park返回-1
+	if(isPark(s)){
+		return -1;
+	}
+	map<string,int>::iterator it = names.find(s);
+	if(it != names.end()){
+		return it->second;
+	}
+	names.insert(pair<string,int>(s, ++rs));
+	return rs;
+}
+
+int bfs(int bh, int trc[25][25]){
+	//对bh这个點bfs，求出到park的路径，记录在trc[bh]中
+	queue<int> bhs;
+	bool bfsUsed[25] = {0};
+	bhs.push(bh);
+	bfsUsed[bh] = 1;
+	while(!bhs.empty()){
+		int cur = bhs.front();
+		bhs.pop();
+		for(int i = 1; i <= rs; i++){
+			if(bfsUsed[i] || !cHx[i][cur]) continue;
+			trc[bh][i] = cur;
+			if(cPark[i]) return i;
+			bfsUsed[i] = 1;
+			bhs.push(i);
+		}
+	}
+	return INFTY;//never happens
+}
+
+int main() {
+	int n;
+	cin >> n;
+	while(n--){
+		//读入，存储数据
+		string s1, s2;
+		int d;
+		cin >> s1 >> s2 >> d;
+		int a1 = getNum(s1), a2 = getNum(s2);
+		if(a1 == -1){
+			parkDist[a2] = d;
+		}
+		else if(a2 == -1){
+			parkDist[a1] = d;
+		}
+		else{
+			adjList[a1][adjNum[a1]] = a2;
+			adjDist[a1][adjNum[a1]++] = d;
+			adjList[a2][adjNum[a2]] = a1;
+			adjDist[a2][adjNum[a2]++] = d;
+		}
+	}
+	int k;
+	cin >> k;
+	for(int i = 1; i <= rs; i++){
+		//求连通分支
+		if(!used[i]) {
+			ltfzgs++;
+			dfs(i);
+		}
+	}
+
+	for(int i = 1; i <= rs; i++){
+		//统计连通分支的點数
+		gs[ltfzbh[i]]++;
+	}
+	int zjl = 0;//所求的总距离
+	for(int ltfz = 1; ltfz <= ltfzgs; ltfz++){
+		//对每个连通分支作prim
+		int jrCnt = 0;//已经计入可达集的點数，到该连通分支的总點数就停止
+		int primDist[25];//Prime算法中的当前距离
+		int connectTo[25];//与其相连的上一个點
+		//琐有距离置为INFTY
+		for(int i = 1; i <= rs; i++){primDist[i] = INFTY;}
+		init();
+		for(int i = 1; i <= rs; i++){
+			//随便找一个點
+			if(ltfzbh[i] == ltfz){
+				primDist[i] = 0;
+				break;
+			}
+		}
+		while(jrCnt < gs[ltfz]){
+			//Prim的循环，找到最小距离的局外點
+			int mn = INFTY, arg = -1;
+			for(int i = 1; i <= rs; i++){
+				if(!used[i] && primDist[i] < mn){
+					mn = primDist[i];
+					arg = i;
+				}
+			}
+			jrCnt++;
+			if(primDist[arg] != 0){
+				cHx[arg][connectTo[arg]] = 1;
+				cHx[connectTo[arg]][arg] = 1;
+				dHx[connectTo[arg]][arg] = mn;
+				dHx[arg][connectTo[arg]] = mn;
+				zjl += mn;
+			}
+			used[arg] = 1;
+			if(jrCnt == gs[ltfz]) break;
+			//更新其他點的距离
+			for(int i = 0; i < adjNum[arg]; i++){
+				int next = adjList[arg][i];
+				if(used[next]) continue;
+				int nextDist = adjDist[arg][i];
+				if(nextDist < primDist[next]){
+					primDist[next] = nextDist;
+					connectTo[next] = arg;
+				}
+			}
+		}
+	}
+	for(int ltfz = 1; ltfz <= ltfzgs; ltfz++){
+		//首先对每个连通分支，把到Park最小距離的點和Park相连
+		int mn = INFTY, arg = -1;
+		for(int i = 1; i <= rs; i++){
+			if(ltfzbh[i] == ltfz && parkDist[i] != 0 && parkDist[i] < mn){
+				mn = parkDist[i];
+				arg = i;
+			}
+		}
+		cPark[arg] = 1;
+		zjl += mn;
+	}
+	int ds = ltfzgs;//现有的度数
+	while(ds < k){
+		//到k就不熊再加了
+		int mxJ = 0;//最多能减少多少
+		int argL = -1;//增加的和park直接相连的点
+		int argQD = -1;//需要去掉的點是argQD和trc[argQD]
+		int trc[25][25];//追踪上一个点
+		for(int i = 1; i <= rs; i++){
+			if(cPark[i] || !parkDist[i]) continue;
+			int last = bfs(i, trc);//从i到park路径上的最后一个點
+			int zcbc = 0;//最长的边长
+			int argB = -1;//记录最长边的前驱點
+			int cur = last, next = trc[i][last];
+			while(cur != i){
+				//找出最长边
+				int thisDist = dHx[cur][next];
+				if(thisDist > zcbc){
+					zcbc = thisDist;
+					argB = cur;
+				}
+				cur = next;
+				next = trc[i][cur];
+			}
+			//更新最长距离
+			int thisMxJ = zcbc - parkDist[i];
+			if(thisMxJ > mxJ){
+				mxJ = thisMxJ;
+				argL = i;
+				argQD = argB;
+			}
+		}
+		if(mxJ <= 0){
+			//没有能减的，退出
+			break;
+		}
+		ds++;
+		zjl -= mxJ;
+		//更新图
+		cPark[argL] = 1;
+		cHx[argQD][trc[argL][argQD]] = 0;
+		cHx[trc[argL][argQD]][argQD] = 0;
+	}
+	cout << "Total miles driven: " << zjl << endl;
+	return 0;
+}
