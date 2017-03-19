@@ -1,0 +1,71 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int adjNum[15];
+int adjList[15][15];
+int n;
+
+bool dfs(int start, int gs, int *state){
+	if(!start){
+		state[start] = 0;
+		return dfs(1, gs, state);
+	}
+	else if(start == n) return true;
+	bool ky[5] = {1,1,1,1,1};
+	for(int i = 0; i < adjNum[start]; i++){
+		if(adjList[start][i] >= start) break;
+		ky[state[adjList[start][i]]] = 0;
+	}
+	for(int i = 0; i < gs; i++){
+		if(ky[i]){
+			state[start] = i;
+			if(dfs(start+1, gs, state)){
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+int main() {
+	int cnt = 0;
+	while(1){
+		scanf("%d", &n);
+		if(!n) break;
+		cnt++;
+		double x[15], y[15];
+		for(int i = 0; i < n; i++){adjNum[i] = 0;}
+		for(int i = 0; i < n; i++){
+			scanf("%lf%lf",&x[i],&y[i]);
+		}
+		bool lx = false;
+		for(int i = 0; i < n-1; i++){
+			for(int j = i+1; j < n; j++){
+				double dist2 = (x[i]-x[j])*(x[i]-x[j])+(y[i]-y[j])*(y[i]-y[j]);
+				if(dist2 < 400.00000001){
+					adjList[i][adjNum[i]++] = j;
+					adjList[j][adjNum[j]++] = i;
+					lx = true;
+				}
+			}
+		}
+		if(!lx){
+			printf("The towers in case %d can be covered in 1 frequencies.\n", cnt);
+			continue;
+		}
+		bool xy4 = false;
+		for(int gs = 2; gs < 5; gs++){
+			int state[15];
+			if(dfs(0, gs, state)){
+				printf("The towers in case %d can be covered in %d frequencies.\n", cnt, gs);
+				xy4 = true;
+				break;
+			}
+		}
+		if(!xy4){
+			printf("The towers in case %d can be covered in 5 frequencies.\n", cnt);
+		}
+	}
+	return 0;
+}
