@@ -1,0 +1,116 @@
+#include <iostream>
+#include <string>
+#include <sstream>
+using namespace std;
+
+int n,m,s,t, INFTY = 1e9;
+
+struct tunnel{
+	int from, to;
+	int travelTime;
+	int closeNum;
+	int closeTime[35];
+}tunnels[505];
+
+int adjNum[55];
+int adjList[55][550];
+int adjTunnel[55][550];
+
+int toTime(int fromTime, int tN){
+	//start at fromTime to travel through tunnel tN
+	//the earliest time to arrive the other end
+	//if cannot arrive, return INFTY
+	int cN = tunnels[tN].closeNum;
+	int *cT = tunnels[tN].closeTime;
+	int tT = tunnels[tN].travelTime;
+	if(fromTime >= cT[cN-1]){
+		if(cN%2==0){
+			return INFTY;
+		}
+		else{
+			return fromTime + tT;
+		}
+	}
+	int lA = -1;
+	for(int i = 1; i < cN; i++){
+		if(cT[i] > fromTime){
+			lA = i-1;
+			break;
+		}
+	}
+	if(lA%2==0 && cT[lA+1]-fromTime >= tT){
+		return fromTime + tT;
+	}
+	lA++;
+	for(; lA < cN-1; lA++){
+		if(lA%2) continue;
+		if(cT[lA+1] - cT[lA] >= tT){
+			return cT[lA] + tT;
+		}
+	}
+	if(cN%2==0) return INFTY;
+	return cT[cN-1] + tT;
+}
+
+int main() {
+	while(1){
+		cin >> n;
+		if(n==0) break;
+		cin >> m >> s >> t;
+		for(int i = 1; i <= n; i++){
+			adjNum[i] = 0;
+		}
+		for(int i = 1; i <= m; i++){
+			string s;
+			while(!s.length()){
+				getline(cin, s);
+			}
+			stringstream ss;
+			ss << s;
+			ss >> tunnels[i].from >> tunnels[i].to >> tunnels[i].travelTime;
+			int tmp;
+			tunnels[i].closeNum = 1;
+			tunnels[i].closeTime[0] = 0;
+			while(ss >> tmp){
+				tunnels[i].closeTime[tunnels[i].closeNum++] = tmp;
+			}
+			int from = tunnels[i].from, to = tunnels[i].to;
+			adjList[from][adjNum[from]] = to;
+			adjTunnel[from][adjNum[from]++] = i;
+			adjList[to][adjNum[to]] = from;
+			adjTunnel[to][adjNum[to]++] = i;
+		}
+		bool ding[55] = {0};
+		int dist[55];
+		for(int i = 1; i <= n; i++){
+			dist[i] = INFTY;
+		}
+		dist[s] = 0;
+		while(1){
+			int mn = INFTY;
+			int arg = -1;
+			for(int i = 1; i <= n; i++){
+				if(ding[i]) continue;
+				if(dist[i] < mn) {
+					mn = dist[i];
+					arg = i;
+				}
+			}
+			if(mn >= INFTY) break;
+			ding[arg] = 1;
+			if(arg == t) break;
+			for(int i = 0; i < adjNum[arg]; i++){
+				int next = adjList[arg][i];
+				if(ding[next]) continue;
+				int tunnelNo = adjTunnel[arg][i];
+				int toT = toTime(dist[arg], tunnelNo);
+				if(toT < dist[next]){
+					dist[next] = toT;
+				}
+			}
+		}
+		if(dist[t] >= INFTY) cout << "*" << endl;
+		else cout << dist[t] << endl;
+	}
+	return 0;
+}
