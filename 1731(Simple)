@@ -1,0 +1,43 @@
+#include <iostream>
+#include <stdio.h>
+#include <algorithm>
+#include <string.h>
+using namespace std;
+
+int main() {
+	char order[203];
+	scanf("%s", order);
+	int len = strlen(order);
+	sort(order, order+len);
+	while(1){
+		printf("%s\n", order);
+		int xj = -1;
+		for(int i = len-1; i > 0; i--){
+			if(order[i] > order[i-1]){
+				xj = i-1;
+				break;
+			}
+		}
+		if(xj == -1) break;
+		int low = xj+1, high = len-1;
+		while(low < high){
+			int mid = (low+high+1)/2;
+			if(order[mid] > order[xj]){
+				low = mid;
+			}
+			else{
+				high = mid-1;
+			}
+		}
+		char tmp = order[low];
+		order[low] = order[xj];
+		order[xj] = tmp;
+		int i = xj+1, j = len-1;
+		for(; i<j; i++,j--){
+			tmp = order[i];
+			order[i] = order[j];
+			order[j] = tmp;
+		}
+	}
+	return 0;
+}
