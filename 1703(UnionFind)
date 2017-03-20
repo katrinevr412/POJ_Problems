@@ -1,0 +1,79 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int rep[100010];
+bool rel[100010];
+int buf[100010];
+int rnk[100010];
+
+int n;
+
+int find(int a){
+	int cnt = 0;
+	while(rep[a] != a){
+		buf[cnt++] = a;
+		a = rep[a];
+	}
+	if(cnt > 1){
+		bool Rel = 0;
+		for(int i = cnt-1; i >= 0; i--){
+			Rel ^= rel[buf[i]];
+			if(i != cnt-1){
+				rep[buf[i]] = a;
+				rel[buf[i]] = Rel;
+			}
+		}
+	}
+	return a;
+}
+
+int main() {
+	int t;
+	scanf("%d",&t);
+	while(t--){
+		int m;
+		scanf("%d%d",&n,&m);
+		for(int i = 1; i <= n; i++){
+			rep[i] = i;
+			rel[i] = 0;
+			rnk[i] = 0;
+		}
+		char c[3]; int a, b;
+		for(int i = 0; i < m; i++){
+			scanf("%s%d%d", c, &a, &b);
+			int aRep = find(a), bRep = find(b);
+			if(c[0] == 'A'){
+
+				if(aRep != bRep){
+					printf("Not sure yet.\n");
+				}
+				else if(rel[a] == rel[b]){
+					printf("In the same gang.\n");
+				}
+				else{
+					printf("In different gangs.\n");
+				}
+			}
+			else{
+				if(aRep != bRep){
+					bool Rel = 1 ^ rel[a] ^ rel[b];
+					if(rnk[aRep] < rnk[bRep]){
+						rep[aRep] = bRep;
+						rel[aRep] = Rel;
+					}
+					else if(rnk[bRep] < rnk[aRep]){
+						rep[bRep] = aRep;
+						rel[bRep] = Rel;
+					}
+					else{
+						rep[aRep] = bRep;
+						rel[aRep] = Rel;
+						rnk[bRep]++;
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
