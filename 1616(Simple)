@@ -1,0 +1,76 @@
+#include <iostream>
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+
+struct task{
+	int hs, zq;
+}tasks[110];
+
+bool operator<(const task& t1, const task& t2){
+	return t1.zq < t2.zq;
+}
+
+int gs;
+
+bool used[500500];
+
+int main() {
+	int n;
+	scanf("%d",&n);
+	while(n--){
+		scanf("%d",&gs);
+		for(int i = 0; i < gs; i++){
+			scanf("%d%d",&tasks[i].hs, &tasks[i].zq);
+		}
+		sort(tasks, tasks+gs);
+		int cur = 0, sd = 0;
+		while(cur < gs){
+			tasks[sd] = tasks[cur];
+			int tmp = cur;
+			cur++;
+			while(cur < gs && tasks[cur].zq == tasks[tmp].zq){
+				tasks[sd].hs += tasks[cur].hs;
+				cur++;
+			}
+			sd++;
+		}
+		int mxZq = tasks[sd-1].zq;
+		int sum = 0;
+		for(int i = 0; i < sd; i++){
+			sum += tasks[i].hs * (mxZq / tasks[i].zq);
+		}
+		if(sum > mxZq){
+			printf("-1\n");
+		}
+		else if(sum == mxZq){
+			printf("%d\n", mxZq);
+		}
+		else if(sd == 1){
+			printf("%d\n", tasks[0].hs);
+		}
+		else{
+			for(int i = 0; i < mxZq; i++){
+				used[i] = 0;
+			}
+			int fUu = 0;
+			//int cmxZq = tasks[sd-2].zq;
+			for(int i = 0; i < sd; i++){
+				int zgs = mxZq / tasks[i].zq;
+				int colGs = 0;
+				int start = fUu;
+				while(colGs < tasks[i].hs){
+					while(used[start]) start++;
+					for(int j = 0; j < zgs; j++){
+						used[start + j * tasks[i].zq] = 1;
+					}
+					colGs++;
+					start++;
+				}
+				fUu = start;
+				if(i == sd-1) printf("%d\n", start);
+			}
+		}
+	}
+	return 0;
+}
