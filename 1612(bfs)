@@ -1,0 +1,91 @@
+#include <iostream>
+#include <stdio.h>
+#include <queue>
+#include <sstream>
+#include <string>
+using namespace std;
+
+int adjNo[44] = {0};
+int adjList[44][44];
+int dist[44][44];
+
+typedef long long int lint;
+int n, m;
+const lint ONE = 1;
+
+lint sets[44][44] = {0};
+
+int main() {
+	cin >> n;
+	for(int i = 1; i <= n; i++){
+		string s;
+		while(!s.length()){
+			getline(cin, s);
+		}
+		stringstream ss;
+		ss << s;
+		int tmp;
+		while(ss >> tmp){
+			adjList[i][adjNo[i]++] = tmp;
+		}
+	}
+	for(int i = 1; i <= n; i++){
+		bool used[44] = {0};
+		used[i] = 1;
+		dist[i][i] = 0;
+		queue<pair<int, int> > bfs;
+		bfs.push(pair<int, int>(i, 0));
+		while(!bfs.empty()){
+			int lD = bfs.front().second;
+			int arg = bfs.front().first;
+			bfs.pop();
+			for(int j = 0; j < adjNo[arg]; j++){
+				int next = adjList[arg][j];
+				if(!used[next]){
+					used[next] = 1;
+					dist[i][next] = lD+1;
+					bfs.push(pair<int, int>(next, lD+1));
+				}
+			}
+		}
+	}
+	for(int i = 1; i <= n-1; i++){
+		for(int j = i+1; j <= n; j++){
+			sets[i][j] = 1;
+			for(int k = 1; k <= n; k++){
+				if(dist[i][j] == dist[i][k] + dist[k][j]){
+					sets[i][j] += (ONE << k);
+				}
+			}
+			sets[j][i] = sets[i][j];
+		}
+	}
+	cin >> m;
+	for(int i = 0; i < m; i++){
+		string s;
+		while(!s.length()){
+			getline(cin, s);
+		}
+		stringstream ss;
+		ss << s;
+		int tmp;
+		int gs[44];
+		int cnt = 0;
+		while(ss >> tmp){
+			gs[cnt++] = tmp;
+		}
+		int xiao = 0;
+		lint res = 1;
+		lint mustRes = (ONE << (n+1)) - 1;
+		while(res < mustRes && xiao < cnt-1){
+			for(int j = xiao+1; j < cnt; j++){
+				res |= sets[gs[xiao]][gs[j]];
+				if(res == mustRes) break;
+			}
+			xiao++;
+		}
+		if(res == mustRes) cout << "yes" << endl;
+		else cout << "no" << endl;
+	}
+	return 0;
+}
