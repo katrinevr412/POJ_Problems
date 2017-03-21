@@ -1,0 +1,65 @@
+#include <iostream>
+#include <stdio.h>
+#include <string.h>
+using namespace std;
+
+typedef long long int lint;
+lint have[220] = {0}, add[220] = {0};
+const lint ONE = 1;
+
+char toChar(int a){
+	if(a < 26) return 'a'+a;
+	return 'A' + a - 26;
+}
+
+int toInt(char c){
+	if(c >= 'a' && c <= 'z') return c-'a';
+	return c-'A'+26;
+}
+
+int main() {
+	int m,n;
+	scanf("%d%d",&m,&n);
+	for(int i = 0; i < m; i++){
+		char s1[55], s2[55], fei[4];
+		scanf("%s%s%s", s1, fei, s2);
+		int len1 = strlen(s1), len2 = strlen(s2);
+		for(int j = 0; j < len1; j++){
+			have[i] |= (ONE << (toInt(s1[j])));
+		}
+		for(int j = 0; j < len2; j++){
+			add[i] |= (ONE << (toInt(s2[j])));
+		}
+	}
+
+	for(int i = 0; i < n; i++){
+		char q[55];
+		scanf("%s", q);
+		int qlen = strlen(q);
+		lint state = 0;
+		for(int j = 0; j < qlen; j++){
+			state |= (ONE << (toInt(q[j])));
+		}
+		bool used[220] = {0};
+		while(1){
+			bool prog = 0;
+			for(int j = 0; j < m; j++){
+				if(used[j]) continue;
+				if((state & have[j]) == have[j]){
+					state = (state | add[j]);
+					used[j] = 1;
+					prog = 1;
+					//cout << j << endl;
+				}
+			}
+			if(!prog) break;
+		}
+		for(int j = 0; j < 52; j++){
+			if(state & (ONE << j)){
+				printf("%c", toChar(j));
+			}
+		}
+		printf("\n");
+	}
+	return 0;
+}
