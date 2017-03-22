@@ -1,0 +1,62 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int dp[35][35][35];
+int D[35][35];
+int m,n;
+
+int main() {
+	scanf("%d", &m);
+	while(m--){
+		scanf("%d", &n);
+		for(int i = 1; i < n; i++){
+			for(int j = i+1; j <= n; j++){
+				scanf("%d", &D[i][j]);
+				D[j][i] = D[i][j];
+			}
+		}
+		if(n == 1){
+			printf("0\n");
+			continue;
+		}
+		for(int a = 1; a <= n; a++){
+			for(int b = (a==1)?1:a+1; b <= n; b++){
+				for(int c = (b==1)?1:b+1; c <= n; c++){
+					if(a==1 && b==1 && c==1) dp[a][b][c] = 0;
+					else if((a>1 && a==b) || (b>1 && b==c)) continue;
+					else{
+						if(b < c-1){
+							dp[a][b][c] = dp[a][b][c-1] + D[c-1][c];
+						}
+						else{
+							int mn = 2147483647;
+							for(int t = 1; t <= c-1; t++){
+								if(t > 1 && (t==a || t==b)) continue;
+								int thisD;
+								if(t > a){
+									thisD = dp[a][t][b];
+								}
+								else{
+									thisD = dp[t][a][b];
+								}
+								thisD += D[t][c];
+								if(thisD < mn) mn = thisD;
+							}
+							dp[a][b][c] = mn;
+						}
+					}
+				}
+			}
+		}
+		int res = 2147483647;
+		for(int a = 1; a < n; a++){
+			for(int b = a; b < n; b++){
+				if(a>1 && a==b) continue;
+				if(res > dp[a][b][n]) res = dp[a][b][n];
+			}
+		}
+		printf("%d\n", res);
+	}
+	return 0;
+}
