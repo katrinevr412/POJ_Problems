@@ -1,0 +1,60 @@
+#include <iostream>
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+
+int pool[10086];
+int n,a,b,zgs;
+
+int score[10086];
+bool jsed[10086];
+
+int getScore(int idx){
+	if(jsed[idx]) return score[idx];
+	int now = pool[idx];
+	int kou = -2147483648;
+	for(int i = idx+1; i < zgs;i++){
+		if(pool[i] < now+a) continue;
+		else if(pool[i] > now+b) break;
+		else{
+			int thisKou = getScore(i);
+			if(thisKou > kou) kou = thisKou;
+		}
+	}
+	if(kou == -2147483648) kou = 0;
+	score[idx] = now - kou;
+	jsed[idx] = 1;
+	return now-kou;
+}
+
+int main() {
+	int t;
+	scanf("%d", &t);
+	while(t--){
+		scanf("%d%d%d", &n,&a,&b);
+		for(int i = 0; i < n; i++) scanf("%d", &pool[i]);
+		sort(pool, pool+n);
+		int Old = 0, New = 0, cur = -1;
+		for(Old =0; Old < n; Old++){
+			if(Old == 0 || pool[Old] != cur){
+				cur = pool[Old];
+				pool[New] = cur;
+				New++;
+			}
+		}
+		zgs = New;
+		for(int i = 0; i < zgs; i++) jsed[i] = false;
+		int mx = -2147483648;
+		for(int i = 0; i < zgs; i++){
+			if(pool[i] < a) continue;
+			else if(pool[i] > b) break;
+			else{
+				int diff = getScore(i);
+				if(diff > mx) mx = diff;
+			}
+		}
+		if(mx == -2147483648) mx = 0;
+		printf("%d\n", mx);
+	}
+	return 0;
+}
