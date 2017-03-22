@@ -1,0 +1,73 @@
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+using namespace std;
+
+int m, T;
+int yd[100];
+bool loseturn[100];
+double result[100][100];
+bool jsed[100][100];
+double eps = 1e-12;
+
+double getRes(int pos, int sycs){
+	if(pos >= m+1) return 1.0;
+	if(sycs <= 0) return 0.0;
+	if(jsed[pos][sycs]) return result[pos][sycs];
+	double thisRes = 0.0;
+	if(pos+1 >= m+1) thisRes += 0.5;
+	else if(loseturn[pos+1]){
+		thisRes += 0.5 * getRes(pos+1, sycs-2);
+	}
+	else{
+		thisRes += 0.5 * getRes(pos+1+yd[pos+1], sycs-1);
+	}
+	if(pos+2 >= m+1) thisRes += 0.5;
+	else if(loseturn[pos+2]){
+		thisRes += 0.5 * getRes(pos+2, sycs-2);
+	}
+	else{
+		thisRes += 0.5 * getRes(pos+2+yd[pos+2], sycs-1);
+	}
+	jsed[pos][sycs] = 1;
+	result[pos][sycs] = thisRes;
+	return thisRes;
+}
+
+int main() {
+	int t;
+	scanf("%d", &t);
+	while(t--){
+		scanf("%d%d", &m, &T);
+		for(int i = 0; i <= m+1; i++){
+			yd[i] = 0;
+			loseturn[i] = 0;
+		}
+		for(int i = 0; i <= m+1; i++){
+			for(int c = 0; c < 100; c++){
+				jsed[i][c] = 0;
+			}
+		}
+		for(int i = 1; i <= m; i++){
+			char tmp[6];
+			scanf("%s", tmp);
+			if(tmp[0] == 'L'){
+				loseturn[i] = 1;
+			}
+			else{
+				yd[i] = atoi(tmp);
+			}
+		}
+		double res = getRes(0, T);
+		if(res > 0.5-eps && res < 0.5+eps){
+			printf("Push. 0.5000\n");
+		}
+		else if(res > 0.5){
+			printf("Bet for. %.4lf\n", res);
+		}
+		else{
+			printf("Bet against. %.4lf\n" , res);
+		}
+	}
+	return 0;
+}
