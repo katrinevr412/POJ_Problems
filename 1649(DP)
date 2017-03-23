@@ -1,0 +1,97 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int N;
+int a[105], b[105];
+int mnTou[105], mnWei[105];
+
+const int INFTY = 2147483647;
+inline int mn(int a, int b){
+	return a<b?a:b;
+}
+
+inline int mx(int a, int b){
+	return a>b?a:b;
+}
+
+struct info{
+	int dl;
+	int zj;
+};
+
+info tou[105], wei[105], merge[210];
+
+int main() {
+	scanf("%d", &N);
+	for(int i = 1; i <= N; i++){
+		scanf("%d", &a[i]);
+	}
+	for(int i = 1; i <= N; i++){
+		scanf("%d", &b[i]);
+	}
+	mnTou[1] = a[1], mnWei[1] = a[N];
+	for(int i = 2; i <= N; i++){
+		mnTou[i] = mn(mnTou[i-1], a[i]);
+		mnWei[i] = mn(mnWei[i-1], a[N-i+1]);
+	}
+	int zmn = -INFTY, zargL = -1, zargP = -1;
+	for(int l = 1; l < N; l++){
+		int touZMN = INFTY, weiZMN = INFTY;
+		int touGs = 0, weiGs = 0;
+		for(int L = l+1; L <= N; L++){
+			int prc = mn(mnTou[L-1], touZMN - 1);
+			tou[touGs].dl = prc;
+			tou[touGs++].zj = b[L];
+			touZMN = mn(touZMN, a[L]);
+		}
+		for(int L = N-l+1; L <= N; L++){
+			int prc = mn(mnWei[L-1], weiZMN - 1);
+			wei[weiGs].dl = prc;
+			wei[weiGs++].zj = b[L];
+			weiZMN = mn(weiZMN, a[N-L+1]);
+		}
+		int zGs = 0;
+		int tGs = 0, wGs = 0;
+		while(1){
+			if(tGs == touGs && wGs == weiGs) break;
+			if(tGs < touGs && (wGs == weiGs || tou[tGs].dl >= wei[wGs].dl)){
+				//merge tou
+				if(zGs == 0 || merge[zGs-1].dl != tou[tGs].dl){
+					merge[zGs++] = tou[tGs];
+				}
+				else{
+					merge[zGs-1].zj += tou[tGs].zj;
+				}
+				tGs++;
+			}
+			else{
+				//merge wei
+				if(zGs == 0 || merge[zGs-1].dl != wei[wGs].dl){
+					merge[zGs++] = wei[wGs];
+				}
+				else{
+					merge[zGs-1].zj += wei[wGs].zj;
+				}
+				wGs++;
+			}
+		}
+		int lMN = -INFTY, lPrc = -1;
+		int kydrs = 0;
+		for(int i = 0; i < zGs; i++){
+			kydrs += merge[i].zj;
+			int now = kydrs * merge[i].dl;
+			if(now > lMN){
+				lMN = now;
+				lPrc = merge[i].dl;
+			}
+		}
+		if(lMN > zmn){
+			zmn = lMN;
+			zargL = l;
+			zargP = lPrc;
+		}
+	}
+	printf("%d %d\n", zargL, zargP);
+	return 0;
+}
