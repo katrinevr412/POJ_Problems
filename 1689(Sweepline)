@@ -1,0 +1,180 @@
+#include <iostream>
+#include <map>
+#include <vector>
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+typedef long long int lint;
+struct pt{
+	lint x,y;
+};
+
+lint sgnArea(pt &p1, pt &p2, pt &p3){
+	return p1.x*p2.y + p2.x*p3.y + p3.x*p1.y - p2.x*p1.y - p3.x*p2.y - p1.x*p3.y;
+}
+
+struct polygon{
+	int bs;
+	vector<pt> vp;
+	bool isShun;
+	lint getArea(){
+		lint res = 0;
+		for(int i = 1; i < bs-1; i++){
+			lint tmp = sgnArea(vp[0], vp[i], vp[i+1]);
+			res += tmp;
+			if(i == 1) isShun = tmp<0;
+		}
+		if(res < 0) res = -res;
+		return res/2;
+	}
+}polygons[52];
+
+int cntX, cntY;
+map<int, int> xVal, yVal;
+vector<int> xs, ys;
+lint xjl[2500], yjl[2500];
+bool covered[2500][2500];
+bool visited[2500][2500];
+lint zmj;
+void dfs(int,int);
+
+int main() {
+	int t;
+	scanf("%d", &t);
+	while(t--){
+		lint ch, ku;
+		scanf("%I64d%I64d", &ch, &ku);
+		cntX = 0, cntY = 0;
+		xVal.clear(), yVal.clear();
+		xs.clear(), ys.clear();
+		xs.push_back(0), xs.push_back(ch);
+		ys.push_back(0), ys.push_back(ku);
+		int nop;
+		scanf("%d", &nop);
+		lint yyarea = 0;
+		for(int i = 0; i < nop; i++){
+			scanf("%d", &polygons[i].bs);
+			polygons[i].vp.clear();
+			for(int j = 0; j < polygons[i].bs; j++){
+				int tmpx, tmpy;
+				scanf("%d%d", &tmpx, &tmpy);
+				tmpy = ku - tmpy;
+				pt tmp;
+				tmp.x = tmpx, tmp.y = tmpy;
+				polygons[i].vp.push_back(tmp);
+				xs.push_back(tmpx), ys.push_back(tmpy);
+			}
+			yyarea += polygons[i].getArea();
+		}
+		sort(xs.begin(), xs.end());
+		sort(ys.begin(), ys.end());
+		int xsz = xs.size(), ysz = ys.size();
+		for(int i = 0; i < xsz; i++){
+			if(i==0 || xs[i] != xs[i-1]){
+				xVal.insert(pair<int,int>(xs[i], cntX));
+				xjl[cntX++] = xs[i];
+			}
+		}
+		for(int i = 0; i < ysz; i++){
+			if(i==0 || ys[i] != ys[i-1]){
+				yVal.insert(pair<int,int>(ys[i], cntY));
+				yjl[cntY++] = ys[i];
+			}
+		}
+		for(int i = 0; i < cntX-1; i++){
+			for(int j = 0; j < cntY-1; j++){
+				covered[i][j] = 0;
+			}
+		}
+		for(int i = 0; i < cntX-1; i++){
+			for(int j = 0; j < cntY-1; j++){
+				visited[i][j] = 0;
+			}
+		}
+		//下面开始填充障碍
+		for(int i = 0; i < nop; i++){
+			polygon &plg = polygons[i];
+			bool isSh = plg.isShun;
+			int zgs = plg.bs;
+			int curX = xVal[plg.vp[1].x], curY = yVal[plg.vp[1].y];
+			int lastX = xVal[plg.vp[0].x], lastY = yVal[plg.vp[0].y];
+			for(int j = 0; j < zgs; j++){
+
+				if(curX > lastX){
+					if(isSh){
+						for(int k = lastX; k < curX; k++){
+							covered[k][curY-1] = 1;
+						}
+					}
+					else{
+						for(int k = lastX; k < curX; k++){
+							covered[k][curY] = 1;
+						}
+					}
+				}
+
+				if(curX < lastX){
+					if(isSh){
+						for(int k = curX; k < lastX; k++){
+							covered[k][curY] = 1;
+						}
+					}
+					else{
+						for(int k = curX; k < lastX; k++){
+							covered[k][curY-1] = 1;
+						}
+					}
+				}
+
+				if(curY > lastY){
+					if(isSh){
+						for(int k = lastY; k < curY; k++){
+							covered[curX][k] = 1;
+						}
+					}
+					else{
+						for(int k = lastY; k < curY; k++){
+							covered[curX-1][k] = 1;
+						}
+					}
+				}
+
+				if(curY < lastY){
+					if(isSh){
+						for(int k = curY; k < lastY; k++){
+							covered[curX-1][k] = 1;
+						}
+					}
+					else{
+						for(int k = curY; k < lastY; k++){
+							covered[curX][k] = 1;
+						}
+					}
+				}
+
+				if(j != zgs-1){
+					lastX = curX, lastY = curY;
+					int nxIdx = (j+2)%zgs;
+					curX = xVal[plg.vp[nxIdx].x], curY = yVal[plg.vp[nxIdx].y];
+				}
+			}
+		}
+
+		zmj = 0;
+		if(!covered[cntX-2][cntY-2]) dfs(cntX-2, cntY-2);
+		printf("%I64d\n", ch*ku-zmj-yyarea);
+	}
+	return 0;
+}
+
+
+void dfs(int xPos, int yPos){
+	visited[xPos][yPos] = 1;
+	zmj += (xjl[xPos+1]-xjl[xPos]) * (yjl[yPos+1]-yjl[yPos]);
+	if(yPos && !covered[xPos][yPos-1] && !visited[xPos][yPos-1]){
+		dfs(xPos,yPos-1);
+	}
+	if(xPos && !covered[xPos-1][yPos] && !visited[xPos-1][yPos]){
+		dfs(xPos-1,yPos);
+	}
+}
