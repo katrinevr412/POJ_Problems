@@ -1,0 +1,48 @@
+#include <iostream>
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+
+int n;
+int adjList[202][202];
+int adjNo[202];
+
+int getRes(int bh){
+	if(!adjNo[bh]) return 1;
+	int *col = new int[adjNo[bh]];
+
+	for(int i = 0; i < adjNo[bh]; i++){
+		col[i] = getRes(adjList[bh][i]);
+	}
+	sort(col, col+adjNo[bh]);
+	int mx = 0;
+	for(int i = 0; i < adjNo[bh]; i++){
+		int th = (adjNo[bh]-1-i) + col[i];
+		if(th > mx) mx = th;
+	}
+
+	delete [] col;
+	return mx;
+}
+
+int main() {
+	int t;
+	scanf("%d",&t);
+	while(t--){
+		scanf("%d",&n);
+		for(int i = 1; i <= n; i++){
+			adjNo[i] = 0;
+		}
+		for(int i = 1; i <= n; i++){
+			int bh,gs;
+			scanf("%d%d",&bh, &gs);
+			for(int j = 0; j < gs; j++){
+				int tmp;
+				scanf("%d",&tmp);
+				adjList[bh][adjNo[bh]++] = tmp;
+			}
+		}
+		printf("%d\n", getRes(1));
+	}
+	return 0;
+}
