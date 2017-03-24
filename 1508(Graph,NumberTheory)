@@ -1,0 +1,115 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+typedef long long int lint;
+int F,E,A,B;
+int X[110], Y[110];
+int adjNo[110];
+int adjList[110][110];
+char res[2][256] = {"The furniture cannot be moved.","It is possible to move the furniture."};
+bool used[110];
+
+lint gcd(lint a, lint b){
+	if(a<0) a = -a;
+	if(b<0) b = -b;
+	if(a==0) return b;
+	if(b==0) return a;
+	if(a<b) return gcd(a, b%a);
+	return gcd(b, a%b);
+}
+
+lint ni(lint a, lint b){
+	if(a==1 || b==1) return 1;
+	a %= b;
+	if(a==1) return 1;
+	lint s = a - ni(b,a);
+	//cout << a << endl;
+	return (b*s+1)/a;
+}
+
+bool xj(int x1, int y1, int x2, int y2){
+	lint g = gcd(x1, x2);
+	if((y2-y1)%g) return false;
+	lint A = x1/g, B = x2/g, C = (y2-y1)/g;
+	lint C_;
+	if(C < 0) C_ = (C%B+B)%B;
+	else C_ = C;
+	lint k = C_ * ni(A, B);
+	k %= B;
+	lint kmin, kmax;
+	kmax = (F-1-y1)/x1;
+	kmin = 0;
+	if(y2 > y1){
+		kmin = (y2-y1-1)/x1+1;
+	}
+	if(kmax < kmin) return false;
+	if(kmax - kmin >= B-1) return true;
+	lint t = (kmin + B - k - 1)/B;
+	return B*t+k <= kmax;
+}
+
+bool dfs(int src, int dest){
+	if(src == dest) return true;
+	used[src] = 1;
+	for(int i = 0; i < adjNo[src]; i++){
+		int next = adjList[src][i];
+		if(used[next]) continue;
+		if(dfs(next, dest)) return true;
+	}
+	return false;
+}
+
+int main() {
+	//cout << 1 << endl;
+	//cout << ni(33,53) << endl;
+	int N;
+	scanf("%d", &N);
+	while(N--){
+		scanf("%d%d%d%d",&F,&E,&A,&B);
+		for(int i = 1; i <= E; i++){
+			scanf("%d%d", &X[i],&Y[i]);
+		}
+		if(A==B){
+			printf("%s\n", res[1]);
+			continue;
+		}
+		int inA = -1, inB = -1;
+		for(int i = 1; i <= E; i++){
+			if((A-Y[i])%X[i]==0 && A >= Y[i]){
+				inA = i;
+				break;
+			}
+		}
+		if(inA==-1){
+			printf("%s\n", res[0]);
+			continue;
+		}
+		for(int i = 1; i <= E; i++){
+			if((B-Y[i])%X[i]==0 && B >= Y[i]){
+				inB = i;
+				break;
+			}
+		}
+		if(inB == -1){
+			printf("%s\n", res[0]);
+			continue;
+		}
+		for(int i = 1; i <= E; i++){
+			adjNo[i] = 0;
+		}
+		for(int i = 1; i < E; i++){
+			for(int j = i+1; j <= E; j++){
+				if(xj(X[i],Y[i],X[j],Y[j])){
+					adjList[i][adjNo[i]++] = j;
+					adjList[j][adjNo[j]++] = i;
+				}
+			}
+		}
+		for(int i = 1; i <= E; i++){
+			used[i] = 0;
+		}
+		printf("%s\n", res[dfs(inA,inB)]);
+	}
+	return 0;
+}
