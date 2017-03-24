@@ -1,0 +1,44 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int x[55], y[55];
+
+int ga2(int *dt, int gs){
+	int a = 0;
+	for(int ks = 1; ks < gs-1; ks++){
+		int i0 = dt[0], i1 = dt[ks], i2 = dt[(ks+1)%gs];
+		a += (x[i0]*y[i1] + x[i1]*y[i2] + x[i2] * y[i0] - x[i1] * y[i0] - x[i2] * y[i1] - x[i0] * y[i2]);
+	}
+	return (a<0)?-a:a;
+}
+
+int main() {
+	int N;
+	scanf("%d",&N);
+	while(N--){
+		int cs;
+		scanf("%d",&cs);
+		for(int i = 1; i <= cs; i++){
+			scanf("%d%d",&x[i],&y[i]);
+		}
+		int k;
+		scanf("%d",&k);
+		int a2 = 0, arg = 0;
+		for(int i = 1; i <= k; i++){
+			int gs;
+			scanf("%d", &gs);
+			int bh[55];
+			for(int j = 0; j < gs; j++){
+				scanf("%d", &bh[j]);
+			}
+			int ta2 = ga2(bh, gs);
+			if(ta2 > a2){
+				a2 = ta2;
+				arg = i;
+			}
+		}
+		printf("%d\n", arg);
+	}
+	return 0;
+}
