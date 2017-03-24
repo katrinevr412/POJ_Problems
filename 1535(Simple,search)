@@ -1,0 +1,52 @@
+#include <iostream>
+#include <stdio.h>
+#include <set>
+using namespace std;
+
+int X, Y, qx, qy, zx, zy;
+set<pair<int, int> > closed;
+bool used[105][105];
+int dir[4][2] = {{-1,0},{0,-1},{1,0},{0,1}};
+
+bool inRange(int x, int y){
+	return x>=0 && x<X && y>=0 && y<Y;
+}
+
+bool isClear(int x, int y){
+	return inRange(x,y) && inRange(zx+qx-x,zy+qy-y)
+			&& closed.find(pair<int,int>(x,y)) == closed.end()
+			&& closed.find(pair<int,int>(zx+qx-x,zy+qy-y)) == closed.end();
+}
+
+bool dfs(int x, int y){
+	if(x==zx && y==zy) return true;
+	used[x][y] = 1;
+	for(int k = 0; k < 4; k++){
+		int nx = x+dir[k][0], ny = y+dir[k][1];
+		if(isClear(nx,ny) && !used[nx][ny] && dfs(nx,ny)) return true;
+	}
+	return false;
+}
+
+int main() {
+	while(1){
+		scanf("%d%d",&X,&Y);
+		if(!X && !Y) break;
+		scanf("%d%d%d%d",&qx,&qy,&zx,&zy);
+		int gs;
+		scanf("%d",&gs);
+		closed.clear();
+		for(int i = 0; i < gs; i++){
+			int tx, ty;
+			scanf("%d%d",&tx,&ty);
+			closed.insert(pair<int,int>(tx,ty));
+		}
+		for(int i = 0; i < X; i++){
+			for(int j = 0; j < Y; j++){
+				used[i][j] = 0;
+			}
+		}
+		printf(dfs(qx,qy)?"YES\n":"NO\n");
+	}
+	return 0;
+}
