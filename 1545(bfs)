@@ -1,0 +1,93 @@
+#include <iostream>
+#include <stdio.h>
+#include <queue>
+using namespace std;
+
+int n;
+bool conn[26][26];
+bool valid[26];
+bool has[26];
+double q[26];
+double rate = 0.95;
+int INFTY = 100000;
+
+double Pow(int nn){
+	if(nn > INFTY - 4) return -1.0;
+	if(!nn) return 1;
+	double tmp = Pow(nn/2);
+	if(nn%2) return tmp*tmp*rate;
+	return tmp*tmp;
+}
+
+int Path(int ii){
+	queue<int> bfs;
+	int dist[26];
+	bool used[26] = {false};
+	for(int i = 0; i < 26; i++){
+		if(valid[i] && has[i]){
+			//cout << "i=" << i << endl;
+			dist[i] = 1;
+			bfs.push(i);
+			used[i] = 1;
+			if(i == ii) return 1;
+		}
+	}
+	while(!bfs.empty()){
+		int top = bfs.front();
+		bfs.pop();
+		for(int i = 0; i < 26; i++){
+			if(valid[i] && !used[i] && conn[top][i]){
+				used[i] = 1;
+				bfs.push(i);
+				dist[i] = dist[top] + 1;
+				if(i == ii) return dist[i];
+			}
+		}
+	}
+	return INFTY;
+}
+
+int main() {
+	while(scanf("%d", &n) > 0){
+		for(int i = 0; i < 26; i++) {
+			q[i] = 0;
+			valid[i] = false;
+			has[i] = false;
+		}
+		for(int i = 0; i < 26; i++){
+			for(int j = 0; j < 26; j++){
+				conn[i][j] = 0;
+			}
+		}
+		for(int i = 0; i < n; i++){
+			char zm[2];
+			double val;
+			char str[52];
+			scanf("%s%lf%s", zm, &val, str);
+			int th = zm[0] - 'A';
+			valid[th] = true;
+			q[th] = val;
+			for(int j = 0; str[j] != 0; j++){
+				if(str[j] == '*') has[th] = 1;
+				else {
+					conn[th][str[j]-'A'] = 1;
+					conn[str[j]-'A'][th] = 1;
+				}
+			}
+		}
+		double val = -1.0;
+		int arg = -1;
+		for(int i = 0; i < 26; i++){
+			if(!valid[i]) continue;
+			//cout << i << endl;
+			double thh = q[i] * Pow(Path(i)-1);
+			//printf("%.16lf\n", thh);
+			if(thh > val){
+				val = thh;
+				arg = i;
+			}
+		}
+		printf("Import from %c\n", 'A'+arg);
+	}
+	return 0;
+}
