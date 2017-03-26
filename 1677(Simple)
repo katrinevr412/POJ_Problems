@@ -1,0 +1,126 @@
+#include <iostream>
+#include <stdio.h>
+#include <string>
+#include <string.h>
+#include <stdlib.h>
+#include <map>
+#include <vector>
+
+using namespace std;
+
+vector<string> names;
+
+char tar[3][256] = {"beautiful", "pretty", "lovely"};
+
+bool isW(string s){
+	for(int i = 0; i < 3; i++){
+		if(!strcmp(s.c_str(), tar[i])) return true;
+	}
+	return false;
+}
+
+bool isL(char c){
+	return c>='a' && c<='z';
+}
+
+vector<string> parse(string s){
+	vector<string> res;
+	//if(s[0] >= 'A' && s[0] <= 'Z') s[0] += ('a'-'A');
+	int len = s.length();
+	for(int i = 0; i < len; i++){
+		if(s[i] >= 'A' && s[i] <= 'Z') s[i] = 'a' + s[i]-'A';
+	}
+	//cout << s << endl;
+	int offset = 0;
+	bool inword = false;
+	string cur;
+	while(offset < len){
+		if(!inword){
+			if(!isL(s[offset])){
+				offset++;
+			}
+			else{
+				inword = true;
+				cur += s[offset++];
+			}
+		}
+		else{
+			if(isL(s[offset])){
+				cur += s[offset++];
+			}
+			else{
+				inword = false;
+				res.push_back(cur);
+				cur = "";
+				offset++;
+			}
+		}
+	}
+	if(inword && cur.length()){
+		res.push_back(cur);
+	}
+	return res;
+}
+
+int main() {
+	int m,n;
+	cin >> m >> n;
+	for(int i = 0; i < m; i++){
+		string s;
+		while(!s.length()){
+			getline(cin, s);
+		}
+		names.push_back(s);
+	}
+	for(int i = 0; i < n; i++){
+		string s;
+		while(!s.length()){
+			getline(cin, s);
+		}
+		vector<int> idx;
+		vector<string> res = parse(s);
+		int szz = res.size();
+		for(int j = 0; j < m; j++){
+			for(int k = 0; k < szz; k++){
+				if(!strcmp(res[k].c_str(), names[j].c_str())){
+					idx.push_back(j);
+					break;
+				}
+			}
+		}
+		/*
+		for(int j = 0; j < m; j++){
+			if(strstr(s.c_str(), names[j].c_str())){
+				idx.push_back(j);
+			}
+		}
+		*/
+		int sz = idx.size();
+
+		if(!sz) cout << "All: ";
+		else{
+			for(int j = 0; j < sz; j++){
+				cout << names[idx[j]];
+				if(j != sz-1) cout << " ";
+			}
+			cout << ": ";
+		}
+
+		//sz = res.size();
+		if(szz < 10) cout << "oh" << endl;
+		else{
+			bool contain = false;
+			for(int i = 0; i < szz; i++){
+				if(isW(res[i])){
+					contain = true;
+					cout << "xixi" << endl;
+					break;
+				}
+			}
+			if(!contain){
+				cout << "hehe" << endl;
+			}
+		}
+	}
+	return 0;
+}
