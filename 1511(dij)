@@ -1,0 +1,116 @@
+#include <iostream>
+#include <queue>
+#include <stdio.h>
+using namespace std;
+
+struct node{
+	node *next;
+	int to, dist;
+}nodes[2000200];
+
+int usedNo, p, q;
+node *stopsFrom[1000100], *stopsTo[1000100];
+
+void add(int src, int dest, int dist, node **ptArr){
+	if(ptArr[src] == NULL){
+		ptArr[src] = &nodes[usedNo];
+		//nodes[usedNo].from = src;
+		nodes[usedNo].to = dest;
+		nodes[usedNo].dist = dist;
+		nodes[usedNo].next = NULL;
+	}
+	else{
+		//nodes[usedNo].from = src;
+		nodes[usedNo].to = dest;
+		nodes[usedNo].dist = dist;
+		nodes[usedNo].next = ptArr[src];
+		ptArr[src] = &nodes[usedNo];
+	}
+	usedNo++;
+}
+
+int dists[1000100];
+bool defined[1000100];
+
+struct info{
+	int bh, dist;
+	info(int b, int d):bh(b),dist(d){}
+};
+
+const int INFTY = 2147483647;
+
+bool operator<(const info &i1, const info &i2){
+	return i1.dist > i2.dist;
+}
+
+void dij(node **adjList){
+	for(int i = 2; i <= p; i++){
+		dists[i] = INFTY;
+	}
+	dists[1] = 0;
+	for(int i = 1; i <= p; i++){
+		defined[i] = false;
+	}
+	priority_queue<info> pq;
+	pq.push(info(1, 0));
+	int gsGet = 0;
+	while(!pq.empty()){
+		//cout << 111 << endl;
+		info tmp(-1,-1);
+		while(!pq.empty()){
+			//cout << 111 << endl;
+			tmp = pq.top();
+			pq.pop();
+			if(dists[tmp.bh] == tmp.dist) break;
+		}
+		if(tmp.bh == -1) break;
+		int bh = tmp.bh;
+		defined[bh] = true;
+		gsGet++;
+		if(gsGet == p) break;
+		node *curNode = adjList[bh];
+		while(curNode != NULL){
+			//cout << 1  << endl;
+			int next = curNode->to;
+			if(defined[next]) {
+				curNode = curNode->next;
+				continue;
+			}
+			int newDist = dists[bh] + curNode->dist;
+			if(newDist < dists[next]){
+				dists[next] = newDist;
+				pq.push(info(next, newDist));
+			}
+			curNode = curNode->next;
+		}
+	}
+}
+
+int main() {
+	int t;
+	scanf("%d", &t);
+	while(t--){
+		scanf("%d%d",&p,&q);
+		for(int i = 1; i <= p; i++){
+			stopsFrom[i] = stopsTo[i] = NULL;
+		}
+		usedNo = 0;
+		for(int i = 0; i < q; i++){
+			int src, dest, dist;
+			scanf("%d%d%d",&src,&dest,&dist);
+			add(src, dest, dist, stopsFrom);
+			add(dest, src, dist, stopsTo);
+		}
+		long long int res = 0;
+		dij(stopsFrom);
+		for(int i = 2; i <= p; i++){
+			res += dists[i];
+		}
+		dij(stopsTo);
+		for(int i = 2; i <= p; i++){
+			res += dists[i];
+		}
+		printf("%I64d\n", res);
+	}
+	return 0;
+}
