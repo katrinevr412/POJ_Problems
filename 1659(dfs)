@@ -1,0 +1,118 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int n;
+int gs[11];
+bool xl[11][11];
+int hy[11][1024];
+int hyNo[11] = {0};
+
+bool rawContain(int tar, int bit){
+	return (tar & (1 << bit));
+}
+
+bool contain(int tar, int bit){
+	return (tar & (1 << (n-bit)));
+}
+
+int hygs(int tar){
+	int res = 0;
+	for(int i = 0; i < 10; i++){
+		if(rawContain(tar, i)) res++;
+	}
+	return res;
+}
+
+void zongInit(){
+	for(int i = 0; i < 1024; i++){
+		int hyg = hygs(i);
+		hy[hyg][hyNo[hyg]++] = i;
+	}
+}
+
+void init(){
+	scanf("%d",&n);
+	for(int i = 1; i <= n; i++){
+		for(int j = 1; j <= n; j++){
+			xl[i][j] = 0;
+		}
+	}
+	for(int i = 1; i <= n; i++){
+		scanf("%d", &gs[i]);
+	}
+}
+
+bool dfs(int wz){
+	if(wz == n){
+		if(gs[wz] == 0) return true;
+		else return false;
+	}
+	int nygs = gs[wz];
+	if(!nygs){
+		return dfs(wz+1);
+	}
+	if(nygs < 0) return false;
+	//n-1~n-wz位均为空
+	//1的bit数是nygs
+	//<(1 << (n-wz))
+	int thres = (1 << (n-wz));
+	for(int i = 0; i < hyNo[nygs]; i++){
+		int state = hy[nygs][i];
+		if(state >= thres) break;
+		int xz[11];
+		int tmpCnt = 0;
+		for(int j = wz+1; j <= n; j++){
+			if(contain(state, j)){
+				xz[tmpCnt++] = j;
+			}
+		}
+		for(int j = 0; j < tmpCnt; j++){
+			int yjd = xz[j];
+			xl[wz][yjd] = 1;
+			xl[yjd][wz] = 1;
+
+			gs[yjd]--;
+		}
+		if(dfs(wz+1)) return true;
+		for(int j = 0; j < tmpCnt; j++){
+			int yjnd = xz[j];
+			xl[wz][yjnd] = 0;
+			xl[yjnd][wz] = 0;
+			gs[yjnd]++;
+		}
+	}
+	return false;
+}
+
+int main() {
+	zongInit();
+	int t;
+	scanf("%d",&t);
+	while(t--){
+		init();
+		int zs = 0;
+		for(int i = 1; i <= n; i++){
+			zs += gs[i];
+		}
+		if(zs%2) {
+			printf("NO\n\n");
+			continue;
+		}
+		if(dfs(1)){
+			printf("YES\n");
+			for(int i = 1; i <= n; i++){
+				for(int j = 1; j <= n; j++){
+					if(xl[i][j]) printf("1 ");
+					else printf("0 ");
+				}
+				printf("\n");
+			}
+			printf("\n");
+		}
+		else{
+			printf("NO\n\n");
+		}
+	}
+	return 0;
+}
