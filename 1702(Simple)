@@ -1,0 +1,52 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+using namespace std;
+
+typedef long long int lint;
+lint sdm[21];
+
+void init(){
+	sdm[0] = 1;
+	for(int i = 1; i < 21; i++){
+		sdm[i] = sdm[i-1]*3;
+	}
+}
+
+void js(lint t){
+	t += (sdm[20]-1)/2;
+	int sjz[20] = {0};
+	for(int i = 0; i < 20; i++){
+		sjz[i] = t%3;
+		t /= 3;
+	}
+	vector<int> zuos, yous;
+	for(int i = 0; i < 20; i++){
+		if(sjz[i] == 2) yous.push_back(i);
+		else if(sjz[i] == 0) zuos.push_back(i);
+	}
+	int zsize = zuos.size(), ysize = yous.size();
+	for(int i = 0; i < zsize; i++){
+		printf("%I64d", sdm[zuos[i]]);
+		if(i != zsize-1) printf(",");
+	}
+	if(zsize == 0) printf("empty");
+	printf(" ");
+	for(int i = 0; i < ysize; i++){
+		printf("%I64d", sdm[yous[i]]);
+		if(i != ysize-1) printf(",");
+	}
+	printf("\n");
+}
+
+int main() {
+	init();
+	int t;
+	scanf("%d", &t);
+	while(t--){
+		lint tmp;
+		scanf("%I64d", &tmp);
+		js(tmp);
+	}
+	return 0;
+}
