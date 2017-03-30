@@ -1,0 +1,36 @@
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+inline int mx(int a, int b){return a>b?a:b;}
+inline int mn(int a, int b){return a>b?b:a;}
+
+int main() {
+	int t;
+	cin >> t;
+	while(t--){
+		int rs;
+		cin >> rs;
+		int sj[1010];
+		int rss[1010];
+		for(int i = 0; i < rs; i++) cin >> sj[i];
+		int res;
+		if(rs == 1) res = sj[0];
+		else if(res == 2) res = mx(sj[0], sj[1]);
+		else if(res == 3)  res = sj[0] + sj[1] + sj[2];
+		else{
+			sort(sj, sj+rs);
+			rss[1] = sj[0];
+			rss[2] = mx(sj[0], sj[1]);
+			rss[3] = sj[0] + sj[1] + sj[2];
+			for(int i = 4; i <= rs; i++){
+				int zm = sj[i-1];
+				int zk = sj[0], ck = sj[1];
+				rss[i] = mn(zm+zk+rss[i-1], (ck << 1)+zk+zm+rss[i-2]);
+			}
+			res = rss[rs];
+		}
+		cout << res << endl;
+	}
+	return 0;
+}
