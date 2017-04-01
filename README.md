@@ -4,4 +4,4 @@ Please brush those labelled with tag "simple" first. These are the watery proble
 
 这里是POJ部分题目的解答代妈。刷题可以按照tag来刷，建议先刷带有‘Simple’标签的题目，它们都是水题。
 
-代妈供学习交流算法和对拍之用，请勿随意抄袭或原样提交到任何OJ。苯repo内琐有代妈最终解释权归Katrina Yang所有。
+代妈供学习交流算法和对拍之用，请勿随意抄袭或原样提交到任何OJ。苯repo内所有代妈最终解释权归Katrina Yang所有。
