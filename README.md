@@ -1,6 +1,6 @@
 # POJ_Problems
 Solutions to problems in POJ.
-Please brush those labelled with tag "simple" first. These are the watery problems. These codes are for correctness verifying and for studying algorithms. All codes in this repo are credited to Katrina Yang. Do not copy them or submit them to any OJ without my permission.
+Please brush those labelled with tag "simple" first. These are the watery problems. These codes are for correctness verifying and for studying algorithms. All codes in this repo are accredited to Katrina Yang. Do not copy them or submit them to any OJ without her permission.
 
 这里是POJ部分题目的解答代妈。刷题可以按照tag来刷，建议先刷带有‘Simple’标签的题目，它们都是水题。
 
