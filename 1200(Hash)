@@ -1,0 +1,56 @@
+#include <stdio.h>
+
+bool has[16000004] = {0};
+int val[256];
+
+int v = 0;
+
+int getVal(char c){
+	if(val[c] == -1) {
+		val[c] = v;
+		v++;
+	}
+	return val[c];
+}
+
+int power(int n, int m){
+	if(m == 0) return 1;
+	int t = power(n, m/2);
+	if(m%2 == 0) return t*t;
+	return t*t*n;
+}
+
+int main() {
+	int N,M;
+	for(int i = 0; i < 256; i++) val[i] = -1;
+	scanf("%d%d\n", &N, &M);
+	char *buf = new char[N];
+	int pos = 0;
+	int ss = 0;
+	int w = power(M, N-1);
+	for(int i = 0; i < N; i++){
+		ss *= M;
+		scanf("%c", &buf[i]);
+		//printf("%c\n", buf[i]);
+		ss += getVal(buf[i]);
+	}
+	has[ss] = 1;
+	int res = 1;
+	char temp;
+	while(scanf("%c ", &temp) > 0){
+		//printf("%c\n", temp);
+		ss -= w * getVal(buf[pos]);
+		ss *= M;
+		ss += getVal(temp);
+		buf[pos] = temp;
+		if(!has[ss]){
+			has[ss] = 1;
+			res ++;
+		}
+		pos += 1;
+		pos %= N;
+	}
+	printf("%d\n", res);
+	delete [] buf;
+	return 0;
+}
