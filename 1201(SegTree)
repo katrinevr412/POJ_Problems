@@ -1,0 +1,81 @@
+#include <iostream>
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+
+int val[240000] = {0};
+int n;
+int prev[50005];
+bool has[50005] = {0};
+
+
+
+struct intv{
+	int start, end, c;
+} intvs[50005];
+
+bool compare(const intv &i1, const intv &i2){
+	return i1.end < i2.end;
+}
+
+int query(int start, int end, int qstart, int qend, int bh){
+	if(qstart == start && qend == end) return val[bh];
+	int qmid = (qstart + qend)/2;
+	if(end <= qmid) return query(start, end, qstart, qmid, 2*bh+1);
+	else if(start > qmid) return query(start, end, qmid+1, qend, 2*bh+2);
+	else return query(start, qmid, qstart, qmid, 2*bh+1) + query(qmid+1, end, qmid+1, qend, 2*bh+2);
+}
+
+void add(int place, int start, int end, int bh){
+	val[bh]++;
+	if(start == end){
+		return;
+	}
+	int mid = (start + end)/2;
+	if(place <= mid){
+		add(place, start, mid, 2*bh+1);
+	}
+	else{
+		add(place, mid+1, end, 2*bh+2);
+	}
+}
+
+int main() {
+	scanf("%d", &n);
+	//cout << n_ << endl;
+	int mx = 0;
+	for(int i = 0; i < n; i++){
+		scanf("%d%d%d", &intvs[i].start, &intvs[i].end, &intvs[i].c);
+		if(intvs[i].end > mx) mx = intvs[i].end;
+	}
+	int n_ = 65535;
+	sort(intvs, intvs+n, compare);
+	//cout << intvs[0].start << " " << intvs[0].end << endl;
+	for(int i = 0; i <= n; i++) prev[i] = i-1;
+	for(int i = 0; i < n; i++){
+		//cout << i << endl;
+		int yygs = query(intvs[i].start, intvs[i].end, 0, n_, 0);
+		if(yygs >= intvs[i].c) continue;
+		int cha = intvs[i].c - yygs;
+		int ks = intvs[i].end;
+		//cout << cha << endl;
+		while(cha > 0){
+			//cout << cha << endl;
+			while(ks >= 0 && has[ks]){
+				ks = prev[ks];
+			}
+			if(ks >= intvs[i].start){
+				add(ks, 0, n_, 0);
+				cha--;
+				has[ks] = 1;
+				ks--;
+			}
+		}
+		while(ks >= 0 && has[ks]){
+			ks = prev[ks];
+		}
+		prev[intvs[i].end] = ks;
+	}
+	printf("%d\n", val[0]);
+	return 0;
+}
