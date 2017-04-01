@@ -1,0 +1,64 @@
+#include <iostream>
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+
+struct intv{
+	int start, end;
+}intvs[10086];
+
+bool operator<(const intv& i1, const intv &i2){
+	return i1.end < i2.end;
+}
+
+inline int left(int n){return 2 * n + 1;}
+inline int right(int n){return 2 * n + 2;}
+
+int segtree[44000] = {0};
+bool used[10086] = {false};
+
+int cx(int qs, int qe, int s, int e, int bh){
+	if(qs == s && qe == e) return segtree[bh];
+	int mid = (s + e) / 2;
+	if(qe <= mid) return cx(qs, qe, s, mid, left(bh));
+	if(qs > mid) return cx(qs, qe, mid+1, e, right(bh));
+	return cx(qs, mid, s, mid, left(bh)) + cx(mid+1, qe, mid+1, e, right(bh));
+}
+
+void add(int pos, int s, int e, int bh){
+	segtree[bh]++;
+	if(s == e){
+		return;
+	}
+	int mid = (s + e) / 2;
+	if(pos <= mid) add(pos, s, mid, left(bh));
+	else add(pos, mid+1, e, right(bh));
+}
+
+int main() {
+	int n;
+	scanf("%d", &n);
+	for(int i = 0; i < n; i++){
+		scanf("%d%d", &intvs[i].start, &intvs[i].end);
+	}
+	sort(intvs, intvs+n);
+	int cnt = 0;
+	for(int i = 0; i < n; i++){
+		int gs = cx(intvs[i].start, intvs[i].end, 0, 10000, 0);
+		if(gs < 2){
+			int xy = 2 - gs;
+			int cur = intvs[i].end;
+			while(xy > 0){
+				while(used[cur]){
+					cur--;
+				}
+				used[cur] = true;
+				cnt++;
+				add(cur, 0, 10000, 0);
+				xy--;
+			}
+		}
+	}
+	printf("%d\n", cnt);
+	return 0;
+}
