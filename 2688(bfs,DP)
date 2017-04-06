@@ -1,0 +1,121 @@
+#include <iostream>
+#include <stdio.h>
+#include <queue>
+using namespace std;
+
+int m,n, cnt;
+
+int states[33][33];
+int zx[20], zy[20];
+int dist[20][20];
+int zdist[20];
+
+inline bool inbound(int x, int y){
+	return x>=0 && x<n && y>=0 && y<m;
+}
+
+int dir[4][2] = {{0,-1},{-1,0},{0,1},{1,0}};
+
+bool getZDist(int rx, int ry, int *Zdist){
+	for(int i = 0; i < cnt; i++) Zdist[i] = 2147483647;
+	int tmpdist[30][30];
+	bool used[30][30] = {false};
+	queue<pair<int, int> > bfs;
+	bfs.push(pair<int, int>(rx, ry));
+	used[rx][ry] = 1;
+	tmpdist[rx][ry] = 0;
+	if(states[rx][ry] >= 0) Zdist[states[rx][ry]] = 0;
+	while(!bfs.empty()){
+		int x = bfs.front().first, y = bfs.front().second;
+		bfs.pop();
+		for(int k = 0; k < 4; k++){
+			int nx = x+dir[k][0], ny = y+dir[k][1];
+			if(inbound(nx,ny) && !used[nx][ny] && states[nx][ny] != -2){
+				used[nx][ny] = 1;
+				tmpdist[nx][ny] = tmpdist[x][y]+1;
+				bfs.push(pair<int,int>(nx,ny));
+				if(states[nx][ny] >= 0) Zdist[states[nx][ny]] = tmpdist[nx][ny];
+			}
+		}
+	}
+	for(int i = 0; i < cnt; i++){
+		if(Zdist[i] == 2147483647) return false;
+	}
+	return true;
+}
+
+inline bool contain(int state, int bit){
+	return (state & (1 << bit)) != 0;
+}
+
+int main() {
+	while(1){
+		cnt = 0;
+		scanf("%d%d",&m,&n);
+		if(!m && !n) return 0;
+		int rx, ry;
+		for(int i = 0; i < n; i++){
+			char tmp[60];
+			scanf("%s", tmp);
+			for(int j = 0; j < m; j++){
+				char c = tmp[j];
+				if(c == 'o'){
+					states[i][j] = -1;
+					rx = i;
+					ry = j;
+				}
+				else if(c == 'x'){
+					states[i][j] = -2;
+				}
+				else if(c == '*'){
+					zx[cnt] = i;
+					zy[cnt] = j;
+					states[i][j] = cnt++;
+				}
+				else{
+					states[i][j] = -1;
+				}
+			}
+		}
+		//cout << rx << " " << ry << endl;
+		if(!getZDist(rx, ry, zdist)){
+			printf("-1\n");
+			continue;
+		}
+		bool guale = false;
+		for(int i = 0; i < cnt; i++){
+			if(!getZDist(zx[i], zy[i], dist[i])){
+				printf("-1\n");
+				guale = true;
+				break;
+			}
+		}
+		if(guale){
+			continue;
+		}
+		int dp[12][1026];
+		for(int i = 0; i < cnt; i++){
+			dp[i][1 << i] = zdist[i];
+		}
+		for(int state = 3; state < (1 << cnt); state++){
+			for(int cur = 0; cur < cnt; cur++){
+				if(!contain(state, cur) || state == (1 << cur)) continue;
+				int oldState = state - (1 << cur);
+				int mn = 2147483647;
+				for(int k = 0; k < cnt; k++){
+					if(!contain(oldState, k)) continue;
+					int thisCost = dp[k][oldState] + dist[k][cur];
+					if(thisCost < mn) mn = thisCost;
+				}
+				dp[cur][state] = mn;
+			}
+		}
+		int res = 2147483647;
+		for(int i = 0; i < cnt; i++){
+			int val = dp[i][(1 << cnt) - 1];
+			if(val < res) res = val;
+		}
+		printf("%d\n", res);
+	}
+	return 0;
+}
