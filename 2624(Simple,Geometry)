@@ -1,0 +1,48 @@
+#include <iostream>
+#include <stdio.h>
+#include <cmath>
+using namespace std;
+
+struct pt{
+	double x,y;
+};
+bool operator==(pt &p1, pt &p2){
+	return abs(p1.x-p2.x)<1e-9 && abs(p1.y-p2.y)<1e-9;
+}
+
+int main() {
+	while(1){
+		pt pts[4];
+		bool wl = false;
+		for(int i = 0; i < 4; i++){
+			if(scanf("%lf%lf", &pts[i].x, &pts[i].y) < 2){
+				wl = true;
+				break;
+			}
+		}
+		if(wl) break;
+		int c1, c2;
+		for(int i = 0; i < 3; i++){
+			for(int j = i+1; j < 4; j++){
+				if(pts[i] == pts[j]){
+					c1 = i,
+							c2 = j;
+					goto done;
+				}
+			}
+		}
+		done:
+		double xx = 0.0, yy = 0.0;
+		for(int i = 0; i < 4; i++){
+			if(i != c1 && i != c2){
+				xx += (pts[i].x - pts[c1].x);
+				yy += (pts[i].y - pts[c1].y);
+			}
+		}
+		double resx = pts[c1].x + xx, resy = pts[c1].y + yy;
+		if(abs(resx) < 0.00049) resx = 0;
+		if(abs(resy) < 0.00049) resy = 0;
+		printf("%.3lf %.3lf\n", resx, resy);
+	}
+	return 0;
+}
