@@ -1,0 +1,59 @@
+#include <iostream>
+#include <stdio.h>
+
+using namespace std;
+
+int n;
+char code[2002][9];
+
+int getDist(char *a, char *b){
+	int res = 0;
+	for(int i = 0; i < 7; i++){
+		if(a[i] != b[i]) res ++;
+	}
+	return res;
+}
+
+int main() {
+	while(1){
+		scanf("%d", &n);
+		if(!n) break;
+		for(int i = 0; i < n; i++){
+			scanf("%s", code[i]);
+		}
+		bool used[2002] = {false};
+		int dist[2002];
+		dist[0] = 0;
+		int cost = 0;
+		for(int i = 1; i < n; i++){
+			dist[i] = 8;
+		}
+		for(int i = 0; i < n; i++){
+			int mn = 8, argMn = -1;
+			if(!i){
+				mn = 0;
+				argMn = 0;
+			}
+			else{
+				for(int j = 0; j < n; j++){
+					if(used[j]) continue;
+					if(dist[j] < mn){
+						mn = dist[j];
+						argMn = j;
+					}
+				}
+			}
+			used[argMn] = true;
+			cost += dist[argMn];
+			for(int j = 1; j < n; j++){
+				if(used[j]) continue;
+				int newDist = getDist(code[argMn], code[j]);
+				if(newDist < dist[j]){
+					dist[j] = newDist;
+				}
+			}
+		}
+		printf("The highest possible quality is 1/%d.\n", cost);
+	}
+	return 0;
+}
