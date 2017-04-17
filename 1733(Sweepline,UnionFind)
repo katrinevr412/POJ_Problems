@@ -1,0 +1,108 @@
+#include <iostream>
+#include <stdio.h>
+#include <vector>
+#include <algorithm>
+#include <map>
+#include <assert.h>
+using namespace std;
+
+int rep[10010];
+bool rel[10010];
+int rnk[10010];
+
+void init(int gs){
+	for(int i = 0;i < gs; i++){
+		rel[i] = 0;
+		rep[i] = i;
+		rnk[i] = 0;
+	}
+}
+
+int getRep(int i){
+	vector<int> path;
+	while(i != rep[i]){
+		path.push_back(i);
+		i = rep[i];
+	}
+	int repr = i;
+	int sz = path.size();
+	bool rela = false;
+	for(int i = sz-1; i >= 0; i--){
+		rep[path[i]] = repr;
+		rela = rela ^ rel[path[i]];
+		rel[path[i]] = rela;
+	}
+	return repr;
+}
+
+void Union(int a, int b, bool relation){
+	assert(a==rep[a] && b==rep[b]);
+	if(rnk[a] > rnk[b]){
+		rep[b] = a;
+		rel[b] = relation;
+	} else if(rnk[a] < rnk[b]){
+		rep[a] = b;
+		rel[a] = relation;
+	} else{
+		rep[a] = b;
+		rel[a] = relation;
+		rnk[b]++;
+	}
+}
+
+int main() {
+	int len, N;
+	int endpoints[10010];
+	map<int, int> bh;
+	int start[5005], end[5005];
+	bool action[5005];
+	scanf("%d%d", &len, &N);
+	for(int i = 0; i < N; i++){
+		char tmp[6];
+		scanf("%d%d%s", &start[i], &end[i], tmp);
+		start[i]--;
+		if(tmp[0] == 'o') action[i] = 1;
+		else action[i] = 0;
+		endpoints[2*i] = start[i];
+		endpoints[2*i+1] = end[i];
+	}
+	sort(endpoints, endpoints + 2*N);
+	int qPtr = 0, hPtr = 0;
+	int cur = -1;
+	for(int i = 0; i < 2*N; i++){
+		if(cur != endpoints[qPtr]){
+			if(cur != -1) endpoints[hPtr++] = cur;
+			cur = endpoints[qPtr++];
+		}
+		else{
+			qPtr++;
+		}
+	}
+	if(cur != -1) endpoints[hPtr++] = cur;
+	//cout << hPtr << endl;
+	//for(int i = 0; i < hPtr; i++) cout << endpoints[i] << " "; cout << endl;
+	for(int i = 0; i < hPtr; i++){
+		bh.insert(pair<int,int>(endpoints[i], i));
+	}
+	init(hPtr);
+	bool ky = true;
+	for(int i = 0; i < N; i++){
+		int startP = bh[start[i]], endP = bh[end[i]];
+		//cout << startP << " " << endP << endl;
+		int r1 = getRep(startP), r2 = getRep(endP);
+		//cout << r1 << " " << r2 << endl;
+		bool newRel = rel[startP] ^ rel[endP] ^ action[i];
+		if(r1 != r2){
+			Union(r1, r2, newRel);
+		} else{
+			//cout << "same" << endl;
+			if(newRel){
+				ky = false;
+				printf("%d\n", i);
+				break;
+			}
+		}
+	}
+	if(ky) printf("%d\n", N);
+	return 0;
+}
