@@ -1,0 +1,90 @@
+#include <iostream>
+#include <stdio.h>
+#include <string.h>
+using namespace std;
+int mapping[26] = {2,2,2,3,3,3,4,4,1,1,5,5,6,6,0,7,0,7,7,8,8,8,9,9,9,0};
+int infty = (int) 1e7;
+struct node{
+	int hv;
+	node *succ[10];
+}nodes[2500050];
+int cnt = 1, gs;
+char words[50005][55];
+char tar[105];
+int mnNum[105];
+int trc[105];
+int main() {
+	scanf("%s", tar);
+	int len = strlen(tar);
+	mnNum[len] = 0;
+	for(int i = 0; i < len; i++){
+		mnNum[i] = infty;
+	}
+	node *root = &nodes[0];
+	for(int i = 0; i < 10; i++) nodes[0].succ[i] = NULL;
+	nodes[0].hv = -1;
+	scanf("%d", &gs);
+	for(int i = 0; i < gs; i++){
+		//cout << cnt << endl;
+		scanf("%s", words[i]);
+		char *tmp = words[i];
+		int tmpLen = strlen(tmp);
+		node *cur = root;
+		for(int j = 0; j < tmpLen; j++){
+			int dir = mapping[tmp[j]-'a'];
+			//cout << dir << " ";
+			//cout << dir << endl;
+			if(!cur->succ[dir]){
+				cur->succ[dir] = &nodes[cnt];
+				nodes[cnt].hv = -1;
+				for(int k = 0; k < 10; k++) nodes[cnt].succ[i] = NULL;
+				cnt++;
+			}
+			cur = cur->succ[dir];
+		}
+		cur->hv = i;
+		//cout << endl;
+	}
+	//cout << cnt << endl;
+	for(int i = len-1; i >= 0; i--){
+		//cout << i << endl;
+		int mn = infty, argmin = -1;
+		node *cur = root;
+		int pos = i;
+		while(cur != NULL && pos < len){
+			//cout << "'" << endl;
+			int dir = tar[pos] - '0';
+			//cout << dir << endl;
+			cur = cur->succ[dir];
+			if(!cur) break;
+			if(cur->hv != -1){
+				//cout << "got it" << endl;
+				int thisMin = mnNum[pos+1] + 1;
+				//cout << "this min:" << thisMin << endl;
+				if(thisMin < mn){
+					mn = thisMin;
+					argmin = cur->hv;
+				}
+			}
+			pos++;
+		}
+		//cout << "mn:" << mn << endl;
+		mnNum[i] = mn;
+		trc[i] = argmin;
+	}
+	if(mnNum[0] >= infty){
+		printf("No solution.\n");
+	}
+	else{
+		bool first = true;
+		int pos = 0;
+		while(pos < len){
+			if(!first) printf(" ");
+			first = false;
+			printf("%s", words[trc[pos]]);
+			pos += strlen(words[trc[pos]]);
+		}
+		printf("\n");
+	}
+	return 0;
+}
