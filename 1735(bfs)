@@ -1,0 +1,115 @@
+#include <iostream>
+#include <stdio.h>
+#include <assert.h>
+#include <queue>
+#include <stack>
+using namespace std;
+
+bool used[2][65536] = {false};
+int last[2][65536];
+int action[2][65536];
+int dist[2][65536];
+
+int adjs[24][2] = {{0,1},{1,2},{2,3},
+					{4,5},{5,6},{6,7},
+					{8,9},{9,10},{10,11},
+					{12,13},{13,14},{14,15},
+					{0,4},{4,8},{8,12},
+					{1,5},{5,9},{9,13},
+					{2,6},{6,10},{10,14},
+					{3,7},{7,11},{11,15}};
+
+int swapState(int state, int swapNo){
+	int bit1 = adjs[swapNo][0], bit2 = adjs[swapNo][1];
+	int val1 = (state >> bit1)%2, val2 = (state >> bit2)%2;
+	if(val1 == val2) return state;
+	return state + (val2 - val1) * ((1<<bit1) - (1<<bit2));
+}
+
+void printCz(int swapNo){
+	int g1 = adjs[swapNo][0], g2 = adjs[swapNo][1];
+	printf("%d %d %d %d\n", g1/4+1, g1%4+1, g2/4+1, g2%4+1);
+}
+
+int main() {
+	int start = 0, end = 0;
+	for(int wz = 0; wz < 2; wz++){
+		for(int i = 0; i < 4; i++){
+			char tmp[7];
+			scanf("%s", tmp);
+			for(int j = 0; j < 4; j++){
+				if(tmp[j] == '1'){
+					int bit = (i<<2) + j;
+					(wz?end:start) += (1 << bit);
+				}
+			}
+		}
+	}
+	if(start == end) {
+		printf("0\n");
+		return 0;
+	}
+	for(int i = 0; i < 2; i++) dist[i][i?end:start] = 0;
+	queue<int> bfs[2];
+	for(int i = 0; i < 2; i++){
+		bfs[i].push(i?end:start);
+		used[i][i?end:start] = 1;
+	}
+	int tarState = -1;
+	bool ky = false;
+	for(int dst = 0; ; dst++){
+		//cout << bfs[0].size() << " " << bfs[1].size() << endl;
+		//cout << dst << endl;
+		//while(!bfs[0].empty() || !bfs[1].empty()){
+		if(bfs[0].empty() && bfs[1].empty()) break;
+		//cout << 1 << endl;
+			for(int i = 0; i < 2; i++){
+				while(!bfs[i].empty()){
+					int cur = bfs[i].front();
+					if(dist[i][cur] != dst) break;
+					//cout << i << " " << cur << endl;
+					bfs[i].pop();
+					for(int j = 0; j < 24; j++){
+						int newState = swapState(cur, j);
+						//if(dst < 5) cout << cur << " " << newState << endl;
+						if(!used[i][newState]){
+							//cout << i << " " << newState << endl;
+							used[i][newState] = 1;
+							bfs[i].push(newState);
+							last[i][newState] = cur;
+							action[i][newState] = j;
+							dist[i][newState] = dst + 1;
+
+							if(used[(i+1)%2][newState]){
+								ky = true;
+								tarState = newState;
+								goto done;
+							}
+						}
+					}
+				}
+			}
+		//}
+	}done:
+	assert(ky);
+	stack<int> cz;
+	int cur = tarState;
+	while(cur != start){
+		cz.push(action[0][cur]);
+		cur = last[0][cur];
+	}
+	printf("%d\n", dist[0][tarState] + dist[1][tarState]);
+	cout << endl;
+	int sz = cz.size();
+	for(int i = 0; i < sz; i++){
+		int tcz = cz.top();
+		cz.pop();
+		printCz(tcz);
+	}
+	cur = tarState;
+	while(cur != end){
+		printCz(action[1][cur]);
+		cur = last[1][cur];
+	}
+	return 0;
+}
