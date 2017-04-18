@@ -1,0 +1,121 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+const int MAXINT = 2147483647/2;
+
+int mn(int a, int b){
+	if(a > b) return b;
+	return a;
+}
+
+int main() {
+	int N, M;
+	int MN = MAXINT;
+	int zdl[2][101][101];
+	int res[101];
+	int pos;
+	scanf("%d%d", &N, &M);
+	int data[101][101];
+	for(int i = 1; i <= N; i++){
+		for(int j = 1; j <= N; j++){
+			data[i][j] = MAXINT;
+		}
+	}
+	//int eychu = -1, eydao = -1;
+	//重边导致的2回路情况
+	for(int i = 0; i < M; i++){
+		int chu, dao, juli;
+		scanf("%d%d%d", &chu, &dao, &juli);
+		int alr = data[chu][dao];
+		if(alr > juli){
+			data[chu][dao] = juli;
+			data[dao][chu] = juli;
+		}
+		//}
+		/*
+		else{
+			int temp = alr + juli;
+			if(temp < MN){
+				MN = temp;
+				//eychu = chu;
+				//eydao = dao;
+			}
+			if(juli < alr){
+				data[chu][dao] = juli;
+				data[dao][chu] = juli;
+			}
+		}*/
+	}
+	/*
+	if(eychu != -1 && eydao != -1){
+		res[1] = eychu;
+		res[2] = eydao;
+		pos = 2;
+	}*/
+	for(int i = 1; i <= N; i++){
+		for(int j = 1; j <= N; j++){
+			if(i == j) zdl[0][i][j] = 0;
+			else zdl[0][i][j] = data[i][j];
+		}
+	}
+	//開始floyd
+	int prev[2][101][101];
+	for(int i = 1; i <= N; i++){
+		for(int j = 1; j <= N; j++){
+			if(zdl[0][i][j] == MAXINT) prev[0][i][j] = 0;
+			else prev[0][i][j] = i;
+		}
+	}
+	for(int k = 1; k < N; k++){
+		int from, to;
+		from = (k+1)%2, to = k%2;
+		for(int i = 1; i <= N; i++){
+			for(int j = 1; j <= N; j++){
+				if(i == j){
+					zdl[to][i][j] = 0;
+					continue;
+				}
+				int yuan = zdl[from][i][j];
+				int xian = zdl[from][i][k] + zdl[from][k][j];
+				if(yuan <= xian){
+					zdl[to][i][j] = yuan;
+					prev[to][i][j] = prev[from][i][j];
+				}
+				else{
+					zdl[to][i][j] = xian;
+					prev[to][i][j] = prev[from][k][j];
+				}
+			}
+		}
+		if(k < 2) continue;
+		k++;
+		for(int i = 1; i <= k-2; i++){
+			for(int j = i+1; j <= k-1; j++){
+				int ij = zdl[to][i][j];
+				int ik = data[i][k];
+				int jk = data[j][k];
+				if(ij == MAXINT || ik == MAXINT || jk == MAXINT || ij + ik + jk >= MN) continue;
+				MN = ij + ik + jk;
+				int temp = 2;
+				res[1] = k;
+				res[2] = j;
+				int dd = j;
+				while(dd != i){
+					res[temp+1] = prev[to][i][dd];
+					temp ++;
+					dd = prev[to][i][dd];
+				}
+				pos = temp;
+			}
+		}
+		k--;
+	}
+	if(MN >= MAXINT) cout << "No solution." << endl;
+	else{
+		for(int i = 1; i <= pos; i++){
+			printf("%d ", res[i]);
+		}
+	}
+	return 0;
+}
