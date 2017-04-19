@@ -1,0 +1,45 @@
+#include <iostream>
+#include <stdio.h>
+#include <cmath>
+using namespace std;
+typedef long long int lint;
+lint power(lint a, lint b){
+	if(b == 0) return 1;
+	if(b == 1) return a;
+	int hf = power(a, b/2);
+	if(b%2) return hf*hf*a;
+	return hf*hf;
+}
+
+bool isP(lint n, int p){
+	int upper = (int)pow(2147483648.0, 1.0/p) + 1;
+	int lower = 2;
+	while(lower <= upper){
+		//cout << lower << " " << upper << endl;
+		int mid = (lower+upper)/2;
+		//cout << mid << endl;
+		lint m = power(mid, p);
+		if(m == n) return true;
+		if(m < n) lower = mid+1;
+		else upper = mid-1;
+	}
+	return false;
+}
+
+int getP(lint n){
+	bool fu = (n<0);
+	n = fu?-n:n;
+	for(int p = 31; p > 1; p -= 1 + fu){
+		if(isP(n, p)) return p;
+	}
+	return 1;
+}
+int N;
+int main() {
+	while(1){
+		scanf("%d",&N);
+		if(!N) break;
+		printf("%d\n", getP(N));
+	}
+	return 0;
+}
