@@ -1,0 +1,55 @@
+#include <iostream>
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+int heng[100010], shu[100010];
+
+int main() {
+	int K,L;
+	scanf("%d%d", &K, &L);
+	for(int i = 1; i <= K; i++) scanf("%d", &heng[i]);
+	for(int i = 1; i <= L; i++) scanf("%d", &shu[i]);
+	sort(heng+1, heng+K+1);
+	sort(shu+1, shu+L+1);
+	heng[0] = shu[0] = 0;
+	if(heng[K] != shu[L]){
+		printf("No solution.\n");
+	}
+	else{
+		int zxz = 0;
+		int hp = K, sp = L;
+		while(1){
+			int tmp = 0;
+			if(heng[hp] > shu[sp]){
+				tmp = heng[hp];
+				hp--;
+			} else if(heng[hp] < shu[sp]){
+				tmp = shu[sp];
+				sp--;
+			} else{
+				tmp = heng[hp];
+				hp--,sp--;
+			}
+			if(!tmp) break;
+			zxz += tmp;
+		}
+		int zdz = 0;
+		int gs[5050] = {0};
+		for(int i = 1; i <= L; i++){
+			gs[shu[i]]++;
+		}
+		for(int lj = shu[L]; lj > 0; lj--){
+			gs[lj-1] += gs[lj];
+		}
+		int cur = 0, curPos = 0;
+		for(int i = 1; i <= K; i++){
+			for(int j = curPos + 1; j <= heng[i]; j++){
+				cur += gs[j];
+			}
+			zdz += cur;
+			curPos = heng[i];
+		}
+		printf("%d %d\n", zxz, zdz);
+	}
+	return 0;
+}
