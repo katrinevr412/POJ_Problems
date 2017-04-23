@@ -1,0 +1,59 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int z[7] = {0}, f[7] = {0}, zong[7] = {0};
+int dp[7][6006];
+int INFTY = (int) 1e9;
+
+inline int ab(int a) {return a>0?a:-a;}
+
+int main() {
+	int n;
+	scanf("%d", &n);
+	for(int i = 0; i < n; i++){
+		int a,b;
+		scanf("%d%d", &a, &b);
+		if(a > b){
+			z[a-b]++;
+		} else if(a < b) {
+			f[b-a]++;
+		}
+	}
+	for(int i = 1; i <= 6; i++) zong[i] = z[i] + f[i];
+	int zh[7] = {0};
+	for(int i = 1; i <= 6; i++) {
+		zh[i] = zh[i-1] + i * zong[i];
+	}
+	for(int i = 0; i <= 6; i++) {
+		for(int j = 0; j <= zh[i]; j++){
+			dp[i][j] = INFTY;
+		}
+	}
+	dp[0][0] = 0;
+	for(int nw = 1; nw <= 6; nw++) {
+		for(int jh = 0; jh <= zh[nw-1]; jh++){
+			int jfd = dp[nw-1][jh];
+			if(jfd >= INFTY) continue;
+			for(int gs = 0; gs <= zong[nw]; gs++){
+				int xh = gs * nw + jh;
+				int xyfd = ab(z[nw] - gs) + jfd;
+				if(dp[nw][xh] > xyfd) dp[nw][xh] = xyfd;
+			}
+		}
+	}
+	int lb, hb;
+	if (zh[6]%2) {
+		lb = zh[6] / 2, hb = lb + 1;
+	} else {
+		lb = hb = zh[6] / 2;
+	}
+	for(int cha = 0; ; cha++) {
+		int mn = std::min(dp[6][lb-cha], dp[6][hb+cha]);
+		if(mn < INFTY) {
+			printf("%d\n", mn);
+			break;
+		}
+	}
+	return 0;
+}
