@@ -1,0 +1,87 @@
+#include <iostream>
+#include <queue>
+#include <stdio.h>
+#include <assert.h>
+using namespace std;
+
+const int INFTY = (int) 1e9;
+
+int dist[105][10005];
+int adjNo[105] = {0};
+int adjList[105][10005];
+bool decided[105][10005] = {false};
+
+int K;
+int N, R;
+void init(){
+	for(int k = 0; k <= K; k++) {
+		dist[1][k] = 0;
+	}
+	for(int i = 2; i <= N; i++) {
+		for(int k = 0; k <= K; k++) {
+			dist[i][k] = INFTY;
+		}
+	}
+	//dist[1][0] = 0;
+}
+
+struct trip {
+	int dist;
+	int cost;
+	int place;
+	trip(int d, int c, int p): dist(d), cost(c), place(p){}
+};
+
+bool operator<(const trip &i1, const trip &i2) {
+	return i1.dist > i2.dist;
+}
+
+struct info {
+	int from, to, dist, cost;
+	void set(int s, int d, int l, int t) {
+		from = s, to = d, dist = l, cost = t;
+	}
+}roadInfo[10005];
+
+int infoCnt = 0;
+
+priority_queue<trip> pq;
+
+int main() {
+	scanf("%d%d%d", &K,&N,&R);
+	init();
+	for(int i = 0; i < R; i++) {
+		int S,D,L,T;
+		scanf("%d%d%d%d", &S,&D,&L,&T);
+		roadInfo[infoCnt].set(S,D,L,T);
+		adjList[S][adjNo[S]++] = infoCnt++;
+	}
+	pq.push(trip(0, 0, 1));
+	while(!pq.empty()) {
+		trip now = pq.top();
+		pq.pop();
+		if(dist[now.place][now.cost] < now.dist || decided[now.place][now.cost]) continue;
+		decided[now.place][now.cost] = 1;
+		for (int i = 0; i < adjNo[now.place]; i++) {
+			info& Info = roadInfo[adjList[now.place][i]];
+			int newCost = now.cost + Info.cost;
+			if (newCost > K || decided[Info.to][newCost]) continue;
+			//assert(Info.from == now.place);
+			int anticDist = now.dist + Info.dist;
+			if (anticDist < dist[Info.to][newCost]) {
+				dist[Info.to][newCost] = anticDist;
+				pq.push(trip(anticDist, newCost, Info.to));
+			}
+		}
+	}
+	int minDist = INFTY;
+	for (int k = 0; k <= K; k++) {
+		if (dist[N][k] < minDist) minDist = dist[N][k];
+	}
+	if (minDist >= INFTY) {
+		printf("-1\n");
+	} else {
+		printf("%d\n", minDist);
+	}
+	return 0;
+}
