@@ -1,0 +1,115 @@
+#include <iostream>
+#include <stdio.h>
+#include <assert.h>
+using namespace std;
+
+int lieAdj[1002][2];
+int hangAdj[1002][1002];
+int hangAdjGs[1002];
+int hangPp[1002];
+int liePp[1002];
+int R, C;
+void init() {
+	for(int i = 1; i <= R; i++) {
+		hangAdjGs[i] = 0;
+	}
+	for(int i = 1; i <= R; i++) {
+		hangPp[i] = 0;
+	}
+	for(int i = 1; i <= C; i++) {
+		liePp[i] = 0;
+	}
+}
+
+int main() {
+	int c;
+	scanf("%d", &c);
+	while(c--) {
+		scanf("%d%d", &R, &C);
+		init();
+		for(int i = 1; i <= C; i++) {
+			int h1, h2;
+			scanf("%d%d", &h1, &h2);
+			lieAdj[i][0] = h1, lieAdj[i][1] = h2;
+			hangAdj[h1][hangAdjGs[h1]++] = i;
+			hangAdj[h2][hangAdjGs[h2]++] = i;
+		}
+		if(R > C) {
+			printf("NO\n");
+			continue;
+		}
+		bool hangZero = false;
+		for(int i = 1; i <= R; i++) {
+			if(!hangAdjGs[i]) {
+				hangZero = true;
+				printf("NO\n");
+				break;
+			}
+		}
+		if(hangZero) continue;
+		int flowVal = 0;
+		for(int i = 1; i <= C; i++) {
+			if(flowVal == R) {
+				break;
+			}
+			if(!hangPp[lieAdj[i][0]]) {
+				liePp[i] = lieAdj[i][0];
+				hangPp[lieAdj[i][0]] = i;
+				flowVal++;
+			} else if(!hangPp[lieAdj[i][1]]) {
+				liePp[i] = lieAdj[i][1];
+				hangPp[lieAdj[i][1]] = i;
+				flowVal++;
+			} else {
+				for(int j = 0; j < 2; j++) {
+					int start = lieAdj[i][j];
+					bool used[1003] = {false};
+					int lieTrc[1003], hangTrc[1003];
+					int lieGs = 0, hangGs = 0;
+					int lieCur = i, hangCur = start;
+					bool success = false;
+					while(1) {
+						lieTrc[lieGs++] = lieCur;
+						hangTrc[hangGs++] = hangCur;
+						used[hangCur] = 1;
+						if(!hangPp[hangCur]) {
+							success = true;
+							break;
+						}
+						lieCur = hangPp[hangCur];
+						hangCur = (hangCur == lieAdj[lieCur][0]) ? lieAdj[lieCur][1] : lieAdj[lieCur][0];
+						if(used[hangCur]) {
+							success = false;
+							break;
+						}
+					}
+					if(success) {
+						flowVal++;
+						assert(lieGs == hangGs);
+						for(int k = 0; k < lieGs; k++) {
+							liePp[lieTrc[k]] = hangTrc[k];
+							hangPp[hangTrc[k]] = lieTrc[k];
+						}
+						break;
+					}
+				}
+			}
+		}
+		if(flowVal < R) {
+			printf("NO\n");
+		} else{
+			for(int i = 1; i <= C; i++) {
+				if(liePp[i]) {
+					printf("%d", liePp[i]);
+				} else {
+					printf("%d", lieAdj[i][0]);
+				}
+				if(i != C) {
+					printf(" ");
+				}
+			}
+			printf("\n");
+		}
+	}
+	return 0;
+}
