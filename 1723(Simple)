@@ -1,0 +1,35 @@
+#include <iostream>
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+
+typedef long long int lint;
+
+inline lint ab(lint a){return (a>0)?a:-a;}
+
+lint dist(lint *arr, lint len) {
+	sort(arr, arr+len);
+	lint zws = arr[len/2];
+	lint res = 0;
+	for(int i = 0; i < len; i++) {
+		res += ab(arr[i] - zws);
+	}
+	return res;
+}
+
+int main() {
+	lint gs;
+	scanf("%I64d", &gs);
+	lint x[10005], y[10005];
+	for(lint i = 0; i < gs; i++) {
+		scanf("%I64d%I64d", &x[i], &y[i]);
+	}
+	lint res = dist(y, gs);
+	sort(x, x+gs);
+	for(lint i = 0; i < gs; i++) {
+		x[i] -= i;
+	}
+	res += dist(x, gs);
+	printf("%I64d\n", res);
+	return 0;
+}
