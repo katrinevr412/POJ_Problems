@@ -1,0 +1,15 @@
+#include <stdio.h>
+#include <cmath>
+using namespace std;
+double PI = 3.141592654;
+int main() {
+	int t, n;
+	double R;
+	scanf("%d",&t);
+	for(int i = 0; i < t; i++) {
+		scanf("%lf%d",&R,&n);
+		printf("Scenario #%d:\n%.3lf\n\n", i+1,  R/(1+1/sin(PI/n)));
+		//r = R/(1+1/sin(PI/n));
+	}
+	return 0;
+}
