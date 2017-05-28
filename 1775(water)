@@ -1,0 +1,45 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int jcs[10] = {1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880};
+int ky[1000010] = {1, 1, 1, 1, 1, -1, 1, 0};
+
+
+int main() {
+	int n;
+	while(1) {
+		scanf("%d", &n);
+		if (n < 0) {
+			break;
+		}
+		if (n == 0) {
+			printf("NO\n");
+		}
+		else if (ky[n] != 0) {
+			printf(ky[n] == 1 ? "YES\n" : "NO\n");
+		}
+		else {
+			int dd;
+			int N = n;
+			//bool ky = true;
+			for (dd = 9; dd >= 3; dd--) {
+				if (jcs[dd] > n) {
+					continue;
+				}
+				n -= jcs[dd];
+				if (n >= jcs[dd] || ky[n] == -1) {
+					ky[N] = 0;
+					printf("NO\n");
+					break;
+				}
+				else if (ky[n] == 1) {
+					ky[N] = 1;
+					printf("YES\n");
+					break;
+				}
+			}
+		}
+	}
+	return 0;
+}
