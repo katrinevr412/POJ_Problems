@@ -1,0 +1,114 @@
+#include <iostream>
+#include <stdio.h>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+
+int N, M;
+struct town {
+	int x, y;
+}towns[801];
+
+double getDist(town& t1, town& t2) {
+	return sqrt(1.0 * (t1.x-t2.x) * (t1.x-t2.x) + 1.0 * (t1.y-t2.y) * (t1.y-t2.y));
+}
+
+struct highway {
+	int t1, t2;
+	double len;
+	void getLength() {
+		len = getDist(towns[t1], towns[t2]);
+	}
+} highways[320004];
+
+bool operator<(const highway& h1, const highway& h2) {
+	return h1.len < h2.len;
+}
+
+int rep[801];
+int rnk[801];
+int cache[801];
+int glbCnt;
+
+void init() {
+	for(int i = 1; i <= N; i++) {
+		rep[i] = i;
+	}
+	for(int i = 1; i <= N; i++) {
+		rnk[i] = 0;
+	}
+	glbCnt = N;
+}
+
+int find(int a) {
+	int len = 0;
+	while(rep[a] != a) {
+		cache[len++] = a;
+		a = rep[a];
+	}
+	for(int i = 0; i < len; i++) {
+		rep[cache[i]] = a;
+	}
+	return a;
+}
+
+bool same(int a, int b) {
+	return find(a) == find(b);
+}
+
+void Union(int a, int b) {
+	a = find(a);
+	b = find(b);
+	if(a == b) {
+		return;
+	}
+	glbCnt--;
+	if (rnk[a] > rnk[b]) {
+		rep[b] = a;
+	}
+	else if (rnk[a] < rnk[b]) {
+		rep[a] = b;
+	}
+	else {
+		rep[a] = b;
+		rnk[b]++;
+	}
+}
+
+int main() {
+	scanf("%d", &N);
+	for(int i = 1; i <= N; i++) {
+		scanf("%d%d", &towns[i].x, &towns[i].y);
+	}
+	init();
+	scanf("%d", &M);
+	for(int i = 0; i < M; i++) {
+		int a,b;
+		scanf("%d%d", &a, &b);
+		Union(a, b);
+	}
+	int numOfHw = 0;
+	for(int i = 1; i < N; i++) {
+		for(int j = i+1; j <= N; j++) {
+			if(!same(i,j)) {
+				highways[numOfHw].t1 = i;
+				highways[numOfHw].t2 = j;
+				highways[numOfHw++].getLength();
+			}
+		}
+	}
+	sort(highways, highways + numOfHw);
+	int offset = 0;
+	while (glbCnt > 1) {
+		//cout << glbCnt << endl;
+		highway& h = highways[offset];
+		int fz1 = find(h.t1), fz2 = find(h.t2);
+		if (fz1 == fz2) {
+			offset++;
+			continue;
+		}
+		Union(fz1, fz2);
+		printf("%d %d\n", h.t1, h.t2);
+	}
+	return 0;
+}
