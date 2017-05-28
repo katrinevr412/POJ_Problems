@@ -1,0 +1,46 @@
+#include <iostream>
+#include <stdio.h>
+
+
+int N, K;
+int shu[10086];
+bool gun[2][110] = {false};
+
+int negate(int n) {
+	n = n%K;
+	if (!n) return 0;
+	return K-n;
+}
+
+int main() {
+	scanf("%d%d", &N, &K);
+	int offset = 0;
+	for(int i = 0; i < N; i++) {
+		int tmp;
+		scanf("%d", &tmp);
+		if (tmp < 0) {
+			tmp = -tmp;
+		}
+		tmp %= K;
+		offset += negate(tmp);
+		offset %= K;
+		shu[i] = (2 * tmp) % K;
+	}
+	gun[0][offset] = true;
+	//std::cout << offset << std::endl;
+	for(int i = 0; i < N; i++) {
+		int from = i%2, to = (i+1)%2;
+		for (int j = 0; j < K; j++) {
+			gun[to][j] = false;
+		}
+		for (int j = 0; j < K; j++) {
+			if (gun[from][j]) {
+				gun[to][j] = true;
+				gun[to][(j + shu[i]) % K] = true;
+			}
+		}
+	}
+	int tar = N%2;
+	printf(gun[tar][0] ? "Divisible\n" : "Not divisible\n");
+	return 0;
+}
