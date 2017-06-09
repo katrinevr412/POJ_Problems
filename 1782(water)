@@ -1,0 +1,50 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+string prc(string s) {
+	string res = "";
+	int len = s.length();
+	for (int i = 0; i < len; i++) {
+		if (s[i] == '1') {
+			res += "11";
+		}
+		else {
+			res += s[i];
+		}
+	}
+	return res;
+}
+
+int main() {
+	string s;
+	while (getline(cin, s)) {
+		int len = s.length();
+		int offset = 0;
+		while (offset < len) {
+			int os = offset;
+			while (os < len - 1 && s[os] != s[os + 1]) {
+				os++;
+			}
+			if (os < len - 1 && s[os] == s[os + 1]) {
+				os--;
+			}
+			if (os >= offset) {
+				cout << 1 << prc(s.substr(offset, os - offset + 1)) << 1;
+				offset = os + 1;
+			}
+			else {
+				int cnt = 0;
+				os = offset;
+				while (os < len - 1 && s[os] == s[os + 1] && cnt < 8) {
+					os++;
+					cnt++;
+				}
+				cout << cnt+1 << s[offset];
+				offset = os + 1;
+			}
+		}
+		cout << endl;
+	}
+	return 0;
+}
