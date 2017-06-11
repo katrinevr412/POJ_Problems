@@ -1,0 +1,112 @@
+#include <iostream>
+using namespace std;
+
+int value[4] = {1, 5, 10, 25};
+int gs[4], P;
+int zdou[100][10050];
+bool path[100][10050];
+const int INFTY = -2147483648;
+
+int val[100];
+int useNum[100];
+int cnt;
+
+void read() {
+	cin >> P;
+	for(int i = 0; i < 4; i++) {
+		cin >> gs[i];
+	}
+}
+
+bool validate() {
+	if (P) {
+		return true;
+	}
+	for(int i = 0; i < 4; i++) {
+		if (gs[i]) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void prc() {
+	cnt = 0;
+	for (int i = 0; i < 4; i++) {
+		gs[i] = std::min(gs[i], 10000 / value[i]);
+		if (gs[i] == 0) {
+			continue;
+		} else if (gs[i] == 1) {
+			val[cnt] = value[i];
+			useNum[cnt] = 1;
+			cnt++;
+		} else {
+			int accu = 0;
+			int toAdd = 1;
+			while (accu + toAdd <= gs[i]) {
+				useNum[cnt] = toAdd;
+				val[cnt] = toAdd * value[i];
+				cnt++;
+				accu += toAdd;
+				toAdd <<= 1;
+			}
+			if (accu < gs[i]) {
+				int offset = gs[i] - accu;
+				useNum[cnt] = offset;
+				val[cnt] = offset * value[i];
+				cnt++;
+			}
+		}
+	}
+}
+
+int main() {
+	while (1) {
+		read();
+		if (!validate()) {
+			break;
+		}
+		//cout << 1 << endl;
+		prc();
+		for (int i = 1; i <= P; i++) {
+			zdou[0][i] = INFTY;
+		}
+		zdou[0][0] = 0;
+		for (int i = 0; i < cnt; i++) {
+			int from = i, to = (i + 1);
+			zdou[to][0] = 0;
+			path[to][0] = false;
+			for (int j = 1; j <= P; j++) {
+				if (j >= val[i]) {
+					int newVal = zdou[from][j-val[i]] + useNum[i];
+					if (newVal > zdou[from][j]) {
+						zdou[to][j] = newVal;
+						path[to][j] = true;
+					} else {
+						zdou[to][j] = zdou[from][j];
+						path[to][j] = false;
+					}
+					//zdou[to][j] = std::max(zdou[from][j], zdou[from][j - val[i]] + useNum[i]);
+				} else {
+					zdou[to][j] = zdou[from][j];
+					path[to][j] = false;
+				}
+			}
+		}
+		int tar = cnt;
+		if (zdou[tar][P] < 0) {
+			cout << "Charlie cannot buy coffee." << endl;
+		} else {
+			int col[30] = {0};
+			int cur = P;
+			for (int i = cnt-1; i >= 0; i--) {
+				if (path[i+1][cur]) {
+					cur -= val[i];
+					col[val[i] / useNum[i]] += useNum[i];
+				}
+			}
+			cout << "Throw in " << col[1] << " cents, " << col[5] << " nickels, " << col[10] << " dimes, and " << col[25] << " quarters." << endl;
+		}
+	}
+	return 0;
+}
