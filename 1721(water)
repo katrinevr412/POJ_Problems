@@ -1,0 +1,55 @@
+#include <iostream>
+using namespace std;
+
+void toC(int *a, int *b, int N) {
+	int start = 1;
+	for (int i = 1; i <= N; i++) {
+		b[i] = start;
+		start = a[start];
+	}
+}
+
+void toS(int *c, int *d, int N) {
+	for (int i = 1; i < N; i++) {
+		d[c[i]] = c[i+1];
+	}
+	d[c[N]] = c[1];
+}
+
+int power(int d, int e, int m) {
+	if (e == 0) return 1;
+	int pw2 = power(d, e/2, m);
+	int pw2m = (pw2 * pw2) % m;
+	if (e%2) {
+		return (pw2m * d) % m;
+	}
+	return pw2m;
+}
+
+void hy(int *a, int *b, int N, int S) {
+	int kd = power(N/2+1, S, N);
+	int start = 1;
+	for (int i = 1; i <= N; i++) {
+		b[i] = a[start];
+		start += kd;
+		if (start > N) {
+			start %= N;
+		}
+	}
+}
+
+int main() {
+	int N,S;
+	cin >> N >> S;
+	int a[1010], b[1010];
+	for (int i = 1; i <= N; i++) {
+		cin >> a[i];
+	}
+	toC(a, b, N);
+	hy(b, a, N, S);
+	toS(a, b, N);
+	for (int i = 1; i <= N; i++) {
+		cout << b[i] << endl;
+	}
+	return 0;
+}
