@@ -1,0 +1,23 @@
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+int main() {
+	double A;
+	int N;
+	cin >> N >> A;
+	double thres = 1e-8;
+	double l = 0, r = A + 1;
+	while (r - l > thres) {
+		double m = (r + l) * 0.5;
+		int k = (int) (std::min(m * 0.5, N - 2.0));
+		if ((m - k) * (k + 1) <= A) {
+			l = m;
+		} else {
+			r = m;
+		}
+	}
+	double res = A - (l - (N - 2)) * ((N - 2) + 1);
+	printf("%.2lf\n", res);
+	return 0;
+}
