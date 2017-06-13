@@ -1,0 +1,67 @@
+#include <iostream>
+#include <string.h>
+#include <algorithm>
+#include <stdio.h>
+using namespace std;
+
+char data[505][85];
+char *ptr[505];
+
+bool cmp(char *str1, char *str2) {
+	return strcmp(str1, str2) < 0;
+}
+
+int main() {
+	int N;
+	scanf("%d", &N);
+	for (int i = 1; i <= N; i++) {
+		scanf("%s", data[i]);
+		for (int j = 0; data[i][j] != '\0'; j++) {
+			if (data[i][j] == '\\') {
+				data[i][j] = ' ';
+			}
+		}
+	}
+	for (int i = 1; i <= N; i++) {
+		ptr[i] = (char*)(data[i]);
+	}
+	sort(ptr + 1, ptr + N + 1, cmp);
+	data[0][0] = '\0';
+	ptr[0] = data[0];
+	for (int i = 1; i <= N; i++) {
+		int numSpace = 0;
+		int offset = 0;
+		int lastSpace = -1;
+		while (ptr[i-1][offset] != '\0' && ptr[i][offset] != '\0' && ptr[i-1][offset] == ptr[i][offset]) {
+			if (ptr[i][offset] == ' ') {
+				lastSpace = offset;
+				numSpace++;
+			}
+			offset++;
+		}
+		if (ptr[i][offset] == ' ') {
+			numSpace++;
+			lastSpace = offset;
+		}
+		int indent = numSpace;
+		offset = lastSpace + 1;
+		for (int j = 0; j < indent; j++) {
+			printf(" ");
+		}
+		while (ptr[i][offset] != '\0') {
+			if (ptr[i][offset] != ' ') {
+				printf("%c", ptr[i][offset]);
+			} else {
+				printf("\n");
+				indent++;
+				for (int j = 0; j < indent; j++) {
+					printf(" ");
+				}
+				//indent++;
+			}
+			offset++;
+		}
+		printf("\n");
+	}
+	return 0;
+}
