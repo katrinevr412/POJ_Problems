@@ -1,0 +1,109 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <stdlib.h>
+#include <stdio.h>
+using namespace std;
+
+int idx[1001] = {0};
+int revIdx[1001];
+
+bool isKong(string s) {
+	int len = s.length();
+	for (int i = 0; i < len; i++) {
+		if (s[i] != ' ') {
+			return false;
+		}
+	}
+	return true;
+}
+
+const int KONG = 0;
+const int IN_REF = 1;
+const int IN_REG = 2;
+
+int state = KONG;
+int refNo = -1;
+int cnt = 1;
+
+vector<string> refs[1000];
+
+void processReg(string s) {
+	int len = s.length();
+	int offset = 0;
+	while (offset < len) {
+		if (s[offset] != '[') {
+			printf("%c", s[offset++]);
+		} else {
+			int j = offset + 1;
+			for (; ; j++) {
+				if (s[j] == ']') {
+					break;
+				}
+			}
+			int index = atoi(s.substr(offset + 1, j - offset - 1).c_str());
+			int subst;
+			if (idx[index] == 0) {
+				subst = idx[index] = cnt;
+				revIdx[cnt++] = index;
+			} else {
+				subst = idx[index];
+			}
+			printf("[%d]", subst);
+			offset = j + 1;
+		}
+	}
+	printf("\n");
+}
+
+int main() {
+	string s;
+    while (getline(cin, s)) {
+    	if (state == KONG) {
+    		if (isKong(s)) {
+    			;
+    		} else if (s[0] != '[') {
+    			processReg(s);
+    			state = IN_REG;
+    		} else {
+    			int len = s.length(), plc;
+    			for (int i = 1; i < len; i++) {
+    				if (s[i] == ']') {
+    					plc = i;
+    					break;
+    				}
+    			}
+    			int refIdx = atoi(s.substr(1, plc-1).c_str());
+    			refs[refIdx].push_back(s.substr(plc + 1));
+    			refNo = refIdx;
+    			state = IN_REF;
+    		}
+    	} else if (state == IN_REF) {
+    		if (isKong(s)) {
+    			state = KONG;
+    		} else {
+    			refs[refNo].push_back(s);
+    		}
+    	} else {
+    		if (isKong(s)) {
+    			state = KONG;
+    			printf("\n");
+    		} else {
+    			processReg(s);
+    		}
+    	}
+    }
+    if (state == IN_REG) {
+    	printf("\n");
+    }
+    for (int i = 1; i < cnt; i++) {
+    	int origIdx = revIdx[i];
+    	printf("[%d]", i);
+    	int lineNo = refs[origIdx].size();
+    	for (int j = 0; j < lineNo; j++) {
+    		printf("%s\n", refs[origIdx][j].c_str());
+    	}
+    	printf("\n");
+    }
+	return 0;
+}
