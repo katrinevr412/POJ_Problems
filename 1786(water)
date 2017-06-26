@@ -1,0 +1,109 @@
+#include <iostream>
+#include <stdio.h>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+
+struct card {
+	char num;
+	char col;
+};
+
+char fgf[233] = "+---+---+---+---+---+---+---+---+---+---+---+---+---+";
+
+card cards[4][13];
+
+int toNum(char c) {
+	if (c >= '2' && c <= '9') {
+		return c - '2';
+	} else if (c == 'T') {
+		return 8;
+	} else if (c == 'J') {
+		return 9;
+	} else if (c == 'Q') {
+		return 10;
+	} else if (c == 'K') {
+		return 11;
+	} else if (c == 'A') {
+		return 12;
+	} else if (c == 'C') {
+		return 0;
+	} else if (c == 'D') {
+		return 13;
+	} else if (c == 'S') {
+		return 26;
+	} else if (c == 'H') {
+		return 39;
+	}
+	return -1;
+}
+
+
+const int NORTH = 0, EAST = 1, SOUTH = 2, WEST = 3;
+
+int toDir(char c) {
+	if (c == 'N') return NORTH;
+	if (c == 'E') return EAST;
+	if (c == 'S') return SOUTH;
+	if (c == 'W') return WEST;
+	return -1;
+}
+
+int toNum(card c) {
+	return toNum(c.num) + toNum(c.col);
+}
+
+bool operator<(const card& c1, const card& c2) {
+	return toNum(c1) < toNum(c2);
+}
+
+inline int next(int a) {
+	return (a + 1) % 4;
+}
+
+
+
+char player[4][64] = {"South player:", "West player:", "North player:", "East player:"};
+
+int main() {
+	char dir[4];
+	char a[233];
+	while (1) {
+		scanf("%s", dir);
+		if (dir[0] == '#') {
+			break;
+		}
+		int start = toDir(dir[0]);
+		scanf("%s", a);
+		scanf("%s", a + strlen(a));
+		int cur = start;
+		for (int i = 0; i < 52; i++) {
+			cur = next(cur);
+			cards[cur][i/4].col = a[2*i];
+			cards[cur][i/4].num = a[2*i+1];
+		}
+		for (int i = 0; i < 4; i++) {
+			sort(cards[i], cards[i] + 13);
+		}
+		start = SOUTH;
+		for (int i = 0; i < 4; i++) {
+			printf("%s\n%s\n", player[i], fgf);
+			for (int j = 0; j < 13; j++) {
+				printf("|%c %c", cards[start][j].num, cards[start][j].num);
+			}
+			printf("|\n");
+			for (int j = 0; j < 13; j++) {
+				printf("| %c ", cards[start][j].col);
+			}
+			printf("|\n");
+			for (int j = 0; j < 13; j++) {
+				printf("|%c %c", cards[start][j].num, cards[start][j].num);
+			}
+			printf("|\n");
+			printf("%s\n", fgf);
+			start = next(start);
+		}
+		printf("\n");
+	}
+	return 0;
+}
