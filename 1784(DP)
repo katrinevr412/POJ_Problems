@@ -1,0 +1,75 @@
+#include <stdio.h>
+#include <algorithm>
+
+int num[420];
+int aggr[420];
+int n;
+int res[210][210];
+bool ed[210][210];
+
+const int INTMAX = 2147483647;
+
+bool init() {
+    scanf("%d", &n);
+    if (!n) {
+        return false;
+    }
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &num[2 * i + 1]);
+    }
+    for (int i = 0; i <= n; i++) {
+        scanf("%d", &num[2 * i]);
+    }
+    aggr[0] = 0;
+    for (int i = 1; i <= 2 * n + 1; i++) {
+        aggr[i] = aggr[i-1] + num[i-1];
+    }
+    for (int i = 0; i < n; i++) {
+        for (int j = i; j < n; j++) {
+            ed[i][j] = false;
+        }
+    }
+    return true;
+}
+
+int partialSum(int i, int j) {
+    return aggr[2 * j + 3] - aggr[2 * i];
+}
+
+void printVal(int i, int j, int val) {
+    printf("%d %d %d\n", i, j, val);
+}
+
+int getVal(int i, int j) {
+    if (i > j) {
+        //printVal(i, j, 0);
+        return 0;
+    } else if (ed[i][j]) {
+        //printVal(i, j, ed[i][j]);
+        return res[i][j];
+    } else {
+        int mn = INTMAX;
+        for (int k = i; k <= j; k++) {
+            int thisMn = getVal(i, k-1) + getVal(k+1, j);
+            if (thisMn < mn) {
+                mn = thisMn;
+            }
+        }
+        mn += partialSum(i, j);
+        res[i][j] = mn;
+        ed[i][j] = true;
+        //printVal(i, j, mn);
+        return mn;
+    }
+}
+
+void solve() {
+    printf("%d\n", getVal(0, n-1));
+}
+
+int main() {
+    while (init()) {
+        solve();
+    }
+    return 0;
+}
