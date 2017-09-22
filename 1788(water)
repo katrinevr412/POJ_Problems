@@ -1,0 +1,85 @@
+#include <stdio.h>
+#include <algorithm>
+int p;
+int* rows[10010];
+int* columns[10010];
+struct pt{
+    int x, y;
+} pts[100100];
+int rowCnt[10010], colCnt[10010];
+int main() {
+    while (1) {
+        scanf("%d", &p);
+        if (!p) {
+            break;
+        }
+        int mnRow = 2147483647, mnCol = mnRow;
+        int mxRow = -1, mxCol = mxRow;
+        for (int i = 0; i < p; i++) {
+            scanf("%d%d", &pts[i].x, &pts[i].y);
+            if (pts[i].x > mxRow) mxRow = pts[i].x;
+            if (pts[i].x < mnRow) mnRow = pts[i].x;
+            if (pts[i].y > mxCol) mxCol = pts[i].y;
+            if (pts[i].y < mnCol) mnCol = pts[i].y;
+        }
+        for (int i = mnRow; i <= mxRow; i++) {
+            rowCnt[i] = 0;
+        }
+        for (int i = mnCol; i <= mxCol; i++) {
+            colCnt[i] = 0;
+        }
+        for (int i = 0; i < p; i++) {
+            rowCnt[pts[i].x]++;
+            colCnt[pts[i].y]++;
+        }
+        for (int i = mnRow; i <= mxRow; i++) {
+            if (rowCnt[i] > 0) {
+                rows[i] = new int[rowCnt[i]];
+            }
+        }
+        for (int i = mnCol; i <= mxCol; i++) {
+            if (colCnt[i] > 0) {
+                columns[i] = new int[colCnt[i]];
+            }
+        }
+        for (int i = mnRow; i <= mxRow; i++) {
+            rowCnt[i] = 0;
+        }
+        for (int i = mnCol; i <= mxCol; i++) {
+            colCnt[i] = 0;
+        }
+        for (int i = 0; i < p; i++) {
+            rows[pts[i].x][rowCnt[pts[i].x]++] = pts[i].y;
+            columns[pts[i].y][colCnt[pts[i].y]++] = pts[i].x;
+        }
+        int res = 0;
+        for (int i = mnRow; i <= mxRow; i++) {
+            if (rowCnt[i] > 0) {
+                std::sort(rows[i], rows[i] + rowCnt[i]);
+                for (int j = 0; j < rowCnt[i]; j += 2) {
+                    res += (rows[i][j+1] - rows[i][j]);
+                }
+            }
+        }
+        for (int i = mnCol; i <= mxCol; i++) {
+            if (colCnt[i] > 0) {
+                std::sort(columns[i], columns[i] + colCnt[i]);
+                for (int j = 0; j < colCnt[i]; j += 2) {
+                    res += (columns[i][j+1] - columns[i][j]);
+                }
+            }
+        }
+        printf("The length of the fence will be %d units.\n", res);
+        for (int i = mnRow; i <= mxRow; i++) {
+            if (rowCnt[i] > 0) {
+                delete [] rows[i];
+            }
+        }
+        for (int i = mnCol; i <= mxCol; i++) {
+            if (colCnt[i] > 0) {
+                delete [] columns[i];
+            }
+        }
+    }
+    return 0;
+}
