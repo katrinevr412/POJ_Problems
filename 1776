@@ -1,0 +1,76 @@
+#include <stdio.h>
+#include <iostream>
+#include <algorithm>
+bool adj[1010][1010] = {false};
+int n;
+int usedCnt = 1;
+struct node {
+    int idx;
+    node *next;
+} pool[1111];
+node *head, *tail;
+char buf[4000];
+
+int main() {
+    while (1) {
+    if (scanf("%d\n", &n) < 0) {
+        break;
+    }
+    usedCnt = 1;
+    for (int i = 0; i < n; i++) {
+        gets(buf);
+        //printf("%s\n", buf);
+        for (int j = 0; j < n; j++) {
+            adj[i][j] = (buf[2 * j] == '1');
+        }
+    }
+    printf("1\n%d\n", n);
+    if (n == 1) {
+        printf("1\n");
+    } else {
+        head = &pool[0];
+        tail = &pool[0];
+        pool[0].next = NULL;
+        pool[0].idx = 0;
+        for (int i = 1; i < n; i++) {
+            node *newNode = &pool[usedCnt++];
+            newNode->idx = i;
+            if (adj[i][head->idx]) {
+                //add to head
+                newNode->next = head;
+                head = newNode;
+            } else if (adj[tail->idx][i]) {
+                //add to tail
+                newNode->next = NULL;
+                tail -> next = newNode;
+                tail = newNode;
+            } else {
+                //find a point where there is an out & in
+                node *cur = head, *next = head->next;
+                while (next != NULL) {
+                    if (adj[cur->idx][i] && adj[i][next->idx]) {
+                        break;
+                    }
+                    cur = next;
+                    next = next->next;
+                }
+                //now newNode is supposed to be inserted between cur and next
+                newNode->next = next;
+                cur->next = newNode;
+            }
+        }
+        node *cur = head;
+        while (cur != NULL) {
+            printf("%d", cur->idx+1);
+            if (cur != tail) {
+                printf(" ");
+                cur = cur -> next;
+            } else {
+                printf("\n");
+                break;
+            }
+        }
+    }
+    }
+    return 0;
+}
