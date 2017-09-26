@@ -1,0 +1,75 @@
+#include <stdio.h>
+#include <iostream>
+#include <algorithm>
+int N, T;
+short trc[110][10010] = {0};
+int arr[110];
+bool sgn[110] = {false};
+int main() {
+    scanf("%d%d", &N, &T);
+    for (int i = 0; i < N; i++) {
+        scanf("%d", &arr[i]);
+    }
+    sgn[1] = true;//true - minus sign
+    if (N == 1) {
+        ;
+    } else if (N == 2) {
+        printf("1\n");
+    } else {
+        trc[2][0] = -1;//-1 means this one does not have a minus sign
+        trc[2][arr[2]] = 1;//1 means this one have a minus sign
+        int tar = 0;
+        for (int i = 2; i < N; i++) {
+            tar += arr[i];
+        }
+        tar = (tar - T + arr[0] - arr[1]) / 2;
+        int sum = arr[2];
+        int mxIdx = N-1;
+        bool computed = false;
+        for (int i = 3; i < N; i++) {
+            sum += arr[i];
+            if (!computed) {
+                for (int j = 0; j <= tar && j <= sum; j++) {
+                    if (trc[i-1][j] != 0) {
+                        trc[i][j] = -1;
+                    } else if (j >= arr[i] && trc[i-1][j-arr[i]] != 0) {
+                        trc[i][j] = 1;
+                    }
+                    if (j == tar && trc[i][j] != 0) {
+                        computed = true;
+                        break;
+                    }
+                }
+            }
+            if (computed) {
+                mxIdx = i;
+                break;
+            }
+        }
+        for (int i = mxIdx; i >= 2; i--) {
+            if (trc[i][tar] == 1) {
+                sgn[i] = true;
+                tar -= arr[i];
+            }
+        }
+        int cnt = 0;
+        int offset = N-1;
+        int numPlus = 0;
+        while (offset > 0) {
+            while (!sgn[offset]) {
+                offset--;
+                numPlus++;
+            }
+            for (int i = 0; i < numPlus; i++) {
+                printf("%d\n", offset+1);
+            }
+            offset--;
+            numPlus = 0;
+            cnt++;
+        }
+        for (int i = 0; i < cnt; i++) {
+            printf("1\n");
+        }
+    }
+    return 0;
+}
