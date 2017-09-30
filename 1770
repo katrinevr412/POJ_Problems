@@ -1,0 +1,94 @@
+#include <stdio.h>
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+#include <set>
+
+int n,m;
+std::set<int> xl;
+int adj[202][202];
+int adjNo[202];
+int xls[202];
+bool used[202];
+int x[202];
+int bx[202];
+int parent[202];
+
+bool init() {
+    scanf("%d%d", &n, &m);
+    if (!n) {
+        return false;
+    }
+    xl.clear();
+    int tmp;
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &xls[i]);
+    }
+    for (int i = 0; i < m; i++) {
+        scanf("%d", &tmp);
+        xl.insert(tmp);
+    }
+    for (int i = 0; i < n; i++) {
+        used[i] = false;
+    }
+    for (int i = 0; i < n; i++) {
+        x[i] = -1;
+    }
+    for (int i = 0; i < n; i++) {
+        bx[i] = -1;
+    }
+    for (int i = 0; i < n; i++) {
+        adjNo[i] = 0;
+    }
+    for (int i = 0; i < n; i++) {
+        parent[i] = -1;
+    }
+    return true;
+}
+
+std::pair<int, int> getXBx(int idx) {
+    //if (x[idx] != -1) {
+        //return std::pair<int, int>(x[idx], bx[idx]);
+    //}
+    //std::cout << idx << std::endl;
+    used[idx] = 1;
+    x[idx] = xls[idx];
+    bx[idx] = 0;
+    for (int i = 0; i < adjNo[idx]; i++) {
+        int j = adj[idx][i];
+        if (j == parent[idx]) {
+            continue;
+        }
+        parent[j] = idx;
+        std::pair<int, int> jRes = getXBx(j);
+        x[idx] += jRes.second;
+        bx[idx] += std::max(jRes.first, jRes.second);
+    }
+    return std::pair<int, int>(x[idx], bx[idx]);
+}
+
+int main() {
+    while (init()) {
+        for (int i = 0; i < n-1; i++) {
+            for (int j = i+1; j < n; j++) {
+                int c = std::abs(xls[j] - xls[i]);
+                if (xl.count(c)) {
+                    adj[i][adjNo[i]++] = j;
+                    adj[j][adjNo[j]++] = i;
+                }
+            }
+        }
+        int res = 0;
+        for (int i = 0; i < n; i++) {
+            if (used[i]) {
+                continue;
+            }
+            //std::cout << i << std::endl;
+            used[i] = 1;
+            getXBx(i);
+            res += std::max(x[i], bx[i]);
+        }
+        printf("%d\n", res);
+    }
+    return 0;
+}
